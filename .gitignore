@@ -1,0 +1,59 @@
+# Local run inputs
+/data/*
+!/data/README.md
+/downloads/
+/outputs/
+
+# Local historical backups and quarantined generated material
+/archive/
+
+# Quarto rendered outputs and intermediates
+/*.html
+/**/*.html
+!assets/**/*.html
+/*.rmarkdown
+**/*_files/
+/.quarto/
+
+# R local state
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# Editor and operating-system state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local agent and audit state
+/.agents/
+/.claude/
+/audit_orchidee.md
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*credentials*
+*secret*
+*token*
+
+# Local scratch / build tooling (e.g. .tmp_spreadsheet: scratch .mjs + node_modules symlink)
+/.tmp_spreadsheet/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+~$*
+__pycache__/
+*.py[cod]
+
