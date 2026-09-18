@@ -1,0 +1,450 @@
+=========================================================
+POPULATION
+=========================================================
+               quantity   old   new delta
+          sir_wide rows 48596 48595    -1
+  dedup global isolates 21754 21703   -51
+ dedup by_type isolates 23794 23777   -17
+     antibiotic columns    34    34     0
+      supported columns    35    35     0
+
+columns only in NEW:   
+columns only in OLD:   
+
+=========================================================
+CELL COUNTS ON THE DEDUPLICATED GLOBAL SCOPE (changed only)
+=========================================================
+                         atb_col n_S_old n_S_new   d_S n_R_old n_R_new  d_R
+ amoxicilline_acide_clavulanique    8874    7425 -1449    3931    5580 1649
+        piperacilline_tazobactam   13288   13214   -74    2467    2441  -26
+                      ofloxacine   12475   12427   -48    2095    2094   -1
+        amoxicilline_ampicilline    5447    5447     0   11094   11048  -46
+  trimethoprime_sulfamethoxazole   13952   13907   -45    3320    3320    0
+                       amikacine   15335   15315   -20     609     585  -24
+                     gentamicine   15967   15928   -39    1226    1222   -4
+                     ceftazidime   13612   13570   -42    2295    2294   -1
+                     ceftriaxone    4911    4872   -39      72      72    0
+                        cefepime    9314    9279   -35    1357    1355   -2
+                 nitrofurantoine    7848    7831   -17    1885    1869  -16
+                      ertapeneme    9453    9423   -30     547     546   -1
+                  fosfomycine_iv    7295    7274   -21    2078    2078    0
+                      mecillinam    5734    5717   -17     638     636   -2
+                  ciprofloxacine    9721    9705   -16    1378    1381    3
+                       imipeneme    8892    8885    -7     388     388    0
+          fosfomycine_trometamol    3792    3786    -6     641     641    0
+                      cefotaxime    7284    7281    -3    2159    2157   -2
+                   levofloxacine   10168   10165    -3    1356    1355   -1
+                      meropeneme    8439    8438    -1     245     245    0
+                   moxifloxacine       2       1    -1       1       1    0
+ n_ZIT_old n_ZIT_new d_ZIT den_old den_new d_den
+       397       137  -260   12805   13005   200
+       454       460     6   15755   15655  -100
+       104       108     4   14570   14521   -49
+         0         0     0   16541   16495   -46
+        24        23    -1   17272   17227   -45
+       149       146    -3   15944   15900   -44
+        17        17     0   17193   17150   -43
+       111       110    -1   15907   15864   -43
+         0         0     0    4983    4944   -39
+       121       124     3   10671   10634   -37
+         2         2     0    9733    9700   -33
+         2         2     0   10000    9969   -31
+         0         0     0    9373    9352   -21
+         0         0     0    6372    6353   -19
+       200       202     2   11099   11086   -13
+       225       224    -1    9280    9273    -7
+         0         0     0    4433    4427    -6
+        56        55    -1    9443    9438    -5
+       144       144     0   11524   11520    -4
+        76        76     0    8684    8683    -1
+         0         0     0       3       2    -1
+
+=========================================================
+INDICATOR PANEL: every published cell that moved
+=========================================================
+published cells total:  5293 
+published cells moved:  571 
+distinct indicators moved:  85 
+distinct organisms moved:  2 
+
+--- largest absolute shifts in resistance rate ---
+                                    indicator_id   organism_label   scope
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+ other_enterobacterales_piperacilline_tazobactam Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+                  ecoli_piperacilline_tazobactam Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+         kpneumo_amoxicilline_acide_clavulanique Enterobacterales by_type
+         kpneumo_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales  global
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+         kpneumo_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales  global
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales by_type
+                  ecoli_piperacilline_tazobactam Enterobacterales by_type
+                sample_type dedup_year n_tested_old n_tested_new d_tested
+                        lcr       2022            1            4        3
+        liquide_articulaire       2022            3            5        2
+            pus_superficiel       2022            2            2        0
+       pvt_resp_non_protege       2023            5            5        0
+                        lcr       2023            4            4        0
+            pus_superficiel       2023           12           13        1
+ dispositif_intravasculaire       2022            5            5        0
+        liquide_articulaire       2022            5            5        0
+             liquide_ascite       2024            6            6        0
+            pus_superficiel       2024            4            3       -1
+                  pvt_autre       2024            6            6        0
+                hemoculture       2022          227          277       50
+                hemoculture       2024          268          246      -22
+        prelevement_genital       2022           13           14        1
+                       <NA>       2022          231          268       37
+                hemoculture       2023          281          291       10
+        prelevement_genital       2024           25           25        0
+                       <NA>       2023          254          260        6
+                pvt_profond       2022          179          199       20
+ pvt_resp_protege_ou_distal       2022           19           20        1
+                  all_types       2024         2454         2383      -71
+                     urines       2024         1705         1679      -26
+ pvt_resp_protege_ou_distal       2023           18           19        1
+ pvt_resp_protege_ou_distal       2024           37           37        0
+                  all_types       2022         2255         2458      203
+            pus_superficiel       2022           20           22        2
+       pvt_resp_non_protege       2022            6            7        1
+                       <NA>       2024          256          247       -9
+ dispositif_intravasculaire       2024            9            7       -2
+                  pvt_autre       2024           16           16        0
+ pct_resistant_old pct_resistant_new   d_pct
+              0.00             75.00  75.000
+              0.00             60.00  60.000
+             50.00              0.00 -50.000
+             40.00             80.00  40.000
+             50.00             75.00  25.000
+             25.00             46.15  21.154
+             40.00             60.00  20.000
+             20.00              0.00 -20.000
+             33.33             50.00  16.667
+             50.00             33.33 -16.667
+             50.00             33.33 -16.667
+             34.80             50.18  15.379
+             29.10             43.50  14.391
+              0.00             14.29  14.286
+             24.24             37.69  13.444
+             35.23             47.42  12.191
+             12.00             24.00  12.000
+             28.35             38.08   9.730
+             24.58             33.17   8.585
+             31.58             40.00   8.421
+             31.54             39.78   8.241
+             33.78             41.99   8.206
+             44.44             52.63   8.187
+             40.54             48.65   8.108
+             32.02             39.71   7.689
+             20.00             27.27   7.273
+             50.00             57.14   7.143
+             27.34             34.01   6.664
+             22.22             28.57   6.349
+             25.00             18.75  -6.250
+
+--- indicators whose DENOMINATOR moved, ranked ---
+                                    indicator_id   organism_label cells
+           ecoli_amoxicilline_acide_clavulanique Enterobacterales    26
+         kpneumo_amoxicilline_acide_clavulanique Enterobacterales    18
+                  ecoli_piperacilline_tazobactam Enterobacterales    16
+                               ecoli_ceftriaxone Enterobacterales     7
+               ecloacae_piperacilline_tazobactam Enterobacterales    11
+                            ecoli_ciprofloxacine Enterobacterales    11
+                                ecoli_cefotaxime Enterobacterales    12
+            enterobacterales_pooled_carbapenemes Enterobacterales    15
+                               ecoli_fosfomycine Enterobacterales    10
+                                ecoli_mecillinam Enterobacterales     5
+                              ecoli_carbapenemes Enterobacterales    15
+               enterobacterales_blse_prop_global Enterobacterales     3
+      enterobacterales_carbapenemase_prop_global Enterobacterales     3
+                           ecoli_nitrofurantoine Enterobacterales     8
+                                ecoli_ertapeneme Enterobacterales    13
+                             kpneumo_ceftazidime Enterobacterales     6
+                               kpneumo_amikacine Enterobacterales     7
+                           kpneumo_cotrimoxazole Enterobacterales     6
+                                     kpneumo_c3g Enterobacterales     6
+                        kpneumo_fluoroquinolones Enterobacterales     6
+                              kpneumo_ofloxacine Enterobacterales     6
+ other_enterobacterales_piperacilline_tazobactam Enterobacterales     7
+                             kpneumo_gentamicine Enterobacterales     6
+                other_enterobacterales_amikacine Enterobacterales     6
+                 other_enterobacterales_cefepime Enterobacterales     6
+            other_enterobacterales_cotrimoxazole Enterobacterales     6
+                          ecoli_fluoroquinolones Enterobacterales    14
+                             ecoli_levofloxacine Enterobacterales    10
+                                ecoli_ofloxacine Enterobacterales    14
+                                kpneumo_cefepime Enterobacterales     5
+                           kpneumo_levofloxacine Enterobacterales     6
+         other_enterobacterales_fluoroquinolones Enterobacterales     6
+            other_enterobacterales_levofloxacine Enterobacterales     6
+                           ecloacae_carbapenemes Enterobacterales     5
+                              ecloacae_imipeneme Enterobacterales     5
+                                       ecoli_c3g Enterobacterales    13
+                                ecoli_meropeneme Enterobacterales     8
+                              kpneumo_cefotaxime Enterobacterales     5
+              other_enterobacterales_fosfomycine Enterobacterales     5
+              other_enterobacterales_gentamicine Enterobacterales     5
+ tested_old tested_new   d pct_change
+      14491      14875 384       2.65
+       3118       3166  48       1.54
+      14241      14198 -43      -0.30
+       7223       7191 -32      -0.44
+       1866       1840 -26      -1.39
+       6465       6489  24       0.37
+       6637       6660  23       0.35
+      14603      14580 -23      -0.16
+      10862      10843 -19      -0.17
+       8477       8458 -19      -0.22
+       9300       9283 -17      -0.18
+      10677      10663 -14      -0.13
+      10677      10663 -14      -0.13
+      10644      10631 -13      -0.12
+       8946       8934 -12      -0.13
+       1910       1921  11       0.58
+       2202       2212  10       0.45
+       1895       1905  10       0.53
+       1929       1938   9       0.47
+       1927       1936   9       0.47
+       1873       1882   9       0.48
+        483        474  -9      -1.86
+       1884       1892   8       0.42
+        456        448  -8      -1.75
+        454        446  -8      -1.76
+        453        445  -8      -1.77
+      14573      14566  -7      -0.05
+       5972       5979   7       0.12
+      14024      14017  -7      -0.05
+       1161       1168   7       0.60
+       1318       1325   7       0.53
+        467        460  -7      -1.50
+        413        406  -7      -1.69
+       1332       1326  -6      -0.45
+       1314       1308  -6      -0.46
+      14308      14302  -6      -0.04
+       3089       3095   6       0.19
+       1272       1278   6       0.47
+        344        338  -6      -1.74
+        404        398  -6      -1.49
+
+=========================================================
+E. COLI / AMOXICILLINE-ACIDE CLAVULANIQUE, full detail
+=========================================================
+                          indicator_id   scope                sample_type
+ ecoli_amoxicilline_acide_clavulanique by_type dispositif_intravasculaire
+ ecoli_amoxicilline_acide_clavulanique by_type dispositif_intravasculaire
+ ecoli_amoxicilline_acide_clavulanique by_type dispositif_intravasculaire
+ ecoli_amoxicilline_acide_clavulanique by_type                hemoculture
+ ecoli_amoxicilline_acide_clavulanique by_type                hemoculture
+ ecoli_amoxicilline_acide_clavulanique by_type                hemoculture
+ ecoli_amoxicilline_acide_clavulanique by_type                        lcr
+ ecoli_amoxicilline_acide_clavulanique by_type                        lcr
+ ecoli_amoxicilline_acide_clavulanique by_type                        lcr
+ ecoli_amoxicilline_acide_clavulanique by_type        liquide_articulaire
+ ecoli_amoxicilline_acide_clavulanique by_type        liquide_articulaire
+ ecoli_amoxicilline_acide_clavulanique by_type        liquide_articulaire
+ ecoli_amoxicilline_acide_clavulanique by_type             liquide_ascite
+ ecoli_amoxicilline_acide_clavulanique by_type             liquide_ascite
+ ecoli_amoxicilline_acide_clavulanique by_type             liquide_ascite
+ ecoli_amoxicilline_acide_clavulanique by_type            liquide_pleural
+ ecoli_amoxicilline_acide_clavulanique by_type            liquide_pleural
+ ecoli_amoxicilline_acide_clavulanique by_type            liquide_pleural
+ ecoli_amoxicilline_acide_clavulanique by_type        prelevement_genital
+ ecoli_amoxicilline_acide_clavulanique by_type        prelevement_genital
+ ecoli_amoxicilline_acide_clavulanique by_type        prelevement_genital
+ ecoli_amoxicilline_acide_clavulanique by_type            pus_superficiel
+ ecoli_amoxicilline_acide_clavulanique by_type            pus_superficiel
+ ecoli_amoxicilline_acide_clavulanique by_type            pus_superficiel
+ ecoli_amoxicilline_acide_clavulanique by_type                  pvt_autre
+ ecoli_amoxicilline_acide_clavulanique by_type                  pvt_autre
+ ecoli_amoxicilline_acide_clavulanique by_type                  pvt_autre
+ ecoli_amoxicilline_acide_clavulanique by_type             pvt_nouveau_ne
+ ecoli_amoxicilline_acide_clavulanique by_type             pvt_nouveau_ne
+ ecoli_amoxicilline_acide_clavulanique by_type             pvt_nouveau_ne
+ ecoli_amoxicilline_acide_clavulanique by_type                pvt_profond
+ ecoli_amoxicilline_acide_clavulanique by_type                pvt_profond
+ ecoli_amoxicilline_acide_clavulanique by_type                pvt_profond
+ ecoli_amoxicilline_acide_clavulanique by_type       pvt_resp_non_protege
+ ecoli_amoxicilline_acide_clavulanique by_type       pvt_resp_non_protege
+ ecoli_amoxicilline_acide_clavulanique by_type       pvt_resp_non_protege
+ ecoli_amoxicilline_acide_clavulanique by_type pvt_resp_protege_ou_distal
+ ecoli_amoxicilline_acide_clavulanique by_type pvt_resp_protege_ou_distal
+ ecoli_amoxicilline_acide_clavulanique by_type pvt_resp_protege_ou_distal
+ ecoli_amoxicilline_acide_clavulanique by_type                     urines
+ ecoli_amoxicilline_acide_clavulanique by_type                     urines
+ ecoli_amoxicilline_acide_clavulanique by_type                     urines
+ ecoli_amoxicilline_acide_clavulanique by_type                       <NA>
+ ecoli_amoxicilline_acide_clavulanique by_type                       <NA>
+ ecoli_amoxicilline_acide_clavulanique by_type                       <NA>
+ ecoli_amoxicilline_acide_clavulanique  global                  all_types
+ ecoli_amoxicilline_acide_clavulanique  global                  all_types
+ ecoli_amoxicilline_acide_clavulanique  global                  all_types
+ dedup_year n_tested_old n_tested_new d_tested n_resistant_old n_resistant_new
+       2022            5            5        0               2               3
+       2023            7            7        0               1               1
+       2024            9            7       -2               2               2
+       2022          227          277       50              79             139
+       2023          281          291       10              99             138
+       2024          268          246      -22              78             107
+       2022            1            4        3               0               3
+       2023            4            4        0               2               3
+       2024            4            4        0               2               2
+       2022            3            5        2               0               3
+       2023            3            3        0               1               1
+       2024            5            5        0               1               1
+       2022            5            5        0               2               2
+       2023            8            8        0               2               2
+       2024            6            6        0               2               3
+       2022            3            3        0               0               0
+       2023            5            5        0               2               2
+       2024            4            4        0               0               0
+       2022           13           14        1               0               2
+       2023           30           29       -1               3               3
+       2024           25           25        0               3               6
+       2022           20           22        2               4               6
+       2023           12           13        1               3               6
+       2024           21           21        0               5               6
+       2022           15           16        1               4               5
+       2023           16           17        1               3               4
+       2024           18           18        0               6               6
+       2022            4            4        0               1               1
+       2023            2            2        0               0               0
+       2024            3            3        0               1               1
+       2022          179          199       20              44              66
+       2023          200          203        3              50              60
+       2024          260          252       -8              47              61
+       2022            6            7        1               3               4
+       2023            5            5        0               2               4
+       2024            5            5        0               4               4
+       2022           19           20        1               6               8
+       2023           22           22        0               9              10
+       2024           37           37        0              15              18
+       2022         1675         1775      100             572             708
+       2023         1708         1746       38             632             738
+       2024         1705         1679      -26             576             705
+       2022          231          268       37              56             101
+       2023          254          260        6              72              99
+       2024          256          247       -9              70              84
+       2022         2255         2458      203             722             976
+       2023         2394         2437       43             836            1003
+       2024         2454         2383      -71             774             948
+ d_resistant pct_resistant_old pct_resistant_new   d_pct
+           1             40.00             60.00 20.0000
+           0             14.29             14.29  0.0000
+           0             22.22             28.57  6.3492
+          60             34.80             50.18 15.3787
+          39             35.23             47.42 12.1914
+          29             29.10             43.50 14.3915
+           3              0.00             75.00 75.0000
+           1             50.00             75.00 25.0000
+           0             50.00             50.00  0.0000
+           3              0.00             60.00 60.0000
+           0             33.33             33.33  0.0000
+           0             20.00             20.00  0.0000
+           0             40.00             40.00  0.0000
+           0             25.00             25.00  0.0000
+           1             33.33             50.00 16.6667
+           0              0.00              0.00  0.0000
+           0             40.00             40.00  0.0000
+           0              0.00              0.00  0.0000
+           2              0.00             14.29 14.2857
+           0             10.00             10.34  0.3448
+           3             12.00             24.00 12.0000
+           2             20.00             27.27  7.2727
+           3             25.00             46.15 21.1538
+           1             23.81             28.57  4.7619
+           1             26.67             31.25  4.5833
+           1             18.75             23.53  4.7794
+           0             33.33             33.33  0.0000
+           0             25.00             25.00  0.0000
+           0              0.00              0.00  0.0000
+           0             33.33             33.33  0.0000
+          22             24.58             33.17  8.5848
+          10             25.00             29.56  4.5567
+          14             18.08             24.21  6.1294
+           1             50.00             57.14  7.1429
+           2             40.00             80.00 40.0000
+           0             80.00             80.00  0.0000
+           2             31.58             40.00  8.4211
+           1             40.91             45.45  4.5455
+           3             40.54             48.65  8.1081
+         136             34.15             39.89  5.7381
+         106             37.00             42.27  5.2657
+         129             33.78             41.99  8.2063
+          45             24.24             37.69 13.4441
+          27             28.35             38.08  9.7305
+          14             27.34             34.01  6.6643
+         254             32.02             39.71  7.6893
+         167             34.92             41.16  6.2365
+         174             31.54             39.78  8.2414
+
+--- every E. coli indicator, denominator movement ---
+                          indicator_id tested_old tested_new res_old res_new
+ ecoli_amoxicilline_acide_clavulanique      14692      15076    4798    6055
+        ecoli_piperacilline_tazobactam      14856      14813    1389    1356
+                     ecoli_ceftriaxone       7257       7225      30      30
+                  ecoli_ciprofloxacine       7788       7812    1039    1046
+                      ecoli_cefotaxime       8115       8138    1187    1190
+                     ecoli_fosfomycine      13320      13301     320     321
+                      ecoli_mecillinam      10182      10163     810     806
+                    ecoli_carbapenemes       9557       9540      48      48
+                 ecoli_nitrofurantoine      10922      10909      88      88
+                      ecoli_ertapeneme       9454       9442      46      46
+                ecoli_fluoroquinolones      15238      15231    2252    2257
+                   ecoli_levofloxacine       7072       7079    1004    1005
+                      ecoli_ofloxacine      14626      14619    2209    2214
+                             ecoli_c3g      15234      15228    1274    1277
+                      ecoli_meropeneme       5201       5207      10      10
+                     ecoli_ceftazidime      15169      15164    1076    1078
+                     ecoli_gentamicine      14705      14709     944     939
+                        ecoli_cefepime       6914       6917     849     845
+                   ecoli_moxifloxacine          2          0       0       0
+                       ecoli_amikacine      14992      14991      97      98
+        ecoli_amoxicilline_ampicilline      15057      15056    8242    8241
+                   ecoli_cotrimoxazole      14945      14944    4296    4299
+                       ecoli_imipeneme       6221       6222      14      14
+ d_tested d_res pct_old pct_new
+      384  1257   32.66   40.16
+      -43   -33    9.35    9.15
+      -32     0    0.41    0.42
+       24     7   13.34   13.39
+       23     3   14.63   14.62
+      -19     1    2.40    2.41
+      -19    -4    7.96    7.93
+      -17     0    0.50    0.50
+      -13     0    0.81    0.81
+      -12     0    0.49    0.49
+       -7     5   14.78   14.82
+        7     1   14.20   14.20
+       -7     5   15.10   15.14
+       -6     3    8.36    8.39
+        6     0    0.19    0.19
+       -5     2    7.09    7.11
+        4    -5    6.42    6.38
+        3    -4   12.28   12.22
+       -2     0    0.00    0.00
+       -1     1    0.65    0.65
+       -1    -1   54.74   54.74
+       -1     3   28.75   28.77
+        1     0    0.23    0.23
+
+WROTE comparison to outputs/_analysis/panel_comparison.rds 
