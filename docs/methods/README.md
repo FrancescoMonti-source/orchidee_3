@@ -19,7 +19,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 |---|---|---|
 | Période de surveillance | [01](01-periode-surveillance.md) | not started |
 | Établissements inclus / exclus | [02](02-etablissements.md) | not started |
-| Activités incluses / exclues | [03](03-activites.md) | not started |
+| Activités incluses / exclues | [03](03-activites.md) | **settled** |
 | Données d'activité | [04](04-donnees-activite.md) | **settled** |
 | Structure de l'établissement | [05](05-structure.md) | not started |
 | Données de résistance bactérienne | [06](06-donnees-resistance.md) | **partial** |
@@ -31,6 +31,18 @@ patient-day denominator (see `04-donnees-activite.md`).
 `not started` means no decision has been taken, not that the section is empty of
 questions. `partial` means some decisions are settled and the section names what
 is still open.
+
+## Where else things are written down
+
+- `../findings.md` - an append-only log of what was discovered while writing
+  this document, newest last, each entry pointing here or to a worked example.
+  It is a log, not an index: nothing depends on it and it never claims to be
+  complete, so it cannot drift out of step with the sections.
+- `../worked-examples/` - the measurements a witness cites, with their
+  reproduction scripts.
+- `../evidence/` - external facts preserved because their original location was
+  not under version control.
+- `../adr/` - decisions whose reach is wider than one section.
 
 ## How a section is written
 

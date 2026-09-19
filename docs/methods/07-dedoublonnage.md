@@ -38,6 +38,7 @@ number it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
 | Window | calendar, annual and monthly |
 | Antibiotype panel | every antibiotic the site tests |
 | Conflict rule | `S <-> R` and `SFP <-> R` major; `S <-> SFP` minor; `ZIT` read as `SFP` |
+| Population selection | the perimeter object and the diagnostic scope; see `03-activites.md` |
 
 The window is expressed as a predicate over a pair of isolates,
 `same_window(i, j)`, not as a grouping column. A calendar window is
@@ -47,6 +48,18 @@ refractory window cheap to add later.
 Deduplication runs **after** population selection and **before** indicator
 computation. It never runs before the screening exclusion; see
 `06-donnees-resistance.md` for why the order is part of the rule.
+
+That ordering is not a precaution specific to screening. Deduplication is **not
+monotone**: removing a row from its input can add a row to its result, because
+both the antibiotype comparison and the more-molecules-tested tiebreak depend on
+which other isolates are present for that patient. Hence the general rule:
+
+> **Any selection on isolates is an input to deduplication, never a filter on
+> its output.**
+
+Measured on the perimeter: filtering then deduplicating keeps 2 445 *E. coli*
+isolates, deduplicating then filtering keeps 2 350, and 79 patients vanish
+entirely. `docs/worked-examples/perimeter-ordering.md`.
 
 ## Decisions
 

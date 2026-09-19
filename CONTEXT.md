@@ -142,6 +142,14 @@ for comparability with what SPARES publishes. Two figures computed under
 different profiles cannot be added: the sum has no unit.
 _Avoid_: counting method, convention
 
+**Population selection**:
+Every step that decides which isolates are analysed: the perimeter, the
+diagnostic scope, the period. It runs after ingestion and before deduplication,
+never after it, because deduplication is not monotone — removing an isolate from
+its input can add one to its result. A selection applied afterwards is a
+different operation wearing the same name.
+_Avoid_: filtering, subsetting, scoping
+
 **Perimeter**:
 The single resolved set of units whose activity enters the surveillance. One
 object, handed to both the numerator and the denominator. Two independent
