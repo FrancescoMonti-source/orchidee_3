@@ -1,6 +1,7 @@
 # 07 - Deduplication
 
-Status: **settled**. Four decisions, four witnesses, none unproven.
+Status: **settled**. Five decisions, three witnesses, two unproven. One
+unresolved conflict between the two source documents, recorded under Open.
 
 ## What SPARES says
 
@@ -93,5 +94,45 @@ nothing able to object
 
 ## Open
 
-Nothing blocking. Two decisions carry no witness and are marked `unproven`
-above; measuring either is a self-contained job against `sir_wide.rds`.
+### The two source documents do not specify the same rule
+
+SPF's Annexe 1 restates deduplication, and drops the antibiotype entirely:
+
+> Pour une même souche, l'analyse ne prend en compte qu'un prélèvement par
+> patient selon le type de recherche souhaitée :
+> • analyse des résistances par type de prélèvement : les doublons
+> « prélèvement » sont exclus, un seul prélèvement (le plus ancien) par type de
+> prélèvement et par patient, est conservé ;
+> • analyse globale des résistances tous types de prélèvements confondus : seul
+> un prélèvement par patient est conservé, le plus ancien quel que soit le type
+> de prélèvement.
+
+No antibiotype criterion, no major-discrepancy test, no more-molecules-tested
+tiebreak. Under the SPARES methodology quoted above, two isolates from one
+patient differing by a major discrepancy are **both retained** — they are
+different antibiotypes, so neither is a duplicate. Under SPF's restatement only
+the oldest survives.
+
+This is not a wording difference. On the *E. coli* / urines / 2024 slice:
+
+| rule | isolates retained |
+|---|---|
+| SPARES methodology (antibiotype-aware) | **4 438** |
+| SPF Annexe 1 (oldest per patient) | **4 039** — one per patient |
+| difference | **−399, −9.0 %** |
+
+Measured from `docs/worked-examples/deduplication.md`: the slice holds 4 963
+isolates across 4 039 patients, so the SPF rule's output is the patient count by
+construction.
+
+ORCHIDEE follows the SPARES methodology, which is the document SPF's own
+requirements name as the method to reproduce. The conflict is recorded rather
+than resolved: it is a question for SPF, and it is a worked example of the
+problem this project exists to address — two official documents describing the
+same operation, differing by 9 % of the published numerator, with nothing
+anywhere obliged to notice.
+
+### Unproven decisions
+
+Two decisions carry no witness and are marked `unproven` above; measuring either
+is a self-contained job against `sir_wide.rds`.
