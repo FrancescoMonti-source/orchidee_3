@@ -20,7 +20,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | Période de surveillance | [01](01-periode-surveillance.md) | not started |
 | Établissements inclus / exclus | [02](02-etablissements.md) | not started |
 | Activités incluses / exclues | [03](03-activites.md) | not started |
-| Données d'activité | [04](04-donnees-activite.md) | not started |
+| Données d'activité | [04](04-donnees-activite.md) | **settled** |
 | Structure de l'établissement | [05](05-structure.md) | not started |
 | Données de résistance bactérienne | [06](06-donnees-resistance.md) | **partial** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |

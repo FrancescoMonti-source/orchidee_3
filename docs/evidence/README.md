@@ -9,3 +9,7 @@ because their original location was not under version control.
   disappeared from the deduplicated global scope and the denominators of 20
   antibiotic columns moved with them. Produced by
   `outputs/_analysis/compare_panels.R`, in a gitignored directory.
+- `2024_consores_rouen_denominator.md` — the JH denominator ConsoRes used for
+  CHU Rouen in 2024 (589 397), transcribed from the published report, against
+  ORCHIDEE's perimeter-correct 355 246. Kept as the receipt for a 40 %
+  divergence ORCHIDEE will be asked to justify, not as a reference.

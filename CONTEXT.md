@@ -124,6 +124,38 @@ exports use it. Treating it as SFP is an ORCHIDEE decision that no external
 document prescribes.
 _Avoid_: treating ZIT and SFP as the same concept without recording the choice
 
+### Exposure and perimeter
+
+**Exposure**:
+The denominator of an incidence density: how much opportunity there was for the
+thing being counted to occur. Measured from the site's hospitalisation
+intervals, never from an administrative declaration. Carried on its own table
+rather than computed inside an indicator, so that one number exists and every
+consumer can name the version it divided by.
+_Avoid_: activity, volume, JH
+
+**Denominator profile**:
+The rule that converts occupied time into exposure. ORCHIDEE's canonical profile
+measures occupancy hours and expresses them in days; `midnight_presence` counts
+the calendar boundaries a stay crosses, and is derived from the same intervals
+for comparability with what SPARES publishes. Two figures computed under
+different profiles cannot be added: the sum has no unit.
+_Avoid_: counting method, convention
+
+**Perimeter**:
+The single resolved set of units whose activity enters the surveillance. One
+object, handed to both the numerator and the denominator. Two independent
+selections would each be defensible and their ratio would be a rate of nothing.
+_Avoid_: scope, inclusion criteria, filter
+
+**SAE** (Statistique annuelle des établissements de santé):
+The annual administrative declaration that SPARES names as the source of
+hospitalisation days. ORCHIDEE does not use it: at Rouen it is declared without
+an activity filter, so it answers a different question from the one the
+indicator asks. It is retained as a recorded figure in the divergence account,
+not as a reference.
+_Avoid_: official figure, reference denominator
+
 ### How decisions are recorded
 
 **Decision register**:
