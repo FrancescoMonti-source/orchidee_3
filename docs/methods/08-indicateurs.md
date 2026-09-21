@@ -102,10 +102,12 @@ erases **35.6 % of *S. aureus* bacteremias** (77 isolates) and **15.4 % of *E. c
 
 ### 4. Resistance Phenotypes and Note Xa
 
-For BLSE, carbapenemase, and vancomycin resistance mechanisms, an absent laboratory test signal
-is interpreted as negative (`FALSE`) per SPARES Note Xa. The proportion denominator is the
+For enzymatic resistance phenotypes (BLSE and carbapenemases in Enterobacterales), an absent laboratory
+test signal is interpreted as negative (`FALSE`) per SPARES Note Xa. The proportion denominator is the
 **total deduplicated population of that species**, not just isolates with an explicit confirmatory
 test row. Restricting the denominator to explicit tests distorts *E. coli* BLSE from **7.61 % to 83.04 %**.
+In contrast, standard antibiogram molecules such as vancomycin in *E. faecium* (ERV) are evaluated strictly
+over isolates tested for that molecule ($n / N_{\text{tested}}$).
 
 ### 5. Exposure Denominator Matching (Inherited Invariant)
 
@@ -161,14 +163,12 @@ This explains why SPARES explicitly prescribed:
 
 Feeding the specimen filter as an input to deduplication is required to prevent preemption.
 
-### 08.3 tripwire (TW-08.1) — SARM marker concordance
+### 08.3 tripwire (TW-08.1) — SARM marker precedence and concordance
 
-**Statement**: Cefoxitine and oxacilline tests on *S. aureus* never yield discordant clinical interpretations. (Cataloged as `TW-08.1` in `tripwire-register.md`).
-**Today**: Rouen 2024 has 1 093 cefoxitine tests and 91 oxacilline tests. All 91 co-tested isolates are
-100 % concordant (84 R / 7 S). Discordances = **0**.
+**Statement**: Cefoxitine is prioritized as primary marker for *S. aureus* methicillin resistance; oxacilline acts as surrogate fallback when cefoxitine is untested. Co-tested isolates are monitored for discordant clinical interpretations (cataloged as `TW-08.1` in `tripwire-register.md`).
+**Today**: Rouen 2024 exports oxacilline on *S. aureus* (1 093 tested: 84 R, 1 009 S, 7 NA; cefoxitine is not in Rouen's routine *S. aureus* panel). Evaluating SARM via the surrogate fallback yields 84 SARM isolates (7.69 %). Discordances on co-tested isolates = **0**.
 
-The tripwire fails if a site records an isolate with `cefoxitine == "S"` and `oxacilline == "R"` or vice versa,
-verifying that cefoxitine precedence remains active.
+The tripwire triggers if a site with co-tested isolates records `cefoxitine == "S"` and `oxacilline == "R"` (or vice versa), verifying that cefoxitine precedence is applied and alerting the audit ledger for review.
 
 ### 08.6 note — why routine laboratory workflow necessitates Note Xa
 

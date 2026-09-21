@@ -104,11 +104,13 @@ perimeter is one object handed to both numerator and denominator. Admitting
 isolates whose hospital days are absent produces an incidence density of
 nothing.
 
-Option A is chosen: isolates without active hospitalisation exposure receive
-`SEJUF = NA` and are excluded from the perimeter. Missing USLD stays or
-pre-admission registration offsets must be addressed at extraction and adapter
-boundaries, not by fabricating an attribution that movement intervals
-contradict.
+Option A is chosen with an explicit admission linkage rule: isolates without
+hospitalisation exposure receive `SEJUF = NA` and are excluded from the perimeter.
+However, to prevent discarding acute sepsis admissions, specimens collected in the
+Emergency Department (TA 10) that are followed by an acute inpatient admission (TA 03/20)
+within a bounded 24-hour look-ahead window are linked to the stay and attributed to the
+initial receiving inpatient UF (`ADR-0009`). True outpatient visits without subsequent
+hospitalisation remain excluded.
 
 ### 05.2 tripwire (TW-05.1)
 

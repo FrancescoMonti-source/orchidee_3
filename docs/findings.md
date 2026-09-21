@@ -209,3 +209,18 @@ down to -27 days) quarantined to protect exposure denominators, and 1 outpatient
 reported susceptible to ampicillin (ELTID 376198529) quarantined from numerator computation (0 violations
 in the eligible hospitalisation perimeter, 604/604 R).
 → `docs/methods/00-audit-qualite.md`, `docs/methods/tripwire-register.md`
+
+### 2026-09-21 — SARM Oxacilline ground truth, Note Xa boundary, and Emergency linkage window (ADR-0009)
+
+1. **SARM Methicillin Ground Truth**: Forensic analysis of raw GLIMS data (`data/bact22_24`) revealed that Rouen exports `OXACILLINE` for *S. aureus* (1 093 tested: 84 R, 1 009 S, 7 NA; 7.69 % SARM), with 0 tests of Cefoxitine on *S. aureus* (cefoxitine was tested exclusively on Enterobacterales). ORCHIDEE enforces the SPF Annexe 3 note 2 rule: cefoxitine takes primary precedence, falling back to oxacilline when cefoxitine is untested. Fabricated contingency tables were removed from documentation and tripwire registers.
+→ `docs/worked-examples/indicators.md`, `docs/methods/08-indicateurs.md` 08.3, `docs/methods/tripwire-register.md` TW-08.1
+
+2. **Note Xa Scope Confined to Enzymatic Phenotypes**: SPARES Note Xa applies strictly to enzymatic reflex phenotypes (BLSE and carbapenemases in Enterobacterales), where absent signals mean negative. Routine antibiogram molecules like vancomycin in *E. faecium* are not covered by Note Xa; their resistance proportions divide strictly by tested isolates ($n / N_{\text{tested}}$).
+→ `docs/methods/08-indicateurs.md` 08.4, `docs/adr/0005-phenotype-indicators-use-spares-note-xa.md`
+
+3. **Emergency Department 24h Pre-Admission Linkage Window**: Blood cultures drawn in Emergency (TA 10) shortly before transfer to an acute inpatient ward (TA 03/20) previously had `SEJUF = NA` under strict timestamp matching, dropping severe sepsis cases from the numerator while their inpatient stay days were counted in the exposure denominator. ADR-0009 defines a 24-hour pre-admission linkage window attributing these specimens to the initial admitting inpatient UF.
+→ `docs/adr/0009-emergency-pre-admission-samples-link-to-inpatient-stay.md`, `docs/methods/05-structure.md` 05.1
+
+4. **Monthly Surveillance Model Finality**: Monthly indicators operate under independent monthly calendar partitions (`window = "monthly"`) and are final upon month close, preventing retrospective fluctuations from later hospitalizations. The long-term architectural goal is aligning with the European ECDC / EARS-Net 30-day rolling refractory window (Decision 07.2).
+→ `docs/worked-examples/deduplication.md`, `docs/methods/07-dedoublonnage.md` 07.1–07.2
+

@@ -26,4 +26,5 @@ rate of **7.61 %** (+75.4 pp distortion avoided; `Finding 18`).
 - The denominator for phenotype proportions is `total_isolates` of that species,
   matching the national SPARES and ONERBA benchmark.
 - Pre-flight audit tripwire `TW-06.1` asserts biological plausibility, ensuring that
-  susceptible strains never carry positive phenotype flags.
+  susceptible isolates never carry positive phenotype flags.
+

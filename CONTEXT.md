@@ -191,8 +191,16 @@ _Avoid_: scope, inclusion criteria, filter
 The derivation of the clinical unit an isolate belongs to, determined by matching
 the sample timestamp to the patient's hospitalisation movement intervals. If no
 movement interval covers the sample time, the isolate receives `SEJUF = NA` and
-is excluded from the eligible perimeter; it is never attributed by guessing from
+is excluded from the eligible perimeter, unless it qualifies under the 24-hour
+pre-admission linkage window (`ADR-0009`). It is never attributed by guessing from
 the ordering laboratory code when intervals contradict it.
+
+**Pre-admission linkage window**:
+A bounded 24-hour look-ahead window linking diagnostic specimens (such as blood
+cultures) collected in the Emergency Department (TA 10) to a subsequent acute
+inpatient stay (TA 03 / TA 20), attributing the specimen to the initial receiving
+inpatient unit (`ADR-0009`). This prevents dropping acute community-onset sepsis
+admissions from the numerator while their inpatient stay days remain in the denominator.
 _Avoid_: unit mapping (when sample attribution is meant), sample location
 
 **Structure snapshot**:

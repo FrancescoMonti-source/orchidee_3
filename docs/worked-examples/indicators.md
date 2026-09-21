@@ -94,27 +94,21 @@ Treating absent phenotype tests as missing data ($NA$) inflates BLSE rates by a 
 
 ---
 
-## 4. SARM methicillin rule and concordance (08.3)
+## 4. SARM methicillin rule and laboratory surrogate handling (08.3)
 
-For *S. aureus* methicillin resistance (SARM), SPF Annexe 3 footnote 2 establishes:
+For *S. aureus* methicillin resistance (SARM), SPF Annexe 3 footnote 2 establishes the marker precedence:
 > *« En cas de discordance entre les résultats céfoxitine et oxacilline, le résultat de la céfoxitine est conservé. »*
 
+Under EUCAST and French laboratory guidelines, cefoxitine is the preferred phenotypic surrogate for *mecA/mecC* resistance, but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule:
+1. **Primary marker**: Cefoxitine interpretation if tested.
+2. **Surrogate fallback**: Oxacilline interpretation if cefoxitine is untested.
+3. **Tripwire verification (TW-08.1)**: If an isolate is co-tested for both, cefoxitine takes precedence and any discordance is flagged for clinical review.
+
 On Rouen 2024 eligible *S. aureus* ($N = 1\,100$ deduplicated isolates):
-- Cefoxitine tested: 1 093 (84 R, 1 009 S)
-- Oxacilline tested: 91 (84 R, 7 S)
-- Cross-tabulation:
-
-```
-            oxacilline
-cefoxitine    NA    R    S
-        NA     7    0    0
-         R     0   84    0
-         S  1002    0    7
-```
-
-There are **exactly 0 discordant pairs** at Rouen in 2024. Cefoxitine is the universal laboratory surrogate (tested in 99.4 % of isolates), while oxacilline is only co-tested on 91 isolates (all 84 R isolates concordant, and 7 S isolates concordant).
-
-The decision to give cefoxitine precedence is guarded by an automated tripwire asserting 100 % concordance on co-tested isolates.
+- Cefoxitine was not included in Rouen's routine *S. aureus* panel (all cefoxitine tests at Rouen are deployed on Enterobacterales as an AmpC marker).
+- Oxacilline is Rouen's routine clinical AST marker for *S. aureus*: **1 093 tested** (84 R, 1 009 S), with 7 untested isolates.
+- SARM prevalence under the surrogate fallback rule: **84 / 1 093 tested (7.69 %)**; slice incidence density = **0.236 / 1 000 JH**.
+- Tripwire `TW-08.1` monitors co-tested discordances (trivially 0 here since cefoxitine is absent, but fully active for multi-center sites testing both).
 
 ---
 
@@ -148,7 +142,7 @@ Computed across all SPARES target organisms on the perimeter-correct denominator
 | *K. pneumoniae* | 517 | BLSE (Note Xa) | 517 | 19.34 % | 0.281 |
 | *E. cloacae complex* | 441 | C3G | 436 | 43.35 % | 0.532 |
 | *E. cloacae complex* | 441 | BLSE (Note Xa) | 441 | 19.73 % | 0.245 |
-| *S. aureus* | 1 100 | SARM (Cefoxitine) | 1 093 | 7.69 % | 0.236 |
+| *S. aureus* | 1 100 | SARM (Cefoxitine / Oxacilline) | 1 093 | 7.69 % | 0.236 |
 | *P. aeruginosa* | 558 | Carbapénèmes (IPM/MEM) | 547 | 16.45 % | 0.253 |
 | *P. aeruginosa* | 558 | Ceftazidime | 554 | 19.49 % | 0.304 |
 | *P. aeruginosa* | 558 | Pipéracilline-tazobactam | 554 | 20.40 % | 0.318 |

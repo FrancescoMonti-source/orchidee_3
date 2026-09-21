@@ -81,7 +81,7 @@ offline LLM batch harmonization pipeline.
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
 | 06.1 | Screening samples | excluded before deduplication | included | +5.6 % isolates; céfotaxime 16.96 &rarr; 25.19 %R (+8.23 pp); ertapénème x4.3. `docs/worked-examples/screening-exclusion.md` |
-| 06.2 | `ZIT` against `SFP` | `ZIT` is read as `SFP`, per SPF text | `ZIT` treated as missing data | see 07.5: 4 438 isolates against 4 428. `docs/worked-examples/deduplication.md` |
+| 06.2 | `ZIT` against `SFP` | `ZIT` is read as `SFP`, per CA-SFM alignment | `ZIT` treated as missing data | see 07.5: 4 438 isolates against 4 428. `docs/worked-examples/deduplication.md` |
 | 06.3 | Isolate key | `(PATID, ELTID, souche_id)` | collapse same species within sample | 213 triples split across several `souche_id`, 214 extra isolates, 0.4 % |
 | 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; non-interpretive &rarr; `NA` | retain `I` as distinct 4th value | Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
 | 06.5 | Resistance phenotypes | binary isolate attribute; absent signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |

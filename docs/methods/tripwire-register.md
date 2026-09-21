@@ -193,25 +193,28 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ---
 
-### TW-08.1 — SARM Marker Concordance
+### TW-08.1 — SARM Marker Precedence and Concordance
 
 - **Identifier**: `TW-08.1`
 - **Pipeline Stage**: Indicator construction (`08-indicateurs.md`, Decision 08.3; `00-audit-qualite.md`,
   Decision 00.6)
-- **Statement**: Cefoxitine and oxacilline susceptibility tests on *S. aureus* never yield
-  discordant clinical interpretations (S vs R) on co-tested isolates.
+- **Statement**: Cefoxitine is prioritized as primary marker for *S. aureus* methicillin resistance;
+  oxacilline acts as surrogate fallback when cefoxitine is untested. Co-tested isolates are monitored
+  for discordant clinical interpretations.
 - **Rationale & Risk**: SPF Annexe 3 note 2 specifies: *"En cas de discordance entre les résultats
   céfoxitine et oxacilline, le résultat de la céfoxitine est conservé."* Cefoxitine is the
-  established surrogate for mecA/mecC-mediated methicillin resistance. If discordance occurs,
-  cefoxitine precedence must be strictly applied and the isolate flagged for microbiological review.
+  preferred EUCAST surrogate for mecA/mecC-mediated methicillin resistance, but French clinical
+  laboratories often test oxacilline. If both are tested and discordant, cefoxitine precedence must
+  be strictly applied and the isolate flagged for microbiological review.
 - **Trigger Condition**:
   Count of co-tested *S. aureus* isolates with $(\text{FOX} == \text{'R'} \land \text{OXA} == \text{'S'})$
   or $(\text{FOX} == \text{'S'} \land \text{OXA} == \text{'R'}) > 0$.
 - **Action on Trip**: Non-blocking warning. Enforces cefoxitine precedence automatically in the
   group evaluation logic and logs discordant isolates in the audit ledger.
 - **Rouen Baseline Witness**: On Rouen 2024 eligible *S. aureus* ($N = 1\,100$ deduplicated isolates),
-  cefoxitine was tested on 1 093 isolates (84 R, 1 009 S) and oxacilline on 91 isolates (84 R, 7 S).
-  All 91 co-tested isolates were 100 % concordant (84 R/R, 7 S/S). **Discordances = 0**.
+  oxacilline is Rouen's routine clinical marker (1 093 tested: 84 R, 1 009 S, 7 NA; cefoxitine is
+  untested on *S. aureus*). Under the surrogate fallback rule, SARM prevalence is 84 / 1 093 (7.69 %).
+  Discordances on co-tested isolates = **0**.
 
 ---
 

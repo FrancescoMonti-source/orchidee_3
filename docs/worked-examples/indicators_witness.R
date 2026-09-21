@@ -357,6 +357,102 @@ cat(sprintf(
   100 * sum(sec_m_counts$n < 10) / nrow(sec_m_counts)
 ))
 
+# --- WITNESS 08.9: COMPREHENSIVE TABLE 6 REPRODUCTION ---
+cat("--- 08.9: Comprehensive Table 6 Reproduction ---\n")
+
+# K. pneumoniae
+kp_elig <- s24_elig[s24_elig$bact_norm == "klebsiella_pneumoniae", ]
+kp_global <- dedup(kp_elig)
+c3g_kp <- eval_group(kp_global, c("cefotaxime", "ceftriaxone", "ceftazidime"))
+fq_kp <- eval_group(kp_global, c("ofloxacine", "levofloxacine", "ciprofloxacine", "moxifloxacine"))
+blse_kp <- sum(kp_global$blse_flag, na.rm = TRUE)
+cat(sprintf(
+  "K. pneumoniae (N = %d):\n  C3G %%R        : %5.2f%% (%d / %d) | DI = %0.3f\n  FQ %%R         : %5.2f%% (%d / %d) | DI = %0.3f\n  BLSE (Note Xa): %5.2f%% (%d / %d) | DI = %0.3f\n",
+  nrow(kp_global),
+  100 * sum(c3g_kp == "R") / sum(c3g_kp != "EMPTY_SET"), sum(c3g_kp == "R"), sum(c3g_kp != "EMPTY_SET"), 1000 * sum(c3g_kp == "R") / total_jh_2024,
+  100 * sum(fq_kp == "R") / sum(fq_kp != "EMPTY_SET"), sum(fq_kp == "R"), sum(fq_kp != "EMPTY_SET"), 1000 * sum(fq_kp == "R") / total_jh_2024,
+  100 * blse_kp / nrow(kp_global), blse_kp, nrow(kp_global), 1000 * blse_kp / total_jh_2024
+))
+
+# E. cloacae complex
+ecl_elig <- s24_elig[s24_elig$bact_norm %in% c("enterobacter_cloacae", "enterobacter_cloacae_complex"), ]
+ecl_global <- dedup(ecl_elig)
+c3g_ecl <- eval_group(ecl_global, c("cefotaxime", "ceftriaxone", "ceftazidime"))
+blse_ecl <- sum(ecl_global$blse_flag, na.rm = TRUE)
+cat(sprintf(
+  "E. cloacae complex (N = %d):\n  C3G %%R        : %5.2f%% (%d / %d) | DI = %0.3f\n  BLSE (Note Xa): %5.2f%% (%d / %d) | DI = %0.3f\n",
+  nrow(ecl_global),
+  100 * sum(c3g_ecl == "R") / sum(c3g_ecl != "EMPTY_SET"), sum(c3g_ecl == "R"), sum(c3g_ecl != "EMPTY_SET"), 1000 * sum(c3g_ecl == "R") / total_jh_2024,
+  100 * blse_ecl / nrow(ecl_global), blse_ecl, nrow(ecl_global), 1000 * blse_ecl / total_jh_2024
+))
+
+# P. aeruginosa
+pa_elig <- s24_elig[s24_elig$bact_norm == "pseudomonas_aeruginosa", ]
+pa_global <- dedup(pa_elig)
+carba_pa <- eval_group(pa_global, c("imipeneme", "meropeneme"))
+caz_pa <- eval_group(pa_global, "ceftazidime")
+ptz_pa <- eval_group(pa_global, "piperacilline_tazobactam")
+cat(sprintf(
+  "P. aeruginosa (N = %d):\n  Carbapénèmes  : %5.2f%% (%d / %d) | DI = %0.3f\n  Ceftazidime   : %5.2f%% (%d / %d) | DI = %0.3f\n  Pip-tazo      : %5.2f%% (%d / %d) | DI = %0.3f\n",
+  nrow(pa_global),
+  100 * sum(carba_pa == "R") / sum(carba_pa != "EMPTY_SET"), sum(carba_pa == "R"), sum(carba_pa != "EMPTY_SET"), 1000 * sum(carba_pa == "R") / total_jh_2024,
+  100 * sum(caz_pa == "R") / sum(caz_pa != "EMPTY_SET"), sum(caz_pa == "R"), sum(caz_pa != "EMPTY_SET"), 1000 * sum(caz_pa == "R") / total_jh_2024,
+  100 * sum(ptz_pa == "R") / sum(ptz_pa != "EMPTY_SET"), sum(ptz_pa == "R"), sum(ptz_pa != "EMPTY_SET"), 1000 * sum(ptz_pa == "R") / total_jh_2024
+))
+
+# E. faecalis & E. faecium
+efa_elig <- s24_elig[s24_elig$bact_norm == "enterococcus_faecalis", ]
+efa_global <- dedup(efa_elig)
+vanc_efa <- eval_group(efa_global, "vancomycine")
+cat(sprintf(
+  "E. faecalis (N = %d):\n  Vancomycine   : %5.2f%% (%d / %d) | DI = %0.3f\n",
+  nrow(efa_global),
+  100 * sum(vanc_efa == "R") / sum(vanc_efa != "EMPTY_SET"), sum(vanc_efa == "R"), sum(vanc_efa != "EMPTY_SET"), 1000 * sum(vanc_efa == "R") / total_jh_2024
+))
+
+efm_elig <- s24_elig[s24_elig$bact_norm == "enterococcus_faecium", ]
+efm_global <- dedup(efm_elig)
+vanc_efm <- eval_group(efm_global, "vancomycine")
+cat(sprintf(
+  "E. faecium (N = %d):\n  Vancomycine (ERV): %5.2f%% (%d / %d) | DI = %0.3f\n",
+  nrow(efm_global),
+  100 * sum(vanc_efm == "R") / sum(vanc_efm != "EMPTY_SET"), sum(vanc_efm == "R"), sum(vanc_efm != "EMPTY_SET"), 1000 * sum(vanc_efm == "R") / total_jh_2024
+))
+
+# --- WITNESS 08.10: FIVE NATIONAL STRATEGY INDICATORS ---
+cat("\n--- 08.10: Five National Strategy Indicators (SPF 2022-2025) ---\n")
+# 1. DI toutes EPC (deduplicated Enterobacterales with carbapenemase flag)
+entero_species <- c(
+  "escherichia_coli", "klebsiella_pneumoniae", "enterobacter_cloacae",
+  "enterobacter_cloacae_complex", "proteus_mirabilis", "klebsiella_oxytoca",
+  "citrobacter_freundii", "serratia_marcescens", "citrobacter_koseri",
+  "morganella_morganii", "providencia_stuartii", "klebsiella_aerogenes",
+  "proteus_vulgaris", "hafnia_alvei"
+)
+entero_elig <- s24_elig[s24_elig$bact_norm %in% entero_species, ]
+entero_global <- dedup(entero_elig)
+epc_cases <- sum(entero_global$carbapenemase_flag, na.rm = TRUE)
+cat(sprintf("1. DI toutes EPC           : %d cases | %0.4f / 1 000 JH\n", epc_cases, 1000 * epc_cases / total_jh_2024))
+
+# 2. DI K. pneumoniae C3G-R
+kp_c3gr_cases <- sum(c3g_kp == "R")
+cat(sprintf("2. DI K. pneumoniae C3G-R  : %d cases | %0.4f / 1 000 JH\n", kp_c3gr_cases, 1000 * kp_c3gr_cases / total_jh_2024))
+
+# 3. DI K. pneumoniae BLSE
+cat(sprintf("3. DI K. pneumoniae BLSE   : %d cases | %0.4f / 1 000 JH\n", blse_kp, 1000 * blse_kp / total_jh_2024))
+
+# 4. Proportion EPC chez K. pneumoniae hémocultures
+kp_hemo_raw <- kp_elig[!is.na(kp_elig$naturepvt_norm) & kp_elig$naturepvt_norm == "hemoculture", ]
+kp_hemo_input <- dedup(kp_hemo_raw)
+kp_hemo_epc <- sum(kp_hemo_input$carbapenemase_flag, na.rm = TRUE)
+cat(sprintf("4. %% EPC KP hémocultures   : %5.2f%% (%d / %d) [Note Xa: ADR-0005]\n", 100 * kp_hemo_epc / nrow(kp_hemo_input), kp_hemo_epc, nrow(kp_hemo_input)))
+
+# 5. Proportion ERV chez E. faecium hémocultures
+efm_hemo_raw <- efm_elig[!is.na(efm_elig$naturepvt_norm) & efm_elig$naturepvt_norm == "hemoculture", ]
+efm_hemo_input <- dedup(efm_hemo_raw)
+efm_hemo_vanc <- eval_group(efm_hemo_input, "vancomycine")
+cat(sprintf("5. %% ERV EFM hémocultures : %5.2f%% (%d / %d tested)\n", 100 * sum(efm_hemo_vanc == "R") / sum(efm_hemo_vanc != "EMPTY_SET"), sum(efm_hemo_vanc == "R"), sum(efm_hemo_vanc != "EMPTY_SET")))
+
 cat(
   "=========================================================================\n"
 )
@@ -364,3 +460,4 @@ cat("ALL WITNESSES COMPUTED SUCCESSFULLY.\n")
 cat(
   "=========================================================================\n"
 )
+
