@@ -70,6 +70,12 @@ A hospital's own clinical data warehouse, the source ORCHIDEE reads from and the
 reason it can see data national surveillance cannot.
 _Avoid_: the warehouse, the datalake
 
+**GLIMS**:
+The Laboratory Information System (LIS / SIL) manufactured by CliniSys/MGI, used
+by the CHU de Rouen bacteriology laboratory. It handles order entry, laboratory
+workbenches, analyzer connections, and medical validation, and is the source of
+the raw `bact22_24` table.
+
 ### Resistance measurement
 
 **Isolate**:
@@ -98,7 +104,9 @@ _Avoid_: the antibiotic list, the columns
 **Deduplication**:
 Discarding an isolate because the same patient already contributed one of the
 same species, same sample type and same antibiotype within the window. Always
-relative to a panel and a window; never absolute.
+relative to a panel and a window; never absolute. Deduplication is strictly
+partitioned by patient, species, and specimen scope: isolates of different
+species never compete, deduplicate, or affect each other.
 _Avoid_: dédoublonnage (in English text), de-duping, filtering
 
 **Major discrepancy**:
@@ -110,6 +118,15 @@ A sample taken to identify the cause of a suspected infection. Distinguished
 from a screening sample, taken to detect colonisation or carriage, which
 resistance indicators exclude.
 _Avoid_: clinical sample, prélèvement
+
+**Screening sample**:
+A sample taken for infection-control surveillance to detect asymptomatic bacterial
+colonisation or carriage (e.g. rectal or nasal swabs). In French hospitals,
+screening is targeted rather than universal: patients transferred from abroad or
+other ICUs, weekly surveillance in high-risk units (ICU, hematology), and contact
+patients during an outbreak. Resistance indicators strictly exclude screening
+samples.
+_Avoid_: surveillance sample, prélèvement écologique (in English text)
 
 **SFP** (sensible à forte posologie):
 The clinical category between susceptible and resistant, EUCAST's "I". The
@@ -123,6 +140,20 @@ nor the SPARES methodology mentions it; only the CA-SFM reference and hospital
 exports use it. Treating it as SFP is an ORCHIDEE decision that no external
 document prescribes.
 _Avoid_: treating ZIT and SFP as the same concept without recording the choice
+
+**Resistance phenotype (BLSE, Carbapenemase)**:
+A binary isolate attribute (`TRUE`/`FALSE`) denoting an enzymatic resistance
+mechanism in Enterobacterales. In clinical microbiology, wild-type susceptible
+isolates do not trigger confirmatory testing and carry no record, which surveillance
+treats as negative per SPARES Note Xa. It is an attribute of the isolate, not an
+antibiotic column in the antibiotype panel.
+_Avoid_: treating phenotypes as molecules during deduplication
+
+**Diagnostic scope**:
+A sample-level contract boolean (`TRUE` for diagnostic specimens, `FALSE` for
+screening or carriage) supplied exclusively by the site adapter according to local
+order codes. Core ORCHIDEE enforces exclusion before deduplication and never
+attempts string heuristics on raw labels.
 
 ### Exposure and perimeter
 
@@ -155,6 +186,20 @@ The single resolved set of units whose activity enters the surveillance. One
 object, handed to both the numerator and the denominator. Two independent
 selections would each be defensible and their ratio would be a rate of nothing.
 _Avoid_: scope, inclusion criteria, filter
+
+**Hospitalisation unit attribution**:
+The derivation of the clinical unit an isolate belongs to, determined by matching
+the sample timestamp to the patient's hospitalisation movement intervals. If no
+movement interval covers the sample time, the isolate receives `SEJUF = NA` and
+is excluded from the eligible perimeter; it is never attributed by guessing from
+the ordering laboratory code when intervals contradict it.
+_Avoid_: unit mapping (when sample attribution is meant), sample location
+
+**Structure snapshot**:
+The annual version of the establishment's structural referential (UFs, TAs,
+DEs, domains) valid for a given campaign year. Constant across the surveillance
+period so that unit eligibility remains stable throughout deduplication.
+_Avoid_: dynamic structure, live hierarchy
 
 **SAE** (Statistique annuelle des établissements de santé):
 The annual administrative declaration that SPARES names as the source of

@@ -17,20 +17,27 @@ patient-day denominator (see `04-donnees-activite.md`).
 
 | SPARES section | ORCHIDEE section | Status |
 |---|---|---|
+| Traitement des données (contrôle qualité pré-vol) | [00](00-audit-qualite.md) | **settled** |
 | Période de surveillance | [01](01-periode-surveillance.md) | not started |
 | Établissements inclus / exclus | [02](02-etablissements.md) | not started |
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
 | Données d'activité | [04](04-donnees-activite.md) | **settled** |
-| Structure de l'établissement | [05](05-structure.md) | not started |
-| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **partial** |
+| Structure de l'établissement | [05](05-structure.md) | **settled** |
+| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **settled** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |
-| Construction des indicateurs | [08](08-indicateurs.md) | **partial** |
+| Construction des indicateurs | [08](08-indicateurs.md) | **settled** |
 | Analyse et diffusion | [09](09-diffusion.md) | not started |
 | Données de consommation (ATB / ATF) | — | out of scope |
 
 `not started` means no decision has been taken, not that the section is empty of
 questions. `partial` means some decisions are settled and the section names what
 is still open.
+
+## Cross-cutting catalogs
+
+- [tripwire-register.md](tripwire-register.md) - The unified catalog of all 7
+  dynamic pipeline tripwires (TW-04.1 through TW-08.1), their mathematical trigger
+  thresholds, action policies, and empirical Rouen baselines.
 
 ## Where else things are written down
 

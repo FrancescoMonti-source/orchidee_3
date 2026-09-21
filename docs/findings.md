@@ -123,3 +123,89 @@ carry no `SEJUF` at all. The gap is not unfinished mapping work; it is samples
 that could not be attributed to a hospitalisation unit. No mapping effort of any
 kind reaches them.
 → `docs/methods/03-activites.md` 03.4 and *Open*, `05-structure.md`
+
+### 2026-09-19 — Unit-less isolates are outpatient visits and extraction boundaries, not unmapped units
+
+All 3 650 isolates with `SEJUF = NA` carry a valid ordering UF in the laboratory
+file. 60 % (2 190) are outpatient or emergency visits (TA 10 urgences 1 278, TA 07
+consultations 447, TA 04 HDJ 164) where no complete hospitalisation occurred. The
+remaining 40 % (1 456) reflect extraction boundaries: 632 in USLD long-term care
+(absent from acute MCO movements) and 824 in MCO (pre-admission sampling or omitted
+stays). Falling back to laboratory UFs adds 110 deduplicated *E. coli* isolates
+(+4.5 %) and moves céfotaxime +1.02 pp, but injects isolates without corresponding
+denominator days.
+→ `docs/worked-examples/unit-attribution.md`, `05-structure.md` 05.1
+
+### 2026-09-19 — The keyword "recherche" is a catastrophic screening proxy
+
+Naive string search for "recherche" across raw laboratory data catches 80 700 rows
+across 118 test types in 2024 alone. In French medical biology, "Recherche" is the
+standard order prefix for both screening orders and high-acuity diagnostics: the search
+catches 6 231 N. gonorrhoeae diagnostic swabs, 18 969 C. difficile GDH and toxin tests,
+and 2 519 malaria blood films. Filtering sample nature on "rectal" similarly discards
+surgical deep-abscess drainages. Screening classification must remain a site-adapter
+contract boolean, never an internal string heuristic.
+→ `docs/worked-examples/phenotypes-and-screening.md`, `06-donnees-resistance.md` 06.7
+
+### 2026-09-19 — Absent phenotype signals are 99.55 % concordant with wild-type susceptibility
+
+In routine hospital microbiology, confirmatory phenotype tests (BLSE, carbapenemase) are
+never performed or documented for wild-type isolates. Across 9 586 *E. coli* isolates in 2024,
+99.55 % of C3G-susceptible isolates (8 636 / 8 675) carry no BLSE record whatsoever, while
+99.1 % of positive BLSE tests coincide with C3G resistance. Treating an absent signal as
+negative (`FALSE`) reflects clinical laboratory reality and introduces zero missing-data
+leakage, directly confirming SPARES Note Xa.
+→ `docs/worked-examples/phenotypes-and-screening.md`, `06-donnees-resistance.md` 06.5
+
+### 2026-09-19 — Reverse-engineering screening requires a three-tier model to avoid wound data loss
+
+Reverse-engineering the screening boundary from raw GLIMS data cannot rely on simple
+heuristics. An audit of all 12 test batteries ending in `_R` establishes three tiers:
+(1) Pure BMR/BHRe carriage batteries (`BGBLSE_R`, `BGCARBA_R`, `BGERV_R`, `BGSAMR_R`,
+`BGABRI_R`, `BGABMR_R`, `BGPYOBMR_R`) carry 0 direct antibiograms, qualitative results,
+and 100 % NA specimen natures; their positive results trigger reflex antibiograms on the
+same `ELTID`.
+(2) Dual-use orders like `BGSTA_R` (*S. aureus* search) are nasal carriage screens when
+standalone (0 AST rows), but active diagnostic cultures on acute infected wounds
+(`PLAIE DOS`, `VESICULE CUTANEE`) when co-ordered with `BGCULTAE` (yielding 681 AST rows
+of *P. aeruginosa*, *Proteus*, and *Serratia*); treating `BGSTA_R` as a blanket screening
+flag discards legitimate wound infections.
+(3) Specimen mapping must separate superficial non-sterile reservoirs (`^NEZ$`, `^AISSELLE$`)
+from surgical collections (`Liquide ABCES MARGE ANALE`, `FISTULE ANO PERINEALE`), which
+represent > 95 % of specimens matching "anal/rectal" that have antibiograms.
+→ `docs/methods/note-cadrage-depistage-microbiologie.md`, `06-donnees-resistance.md` 06.7
+
+### 2026-09-19 — Specimen scoping is an input to deduplication; post-filtering deletes 35.6 % of bacteremias
+
+Comparing blood-culture-specific indicators on Rouen 2024 data: feeding blood cultures
+as an input to deduplication keeps 216 *S. aureus* and 267 *E. coli* isolates, whereas
+deduplicating globally and post-filtering keeps only 139 *S. aureus* (−35.6 %) and 226 *E. coli*
+(−15.4 %). 5 SARM bacteremias are erased (−33.3 %, dropping DI from 0.0422 to 0.0281 / 1000 JH).
+Because prior non-blood samples (urine, sputum, wound) preempt secondary bacteremias under
+the oldest-sample tiebreak, specimen scoping must remain an input to deduplication.
+→ `docs/worked-examples/indicators.md`, `docs/methods/08-indicateurs.md` 08.1
+
+### 2026-09-19 — Restricting phenotype denominators to explicit test rows inflates BLSE from 7.6 % to 83.0 %
+
+In routine bacteriology, wild-type susceptible Enterobacterales do not trigger confirmatory
+double-disk synergy or PCR tests. On Rouen 2024 eligible *E. coli*, 186 isolates are BLSE-positive
+out of 2 445 total deduplicated isolates (7.61 % prevalence under SPARES Note Xa). If the
+denominator is restricted to isolates with an explicit BLSE test row in the laboratory export
+(224 isolates: 186 positive, 38 negative), the rate jumps to 83.04 % (+75.4 pp). Treating an
+absent phenotype test as missing data rather than negative completely destroys surveillance validity.
+→ `docs/worked-examples/indicators.md`, `docs/methods/08-indicateurs.md` 08.6
+
+### 2026-09-20 — Pre-flight data quality operationalizes SPARES §1 and unifies 7 pipeline tripwires
+
+SPARES Page 16 §1 specifies an upfront coherence and plausibility audit of the whole database.
+In ConsoRes this step was informal and unreviewable. ORCHIDEE formalizes this into an upfront automated
+pre-flight audit (`00-audit-qualite.md`) and a master catalog of seven dynamic pipeline tripwires
+(`tripwire-register.md`), verifying movement interval ordering (`DATENT <= DATSORT`), timestamp grain
+degradation (where date-only occupancy hours simplifies identically to midnight presence), structural
+referential linkage (> 99.9 %), EUCAST intrinsic resistances (*K. pneumoniae*/ampicillin, *P. mirabilis*/colistin),
+and reflex phenotype-AST plausibility under Note Xa.
+Empirical audit at Rouen revealed 80 raw PMSI movement rows (0.018 %) with negative durations (`DATSORT < DATENT`,
+down to -27 days) quarantined to protect exposure denominators, and 1 outpatient *K. pneumoniae* isolate
+reported susceptible to ampicillin (ELTID 376198529) quarantined from numerator computation (0 violations
+in the eligible hospitalisation perimeter, 604/604 R).
+→ `docs/methods/00-audit-qualite.md`, `docs/methods/tripwire-register.md`

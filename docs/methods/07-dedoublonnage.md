@@ -94,9 +94,9 @@ mix - which weakens exactly the comparison between establishments that the
 surveillance exists to provide. SPARES states its choice and never argues for
 it. ORCHIDEE follows the choice and records the objection.
 
-### 07.4 tripwire
+### 07.4 tripwire (TW-07.1)
 
-**Statement**: the SPARES panel and the full panel retain the same isolates.
+**Statement**: the SPARES panel and the full panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
 **Today**: 4438 and 4438, *E. coli* / urines / 2024.
 
 The check fails on the day a site starts testing a molecule that separates two

@@ -148,12 +148,12 @@ Which is why the resolution must be declared rather than inferred:
 A site declares `datetime` or `date`. ORCHIDEE compares the declaration against
 the observed share at 00:00 and refuses a site that is neither — Rouen at 4.11 %
 is a clean `datetime`; a site at 97 % is a clean `date`; a site at 40 % is
-refused rather than averaged.
+refused rather than averaged. Guarded by tripwire `TW-04.2` (see `tripwire-register.md`).
 
-### 04.10 tripwire
+### 04.10 tripwire (TW-04.1)
 
 **Statement**: no unit's eligible patient-days move more than ±30 % year over
-year without acknowledgement.
+year without acknowledgement. (Cataloged as `TW-04.1` in `tripwire-register.md`).
 **Today**: 327 301 / 347 303 / 355 246 for 2022-2024.
 
 Non-blocking by design. A hospital that genuinely closes a ward must still be
