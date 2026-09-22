@@ -54,9 +54,11 @@ not as antibiotic rows.
 
 The site adapter maps local laboratory signals (confirmatory tests, expert comments,
 disk synergy rows) into `blse` and `carbapenemase`. In accordance with clinical
-laboratory practice and SPARES Note Xa, an **absent signal is interpreted as negative
-(`FALSE`)**. Wild-type susceptible strains do not trigger confirmatory testing in
-routine practice.
+laboratory practice and SPARES Note Xa, an **absent phenotype signal is interpreted as
+negative (`FALSE`)**. Wild-type susceptible strains do not trigger confirmatory testing
+in routine practice. A positive phenotype with no corresponding antibiotic test result
+is recorded as a non-blocking finding and processing continues; see the
+[TW-06.1 specification](tripwire-register.md#tw-06-1).
 
 During deduplication, comparison operates on the antibiotic panel. Within a deduplicated
 patient-sample cluster, positive phenotype status is propagated (`any(positive) -> TRUE`).
@@ -84,7 +86,7 @@ offline LLM batch harmonization pipeline.
 | 06.2 | `ZIT` against `SFP` | `ZIT` is read as `SFP`, per CA-SFM alignment | `ZIT` treated as missing data | see 07.5: 4 438 isolates against 4 428. `docs/worked-examples/deduplication.md` |
 | 06.3 | Isolate key | `(PATID, ELTID, souche_id)` | collapse same species within sample | 213 triples split across several `souche_id`, 214 extra isolates, 0.4 % |
 | 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; non-interpretive &rarr; `NA` | retain `I` as distinct 4th value | Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
-| 06.5 | Resistance phenotypes | binary isolate attribute; absent signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
+| 06.5 | Resistance phenotypes | binary isolate attribute; absent phenotype signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
 | 06.6 | CA-SFM validation | run metadata declaration + ingestion tripwire | per-row rejection on raw `CASFM` | 100 % of Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance; per-row drop discards entire historical years |
 | 06.7 | Screening contract | sample-level boolean `diagnostic_scope` from site adapter | internal string heuristics (`"recherche"`, `"rectal"`) | `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
 | 06.8 | Bacterial scope | open ingestion &rarr; ONERBA standard mapping &rarr; counted residual | closed hardcoded filter | isolates outside target species logged and surfaced; mapping dictionary maintained via offline LLM batch job |
@@ -101,7 +103,8 @@ At Rouen in 2024, treating phenotypes as molecules changed only 10 isolates acro
 Enterobacterales (+4 *E. coli*, +3 *K. pneumoniae*). Adhering to strict SPARES
 specifications (comparing only genuine antibiotic molecules) avoids artificial
 discrepancies driven by delayed confirmatory testing. Phenotype-AST biological plausibility
-is guarded by tripwire `TW-06.1` (see `tripwire-register.md`).
+is guarded by [tripwire TW-06.1](tripwire-register.md#tw-06-1), whose full trigger conditions
+and actions are defined in that register entry.
 
 ### 06.6 tripwire (TW-06.2)
 **Statement**: Ingestion checks that raw `CASFM` &ge; 2020 on surveillance data from 2024 onward. (Cataloged as `TW-06.2` in `tripwire-register.md`).

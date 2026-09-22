@@ -40,7 +40,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 | **TW-04.1** | Unit Denominator Annual Stability | Exposure derivation | PMSI movement exposure | Non-blocking (acknowledgement) | Denominators: 327 301 / 347 303 / 355 246 JH (2022–2024) |
 | **TW-04.2** | Timestamp Grain Resolution | Ingestion & pre-flight audit | Movement timestamps (`DATENT`, `DATSORT`) | Blocking refusal | Rouen: 4.11 % `DATENT`, 4.08 % `DATSORT` at 00:00 (clean `datetime`) |
 | **TW-05.1** | Structure Snapshot Referential Coverage | Referential linkage | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
-| **TW-06.1** | Phenotype-AST Biological Plausibility | Ingestion & pre-flight audit | Binary resistance phenotypes vs AST | Non-blocking (quarantine & ledger) | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
+| **TW-06.1** | Resistance Flags and Antibiotic Test Results | Ingestion & pre-flight audit | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
 | **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` |
 | **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 438 isolates under full panel vs 4 438 under SPARES panel |
 | **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 91 co-tested isolates: 84 R/R, 7 S/S, exactly 0 discordances |
@@ -120,27 +120,37 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ---
 
-### TW-06.1 — Phenotype-AST Biological Plausibility Discordance
+<a id="tw-06-1"></a>
+### TW-06.1 — Resistance Flags and Antibiotic Test Results
 
 - **Identifier**: `TW-06.1`
 - **Pipeline Stage**: Ingestion & pre-flight audit (`00-audit-qualite.md`, Decision 00.7;
   `06-donnees-resistance.md`, Decision 06.5)
-- **Statement**: Resistance phenotypes (BLSE, Carbapenemase) are biologically concordant with
-  underlying AST measurements; wild-type susceptible Enterobacterales have 0 unexplained positive
+- **Statement**: Positive BLSE and carbapenemase flags are checked against results for the
+  corresponding antibiotics. Wild-type susceptible Enterobacterales have 0 unexplained positive
   phenotype flags.
-- **Rationale & Risk**: In French hospital bacteriology, wild-type susceptible Enterobacterales
-  never trigger confirmatory phenotype testing (SPARES Note Xa). An absent record is treated as
-  negative (`FALSE`). If a site adapter inverts boolean flags or misinterprets LIS expert
-  comments, susceptible strains could be falsely marked as resistant mechanisms, distorting
+- **Rationale & Risk**: Under SPARES Note Xa, an absent **phenotype signal** is treated as
+  negative (`FALSE`); this is distinct from a positive phenotype with no corresponding antibiotic
+  test result. If a site adapter inverts boolean flags or misinterprets LIS expert comments, a
+  susceptible isolate could be falsely marked as carrying a resistance mechanism, distorting
   national indicators.
 - **Trigger Condition**:
-  - Any Enterobacterales isolate marked `blse = TRUE` that is susceptible (`S`) across all
-    tested 3rd/4th generation cephalosporins (cefotaxime, ceftriaxone, ceftazidime, cefepime).
-  - Any isolate marked `carbapenemase = TRUE` that is susceptible (`S`) across all tested
-    carbapenems (meropenem, imipenem, ertapenem).
-  - Total discordant phenotype-AST isolates $> 0.5\,\%$ of phenotype-positive isolates.
-- **Action on Trip**: Non-blocking warning. Discordant isolates are quarantined from indicator
-  numerators and exported to the quality audit ledger.
+  - Any Enterobacterales isolate marked `blse = TRUE` with no interpretable result (`S`, `SFP`, or
+    `R`) for any corresponding 3rd/4th generation cephalosporin (cefotaxime, ceftriaxone,
+    ceftazidime, cefepime).
+  - Any Enterobacterales isolate marked `blse = TRUE` with at least one corresponding result, where
+    all interpretable results are susceptible (`S`). An `R` or `SFP` result supports the flag.
+  - Any isolate marked `carbapenemase = TRUE` with no interpretable result (`S`, `SFP`, or `R`) for
+    any corresponding carbapenem (meropenem, imipenem, ertapenem).
+  - Any isolate marked `carbapenemase = TRUE` with at least one corresponding result, where all
+    interpretable results are susceptible (`S`). An `R` or `SFP` result supports the flag.
+  - Total discordant phenotype-AST isolates $> 0.5\,\%$ of phenotype-positive isolates. Missing-result
+    findings are reported separately and are not included in this proportion.
+- **Action on Trip**: Non-blocking warning; processing continues.
+  - If a positive phenotype has no corresponding antibiotic test result, log that finding in the
+    quality audit ledger and retain the reported phenotype under Decision 06.5.
+  - If corresponding results are present but all are susceptible (`S`), quarantine the discordant
+    isolate from indicator numerators and export it to the quality audit ledger.
 - **Rouen Baseline Witness**: Rouen 2024 has 9 586 *E. coli* isolates: 99.55 % of C3G-susceptible
   isolates (8 636 / 8 675) carry no BLSE record, and 99.1 % of positive BLSE records coincide with
   C3G resistance. Exactly 0 wild-type pan-susceptible isolates are flagged BLSE-positive.

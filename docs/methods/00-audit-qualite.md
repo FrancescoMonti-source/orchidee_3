@@ -63,15 +63,15 @@ Section 00 Pre-Flight Audit Gate
 │   ├── Test 3.3: Report sample lags outside stays; ≥48 h pre-admission is suspicious, >30 d is report-only
 │   └── Test 3.4: Count admission/discharge times at 00:00:00 and with a non-midnight time (TW-04.2)
 │
-├── Suite 4: Structural & Referential Coverage
-│   ├── Test 4.1: Referential Linkage Tolerance (TW-05.1; >= 99.9 % active UFs in structure)
-│   └── Test 4.2: Positive Perimeter Exclusion Ledger (logs unmapped UFs in divergence account)
+├── Suite 4: Hospital Unit Structure Checks
+│   ├── Test 4.1: Check that hospital units in the data appear in the annual structure (TW-05.1)
+│   └── Test 4.2: Record unit codes missing from the structure and exclude their records from surveillance
 │
 ├── Suite 5: Intrinsic & Phenotypic Microbiological Plausibility
 │   ├── Test 5.1: Intrinsic Microbiological Resistances (flags impossible susceptible phenotypes)
-│   ├── Test 5.2: Phenotype–AST Plausibility (TW-06.1; flags C3G-S with BLSE-positive)
+│   ├── Test 5.2: Check BLSE and carbapenemase flags against antibiotic test results (TW-06.1)
 │   ├── Test 5.3: CA-SFM Standard Version Referential (TW-06.2; asserts CASFM >= 2020)
-│   └── Test 5.4: AST Duplicate Resolution Audit (verifies deterministic pivot rule)
+│   └── Test 5.4: Check which result is kept when the same isolate has repeat tests for one antibiotic
 │
 └── Suite 6: Descriptive Profiling & Redundancy Statistics
     ├── Test 6.1: Global Entity Volumes (counts of distinct PATID, EVTID, ELTID, isolates)
@@ -149,16 +149,17 @@ Patient demographic fields must be stable across surveillance encounters:
 
 ---
 
-### 4. Structural and Referential Coverage
+### 4. Hospital Unit Structure Checks
 
-The establishment structure is ingested as a frozen annual snapshot `unit_mapping` (Decision 05.4):
-- **Administrative completeness**: 100 % of administrative UFs with hospitalisation activity
-  must resolve in the structure referential (`CODE_TA`, `CODE_DE`, `de_domain_ref`).
-- **Microbiology completeness (`TW-05.1`)**: $\ge 99.9\,\%$ of microbiology observations must
-  resolve to known UFs in the structure snapshot.
-- **Positive perimeter**: In accordance with Decision 03.5, the perimeter is defined positively.
-  Unmapped UFs are excluded by design and logged in the quality ledger, preventing unknown units
-  from entering surveillance by omission.
+The establishment structure is ingested as a frozen annual snapshot `unit_mapping` (Decision 05.4).
+The code `TW-05.1` is the corresponding check's identifier in the tripwire register.
+
+- **Check that hospital units in the data appear in the annual structure (`TW-05.1`)**:
+  Check that every administrative unit contributing hospitalisation days, and at least 99.9 % of
+  microbiology observations, link to a unit in `unit_mapping`.
+- **Record units missing from the structure and exclude their records from surveillance**: Under
+  Decision 03.5, only units present in the structure are included in the surveillance perimeter.
+  Record unmatched unit codes and their affected observations in the quality ledger.
 
 ---
 
@@ -172,12 +173,16 @@ The establishment structure is ingested as a frozen annual snapshot `unit_mappin
   - ***Enterobacter cloacae complex***: intrinsically resistant to **Amoxicillin-clavulanate**.
   - ***Proteus mirabilis***: intrinsically resistant to **Colistin**.
   - ***Pseudomonas aeruginosa***: intrinsically resistant to **Ampicillin, Amox-clav, Cefotaxime, Ceftriaxone, Ertapenem, Trimethoprim-sulfamethoxazole**.
-- **Phenotype–AST concordance (`TW-06.1`)**: Positive resistance phenotypes must be biologically
-  supported by underlying AST measurements. An isolate marked `blse = TRUE` must show resistance (`R`)
-  or decreased susceptibility (`SFP`) to at least one 3rd/4th generation cephalosporin.
-- **AST duplicate resolution audit**: When the same isolate is tested multiple times against the
-  same antibiotic, the audit verifies that the site adapter's pivot engine resolves duplicates
-  deterministically via the documented last-row order rule (`vals[[length(vals)]]` in `external_handoff_helpers.R`).
+- **Resistance flags and antibiotic test results (`TW-06.1`)**: Compare positive BLSE and
+  carbapenemase flags with the relevant antimicrobial susceptibility testing (AST) results. If a
+  positive flag has no corresponding antibiotic test result, record a non-blocking finding and
+  continue processing; retain the reported phenotype under Decision 06.5. The
+  [full TW-06.1 specification](tripwire-register.md#tw-06-1) defines the exact checks and what
+  happens to discordant results.
+- **Repeated antibiotic test results**: An isolate can have more than one result for the same
+  antibiotic. Before analysis, the handoff reduces these to one result for that isolate and
+  antibiotic. This check verifies the documented rule: keep the last result in the source file's row
+  order.
 
 ---
 
@@ -263,7 +268,7 @@ All witnesses measured on Rouen 2022–2024 raw data (`data/pmsi`, `data/bact22_
 | 00.4 | Denominator grain verification | Operational threshold check on `00:00:00` timestamps; rejects intermediate distributions (TW-04.2) | Silently accept mixed temporal resolutions | Rouen has **4.11 %** `DATENT` and **4.08 %** `DATSORT` at 00:00 (clean `datetime`); method defined in `04-donnees-activite.md` (Decision 04.9) |
 | 00.5 | Structure referential link check | Positive perimeter with non-blocking tripwire asserting $\ge 99.9\,\%$ microbiology resolution (TW-05.1) | Blocking pipeline failure on any unmapped code | Admin 362/362 (100 %); lab 272/278 UFs in structure (6 external referral UFs, 68 raw rows, 0 in `sir_wide.rds`) |
 | 00.6 | Intrinsic resistance violations | Quarantined and logged in audit ledger; excluded from indicator numerator | Silently admitted or unverified | In 2024 raw extract, 1 *K. pneumoniae* reported S to ampicillin (outpatient ELTID 376198529, quarantined); 0 violations in eligible hospitalisation perimeter (604/604 R) |
-| 00.7 | Phenotype-AST plausibility | Assert biological concordance; absent test = `FALSE` kept in species denominator (Note Xa) (TW-06.1) | Restrict denominator to explicit test rows | Under Note Xa, *E. coli* BLSE is **7.61 %** (186/2 445); restricting to explicit tests yields distorted **83.04 %** (186/224) |
+| 00.7 | Phenotype-AST plausibility | An absent phenotype signal is `FALSE` under Note Xa; a positive flag without matching antibiotic results is logged and processing continues ([TW-06.1](tripwire-register.md#tw-06-1)) | Restrict denominator to explicit test rows | Under Note Xa, *E. coli* BLSE is **7.61 %** (186/2 445); restricting to explicit tests yields distorted **83.04 %** (186/224) |
 | 00.8 | Pre-flight descriptive profiling | Export comprehensive descriptive profile and divergence ledger (`audit_qualite.rds`) | Omit ingestion profiling | Quantifies true within-species redundancy (32.1 % 3-year ratio; 24.9 % repeat episodes; 26.5 % in 2024) and polymicrobial rates (13.5 % target samples) |
 
 Unproven: **0 of 8**.
@@ -319,11 +324,12 @@ sitting at `00:00:00`:
 Asserts that $\ge 99.9\,\%$ of active administrative UFs and microbiology orders resolve in the
 frozen structure snapshot `unit_mapping` (Decision 05.2).
 
-### 00.7 tripwire (TW-06.1) — phenotype–AST biological plausibility
+### 00.7 tripwire (TW-06.1) — resistance flags and antibiotic test results
 
-Asserts that positive resistance phenotypes (BLSE, Carbapenemase) are biologically concordant with
-underlying AST measurements. Flags isolates where C3G is fully sensitive (`S`) but `blse == TRUE`,
-or carbapenems fully sensitive (`S`) but `carbapenemase == TRUE`.
+Compares positive BLSE and carbapenemase flags with the relevant antibiotic test results. A positive
+flag without any corresponding results is recorded as a non-blocking finding, and processing
+continues. See the [full TW-06.1 specification](tripwire-register.md#tw-06-1) for exact trigger
+conditions and actions, including when discordant isolates are quarantined.
 
 ### 00.8 note — clinical significance of deduplication redundancy profiling
 
