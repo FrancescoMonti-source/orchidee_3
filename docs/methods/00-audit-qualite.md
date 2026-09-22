@@ -1,6 +1,6 @@
 # 00 - Pre-flight data quality and coherence audit
 
-Status: **settled**. Eight decisions, eight witnesses, three tripwires. Zero unproven.
+Status: **method decisions settled**. Eight decisions, eight witnesses, three tripwires, zero unproven. One follow-up is listed under Open.
 
 ---
 
@@ -47,8 +47,8 @@ The pre-flight audit inspects six core domains:
 ```
 Section 00 Pre-Flight Audit Gate
 ├── Suite 1: Relational Integrity & Composite Key Enclosure
-│   ├── Test 1.1: Stay Identifier Recycling Defense (enforces composite key PATID + EVTID)
-│   ├── Test 1.2: Sample Accession Recycling Defense (enforces composite key PATID + ELTID + souche_id)
+│   ├── Test 1.1: Check for stay IDs used by multiple patients (PATID + EVTID)
+│   ├── Test 1.2: Check for sample IDs used by multiple patients (PATID + ELTID + souche_id)
 │   └── Test 1.3: PMSI Referential Coverage (flags orphaned laboratory stays missing from PMSI)
 │
 ├── Suite 2: Demographic Invariant Plausibility
@@ -60,8 +60,8 @@ Section 00 Pre-Flight Audit Gate
 ├── Suite 3: Temporal Containment & Chronology
 │   ├── Test 3.1: Physical Interval Validity (DATENT <= DATSORT; quarantines negative durations)
 │   ├── Test 3.2: Sampling Stay Containment (expects >= 98 % within [DATENT, DATSORT])
-│   ├── Test 3.3: Pre-admission / Post-discharge Lag Audit (audits tails > 30 days)
-│   └── Test 3.4: Denominator Grain Verification (TW-04.2; refuses intermediate 10 %–95 % at 00:00:00)
+│   ├── Test 3.3: Report sample lags outside stays; ≥48 h pre-admission is suspicious, >30 d is report-only
+│   └── Test 3.4: Count admission/discharge times at 00:00:00 and with a non-midnight time (TW-04.2)
 │
 ├── Suite 4: Structural & Referential Coverage
 │   ├── Test 4.1: Referential Linkage Tolerance (TW-05.1; >= 99.9 % active UFs in structure)
@@ -124,18 +124,25 @@ Patient demographic fields must be stable across surveillance encounters:
 - **Chronological interval validity**: Movement records must satisfy `DATENT <= DATSORT`.
   Negative stay durations (`DATSORT < DATENT`) are quarantined from exposure calculations
   (Decision 00.3).
-- **Sampling stay containment**: Isolates linked to a hospital stay must fall within the stay
-  boundaries. On Rouen surveillance data (`sir_wide.rds` linked to PMSI):
+- **Sample timing relative to linked stays**: Report how far sample collection falls before admission
+  or after discharge. On Rouen surveillance data (`sir_wide.rds` linked to PMSI):
   - **45 927 isolates (98.56 %)** are strictly contained within the stay (`DATENT <= DATEPRELEV <= DATSORT`).
   - **185 isolates (0.40 %)** were sampled *before* admission (`DATEPRELEV < DATENT`), with a median
     lag of 4 days (pre-admission emergency department testing or pre-operative outpatient consultations).
   - **485 isolates (1.04 %)** were sampled *after* discharge (`DATEPRELEV > DATSORT`), with a median
     lag of 14 days (post-discharge surgical wound follow-up).
-- **Denominator timestamp grain verification (`TW-04.2`)**: The audit evaluates the proportion
-  of timestamps sitting at exactly `00:00:00` ($p_{00}$) against the site's declared resolution.
+  - Lags of more than 30 days before admission or after discharge are reported only; they do not
+    by themselves change isolate eligibility.
+  - Pre-admission lags of 48 hours or more are reported as suspicious. Their relationship to the
+    Emergency linkage decision is tracked under Open in `05-structure.md`.
+- **Admission and discharge time detail (`TW-04.2`)**: Count `DATENT` and `DATSORT` values at
+  exactly `00:00:00` and values with a non-midnight time. Compare the midnight share with the site's
+  declared format (`date` or `datetime`).
   The mathematical definition of occupancy hours and its algebraic reduction to midnight presence
   on date-only data belongs strictly to `04-donnees-activite.md` (Decisions 04.2 and 04.9).
-  The audit executes the operational verification check:
+  When the site declares `datetime`, a high midnight share may indicate times replaced by the
+  `00:00:00` default. The check counts those values and flags the overall pattern; the timestamp alone
+  cannot distinguish a real midnight from a default. The operational verification check is:
   - Declared `datetime`: expects $p_{00} \le 10\,\%$ (Rouen: 4.11 % of `DATENT`, 4.08 % of `DATSORT`).
   - Declared `date`: expects $p_{00} \ge 95\,\%$.
   - Intermediate ($10\,\% < p_{00} < 95\,\%$): **blocking refusal** to prevent intra-hospital exposure bias.
@@ -334,5 +341,6 @@ Measuring deduplication redundancy at ingestion provides vital clinical and oper
 
 ## Open
 
-None.
-
+- **Action following a quality finding.** In a separate discussion, specify and trace what happens
+  after each check finds a problem, including when the outcome is report-only. Keep each action with
+  its owning check or tripwire entry; this note is the follow-up marker, not a parallel action register.

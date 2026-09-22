@@ -156,6 +156,11 @@ monitored through the 04.10 exposure volume tripwire (±30 % year-over-year shif
 
 ## Open
 
+- **Review ADR-0009's pre-admission linkage scope.** The current rule links diagnostic
+  bacteriology samples from Emergency (TA 10) to a complete hospitalisation (TA 03/20) only when
+  admission follows within 24 hours; Emergency visits discharged home remain excluded. Revisit
+  whether these conditions are intended and how the 24-hour window relates to Section 00's report of
+  pre-admission lags of 48 hours or more as suspicious. ADR-0009 remains the decision source.
 - **Extraction boundary for USLD.** 632 isolates in long-term care units (UFs
   7163, 7183, etc.) lack PMSI intervals because USLD is not extracted in acute
   MCO PMSI. If national surveillance includes USLD for a site, the site adapter
