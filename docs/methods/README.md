@@ -55,11 +55,13 @@ is still open.
 
 Each section has the same four parts:
 
-1. **What SPARES says** - quoted, not paraphrased, so a reader can check it.
-2. **What ORCHIDEE does** - in enough detail to implement without choosing.
-3. **Decisions** - every choice SPARES leaves open, with the alternative and its
-   witness. See `CONTEXT.md` for what witness, tripwire and unproven mean.
-4. **Open** - what is not yet decided, and what would settle it.
+1. **What SPARES says** — quoted, not paraphrased, so a reader can check it.
+2. **What ORCHIDEE does** — in enough detail to implement without choosing.
+3. **Decisions** — every choice where SPARES was silent, vague, or where ORCHIDEE decided to do things cleanly and differently. Each choice records the question, the chosen answer, the alternative, and its witness:
+   - **Witness**: the empirical proof measured from real hospital data showing what difference the choice makes versus the alternative.
+   - **Unproven**: the choice and rationale are stated, but an empirical script has not yet been run on real hospital data to measure the exact numerical delta.
+   - **Settled**: the decision is locked and backed by a real numerical witness (or verified zero divergence).
+4. **Open** — what is not yet decided, and what would settle it.
 
 Part 3 is the point of the whole document. A decision with no witness is marked
 `unproven` and counted; it is not hidden.
