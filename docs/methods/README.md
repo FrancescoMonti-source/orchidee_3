@@ -26,7 +26,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | Données de résistance bactérienne | [06](06-donnees-resistance.md) | **settled** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |
 | Construction des indicateurs | [08](08-indicateurs.md) | **settled** |
-| Analyse et diffusion | [09](09-diffusion.md) | not started |
+| Analyse et diffusion | [09](09-diffusion.md) | **settled** |
 | Données de consommation (ATB / ATF) | — | out of scope |
 
 `not started` means no decision has been taken, not that the section is empty of
@@ -35,9 +35,10 @@ is still open.
 
 ## Cross-cutting catalogs
 
-- [tripwire-register.md](tripwire-register.md) - The unified catalog of all 7
-  dynamic pipeline tripwires (TW-04.1 through TW-08.1), their mathematical trigger
+- [tripwire-register.md](tripwire-register.md) - The unified catalog of all 9
+  dynamic pipeline tripwires (TW-04.1 through TW-09.2), their mathematical trigger
   thresholds, action policies, and empirical Rouen baselines.
+
 
 ## Where else things are written down
 

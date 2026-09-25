@@ -1,6 +1,6 @@
 # Dynamic Pipeline Tripwire Register
 
-Status: **settled**. Seven active tripwires, zero unproven, verified against Rouen 2024 baseline data.
+Status: **settled**. Nine active tripwires, zero unproven, verified against Rouen 2024 baseline data.
 
 ---
 
@@ -28,8 +28,8 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
    the divergence may represent a legitimate hospital reorganization (e.g. ward closure, new
    microbiology panel, or clinical emergence). A non-blocking tripwire never silently halts
    production; instead, it logs the event in the pre-flight quality ledger (`00-audit-qualite.md`)
-   and requires an explicit signed acknowledgement before publication ("converts *nobody noticed*
-   into *someone signed*").
+   or post-flight delivery manifest (`09-diffusion.md`) and requires an explicit acknowledgement
+   before publication ("converts *nobody noticed* into *someone signed*").
 
 ---
 
@@ -44,6 +44,9 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 | **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` |
 | **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 438 isolates under full panel vs 4 438 under SPARES panel |
 | **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 91 co-tested isolates: 84 R/R, 7 S/S, exactly 0 discordances |
+| **TW-09.1** | EUCAST Exceptional Phenotype Integrity | Diffusion & post-flight audit | Output tables & unquarantined isolates | Non-blocking warning (`manifest.json` flagged for biologist review) | Rouen 2024: 0 exceptional phenotypes (0 VRSA, 0 Amp-S *K. pneumoniae*) |
+| **TW-09.2** | Temporal Surge Outbreak Detection | Diffusion & post-flight audit | Output indicators ($N_{\text{tested}} \ge 30$) | Non-blocking warning (`manifest.json` flagged for epidemiological review) | Rouen 2022–2024: 0 indicators with $> 3\times$ year-over-year surge |
+
 
 ---
 
@@ -228,15 +231,57 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ---
 
+### TW-09.1 — EUCAST Exceptional Phenotype Integrity
+
+- **Identifier**: `TW-09.1`
+- **Pipeline Stage**: Diffusion & post-flight audit (`09-diffusion.md`, Decision 09.3)
+- **Statement**: Zero unquarantined isolates display biologically aberrant resistance phenotypes
+  contradicting EUCAST expert rules and intrinsic resistance guidelines.
+- **Rationale & Risk**: Bacterial species have predictable intrinsic resistance mechanisms (e.g. *Klebsiella pneumoniae*
+  is naturally ampicillin-resistant; *Proteus mirabilis* is naturally colistin-resistant) and certain acquired
+  resistances are exceptionally rare (e.g. vancomycin resistance in *Staphylococcus aureus* [VRSA]). Identifying
+  such isolates usually points to species misidentification, laboratory contamination, or transcription errors,
+  though very rarely it represents a true superbug emergence. In either case, the run must flag the finding
+  for medical biologist review rather than silently passing it to national aggregation.
+- **Trigger Condition**:
+  Count of unquarantined isolates matching any EUCAST exceptional/impossible phenotype $> 0$.
+- **Action on Trip**: Non-blocking warning. Records finding in `manifest.json` (`status = "FLAGGED"`),
+  detailing isolate identifiers, species, and contradictory antibiotic results for medical validation.
+- **Rouen Baseline Witness**: On Rouen 2024 data, exactly **0** exceptional phenotypes detected across
+  all eligible surveillance isolates.
+
+---
+
+### TW-09.2 — Temporal Surge Outbreak Detection
+
+- **Identifier**: `TW-09.2`
+- **Pipeline Stage**: Diffusion & post-flight audit (`09-diffusion.md`, Decision 09.3)
+- **Statement**: In routine hospital surveillance, annual resistance proportions on stable sample
+  volumes ($N_{\text{tested}} \ge 30$) do not experience $> 3\times$ relative increases.
+- **Rationale & Risk**: A sudden 3-fold surge in resistance either indicates a severe nosocomial outbreak
+  or an operational testing artifact (e.g. abrupt change in laboratory testing panels, shift from universal
+  to selective cascade reporting). The check flags the anomalous indicator row for epidemiologist inspection
+  before external transmission.
+- **Trigger Condition**:
+  For any stratum with $N_{\text{tested}} \ge 30$:
+  $$\frac{\text{rate}_{t}}{\text{rate}_{t-1}} > 3.0 \quad \text{with} \quad \Delta \text{rate} \ge 0.05$$
+- **Action on Trip**: Non-blocking warning. Attaches an epidemiological alert flag to the indicator row
+  in `manifest.json`, alerting the local hygiene team and PDS/SPF.
+- **Rouen Baseline Witness**: 0 indicators exhibit $> 3\times$ relative jumps between 2022 and 2024 at CHU de Rouen.
+
+---
+
 ## 4. Tripwire Governance and Audit Integration
 
-All 7 dynamic tripwires are evaluated automatically during pipeline execution:
+All 9 dynamic tripwires are evaluated automatically during pipeline execution:
 1. **Execution**: Tripwires TW-04.2, TW-05.1, TW-06.1, and TW-06.2 execute during the pre-flight
    audit (`00-audit-qualite.md`). TW-04.1 executes during exposure calculation. TW-07.1 executes
-   during deduplication. TW-08.1 executes during indicator construction.
+   during deduplication. TW-08.1 executes during indicator construction. TW-09.1 and TW-09.2 execute
+   during post-flight quality audit (`09-diffusion.md`) prior to delivery bundle packaging.
 2. **Ledger Recording**: The status of all tripwires (PASS / TRIP / ACKNOWLEDGED), their numerical
-   readings, and baseline comparisons are recorded in the run metadata and published alongside
+   readings, and baseline comparisons are recorded in the run metadata (`manifest.json`) and published alongside
    the **indicator table**.
 3. **Auditability**: When an indicator diverges from national figures (e.g. ConsoRes), the tripwire
    ledger provides the empirical proof of whether local data shifted or whether divergence is
    attributable to explicit methodological choices.
+

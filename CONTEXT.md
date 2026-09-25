@@ -29,6 +29,14 @@ carrying its numerator and denominator alongside the computed value. Reports
 are consumers of this table and hold no calculation of their own.
 _Avoid_: results, output, report
 
+**Delivery bundle**:
+The versioned, self-contained package produced by ORCHIDEE for transmission to
+national authorities (HDH/SPF), containing unmasked indicator tables, exposure
+denominators, and a signed metadata manifest (`manifest.json`) recording pipeline
+provenance, snapshot hashes, and the post-flight audit ledger.
+_Avoid_: submission, export zip, payload
+
+
 ### The surveillance landscape
 
 **SPARES**:
@@ -56,10 +64,27 @@ the SPARES indicators. Its implementation is not reviewable. It is ORCHIDEE's
 point of comparison, not its reference.
 _Avoid_: the national tool, the reference implementation, the gold standard
 
+**Divergence account**:
+A one-time retrospective reconciliation monograph comparing ORCHIDEE against
+ConsoRes on a benchmark surveillance period (Rouen 2024), decomposing the gap
+into an additive waterfall of named methodological decisions to demonstrate
+validity to SPF. A transition proof, not an annual pipeline routine.
+_Avoid_: annual reconciliation, ConsoRes report
+
+
 **SPF** (Santé Publique France):
 The agency that commissioned ORCHIDEE and consumes its indicators, and which
 currently treats ConsoRes output as authoritative.
 _Avoid_: the agency, the client
+
+**PDS / HDH** (Plateforme des données de santé / Health Data Hub):
+The French national health data platform that acts as the technical receiving and
+processing infrastructure for hospital surveillance delivery bundles on behalf of
+Santé Publique France. It handles ingestion of unmasked indicator tables, national
+aggregation, and downstream statistical disclosure control.
+_Avoid_: data lake, platform
+
+
 
 **ONERBA**:
 The observatory whose methodological recommendations define what a duplicate is.
@@ -243,3 +268,10 @@ The state of a register line whose witness has not been found yet, usually
 because the effect only appears on data another hospital holds. A legal state.
 The count of unproven lines is published and is expected to fall over time.
 _Avoid_: TODO, open question
+
+**Post-flight audit**:
+Automated quality verification applied to the generated indicator table prior to
+delivery or diffusion. Distinguishes fatal invariant violations that halt
+delivery from microbiological or epidemiological tripwires that record warnings.
+_Avoid_: sanity check, output filter
+
