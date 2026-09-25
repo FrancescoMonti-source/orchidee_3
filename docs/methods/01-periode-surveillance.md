@@ -23,7 +23,10 @@ SPF requires **monthly surveillance indicators** alongside the national annual c
 
 ## What ORCHIDEE does
 
-ORCHIDEE supports both active ongoing monthly surveillance and the annual national campaign:
+ORCHIDEE disentangles temporal surveillance along three independent axes:
+1. **Cadence (When to report)**: Dual reporting — monthly for operational hospital monitoring, annual for national campaigns.
+2. **Episode Horizon (Over what timeframe to group duplicates)**: French calendar boundaries (SPARES) and continuous 30-day rolling refractory windows (European EARS-Net/ECDC).
+3. **State Lifecycle (Can past monthly numbers change?)**: Strictly immutable upon month close — no retrospective revision from later cultures.
 
 ### 1. Dual Temporal Cadence
 Surveillance indicators are produced at two distinct grains:
