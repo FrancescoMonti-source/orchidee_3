@@ -18,7 +18,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | SPARES section | ORCHIDEE section | Status |
 |---|---|---|
 | Traitement des données (contrôle qualité pré-vol) | [00](00-audit-qualite.md) | **settled** |
-| Période de surveillance | [01](01-periode-surveillance.md) | not started |
+| Période de surveillance | [01](01-periode-surveillance.md) | **settled** |
 | Établissements inclus / exclus | [02](02-etablissements.md) | not started |
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
 | Données d'activité | [04](04-donnees-activite.md) | **settled** |
