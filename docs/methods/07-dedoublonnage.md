@@ -1,6 +1,6 @@
 # 07 - Deduplication
 
-Status: **settled**. Five decisions, three witnesses, two unproven. One
+Status: **settled**. Five decisions, four witnesses, one unproven. One
 unresolved conflict between the two source documents, recorded under Open.
 
 ## What SPARES says
@@ -69,21 +69,27 @@ All witnesses are measured on real Rouen rows. Method and scripts:
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
 | 07.1 | Window length | annual **and** monthly | one only | annual keeps 4438 isolates, monthly 4813 (+8.4 %); proportions move 0.3 pp while every incidence density moves 8.4 % |
-| 07.2 | Window shape | calendar | rolling refractory | not measured - recorded as an experiment, not a parameter. `unproven` |
+| 07.2 | Window shape | calendar (production) with 30-day rolling refractory reference | pure calendar only | 30d rolling refractory keeps 4 718 isolates on E. coli urines (+6.31 % vs annual), eliminating 1.97 % calendar month-end inflation and cross-year resetting; witness in `docs/evidence/dedup_window_30day_refractory_witness.md` |
 | 07.3 | Grouping key | patient | patient and stay | not measured; `EVTID` is retained so it stays computable. `unproven` |
 | 07.4 | Antibiotype panel | everything the site tests | the SPARES panel per species | identical at Rouen today (4438 both ways); guarded by a tripwire |
 | 07.5 | Conflict rule | `SFP <-> R` is major, per the SPARES text | `ZIT` never conflicts, as v2 decided | 4438 isolates against 4428 |
 
-Unproven: **2 of 5**.
+Unproven: **1 of 5**.
 
 ### 07.2 note
 
-A rolling refractory window is measured from the previous retained isolate for
-that patient, not from 1 January. It is closer to what *incidence* means,
-because it counts episodes rather than calendar coincidences. It is not a
-parameter because no consumer asks for it, and because "same window" would stop
-being transitive - isolates at day 1, day 20 and day 40 with N=30 pair up
-inconsistently - which needs a sweep rule this document does not have.
+A rolling refractory window is measured from the initial episode onset for that
+patient, not from 1 January. It resolves the definition of an *infectious episode*
+used by European surveillance (EARS-Net, HAI-Net, WHO GLASS).
+
+The non-transitivity dilemma noted previously (chaining across sequential cultures)
+is settled mathematically by the **chronological sweep automaton**: an episode window
+$[T_{\text{onset}}, T_{\text{onset}} + 30\text{d}]$ is anchored at the initial culture.
+Subsequent isolates within 30 days are compared against active isolates (retaining
+emergent resistance under phenotype-aware rules), while isolates arriving $> 30$ days
+close the episode and initiate a new one. Full empirical comparison across *E. coli*,
+*S. aureus*, *K. pneumoniae*, and *E. cloacae* blood cultures and urines is
+cataloged in `docs/evidence/dedup_window_30day_refractory_witness.md`.
 
 ### 07.3 note
 
