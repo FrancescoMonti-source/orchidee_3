@@ -25,6 +25,10 @@ ORCHIDEE V3 establishes a transparent, national-level antimicrobial resistance (
 - **Findings Log**: [`docs/findings.md`](docs/findings.md) (append-only discovery record)
 - **Worked Examples & Code**: [`docs/worked-examples/`](docs/worked-examples/)
 
+## Citation Check
+
+Every citation in the docs must be checkable. A pre-commit hook (`tools/citecheck/`) blocks added lines where a reference disagrees with Crossref, a block quote is not verbatim in its source PDF, or a claim attributed to a named body (EARS-Net, SPARES, SPF...) has no page or section. Enable it once per clone with `git config core.hooksPath .githooks`. Do not bypass it with `--no-verify`: fix the citation, or, when a sentence only mentions a body, mark the paragraph `<!-- citecheck: ok, <reason> -->`.
+
 ## Agent skills
 
 ### Issue tracker

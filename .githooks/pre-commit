@@ -1,0 +1,10 @@
+#!/bin/sh
+# Citation check on the docs lines added by this commit (tools/citecheck/README.md).
+# Enable once per clone:  git config core.hooksPath .githooks
+
+python=$(command -v python3 || command -v python)
+if [ -z "$python" ]; then
+    echo "citecheck: no Python found; citations not checked (CI will check them)." >&2
+    exit 0
+fi
+exec "$python" tools/citecheck/citecheck.py --staged

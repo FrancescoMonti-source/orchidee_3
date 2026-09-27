@@ -1,0 +1,26 @@
+# Backstop for the pre-commit hook, which a clone may not have enabled or a
+# commit may have skipped with --no-verify. See tools/citecheck/README.md.
+name: citecheck
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  citecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get install -y poppler-utils
+      - name: Unit tests
+        run: python -m unittest discover tools/citecheck/tests
+      - name: Check citations added by this change
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: python tools/citecheck/citecheck.py --base "$BASE"
