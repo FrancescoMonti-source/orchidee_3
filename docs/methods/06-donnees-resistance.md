@@ -4,19 +4,35 @@ Status: **settled**. Eight decisions, seven witnesses, one tripwire. Zero unprov
 
 ## What SPARES says
 
-> Seules les souches isolées d'un prélèvement à visée diagnostique ayant fait l'objet
-> d'un antibiogramme sont incluses. Les prélèvements à visée écologique (dépistage,
-> colonisation, portage) sont exclus.
+> Seules les souches de bactéries isolées des prélèvements à visée diagnostique ayant
+> fait l'objet d'un antibiogramme durant l'année 2024 sont inclues dans la surveillance
+> (date de prélèvement entre le 1er janvier et le 31 décembre 2024). (p. 14)
 
-> Chaque isolat est caractérisé par un patient source, une date et un site de
-> prélèvement, un antibiotype, et pour les entérobactéries un phénotype de résistance
-> (BLSE, carbapénémase). Pour chaque molécule testée, le résultat est S, SFP ou R.
+> Prélèvements exclus de la surveillance : prélèvements à visée écologique (recherche
+> de colonisation, portage, dépistage). (p. 15)
 
-> Seuls les antibiogrammes interprétés selon les recommandations du CA-SFM/EUCAST
-> 2020 ou postérieures sont acceptés.
+> Chaque souche bactérienne d'intérêt est caractérisée par : un patient source [...],
+> une date de prélèvement et un site de prélèvement, un antibiotype, un phénotype de
+> résistance pour les Enterobacterales (BLSE, carbapénémase). (p. 14)
 
-> Note Xa : En l'absence de mention d'un phénotype de résistance BLSE ou carbapénémase,
-> celui-ci est considéré comme négatif.
+> Pour chaque molécule testée, le résultat S (Sensible), SFP (sensible à forte
+> posologie) ou R (Résistant) est renseigné. [...] Seuls les résultats des
+> antibiogrammes interprétés selon une version du CA-SFM/EUCAST postérieure à 2019
+> (version 2020 ou plus récente) sont pris en compte dans ConsoRes. (p. 15)
+
+> Pour les Enterobacterales et Pseudomonas, les résultats de la recherche de
+> bêta-lactamases à spectre étendu (BLSE) et de carbapénèmase sont à renseigner après
+> vérification du phénotype. (p. 15)
+
+> a : les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et
+> Pseudomonas doivent être renseignés en cas de positivité et après vérification. Une
+> case vide est considérée comme une absence de phénotype de résistance (et non comme
+> une donnée manquante). (p. 31)
+
+The last passage is footnote *a* of the variable dictionary (Annexe 6, p. 31), attached
+to the BLSE and Carbapénémase rows. These docs call it **Note Xa**. The two pages
+disagree on scope: p. 14 names Enterobacterales only, while p. 15 and footnote *a* name
+Enterobacterales and Pseudomonas.
 
 ## What ORCHIDEE does
 

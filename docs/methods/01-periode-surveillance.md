@@ -6,9 +6,8 @@ Status: **settled**. Four decisions, four witnesses, zero unproven. Zero open.
 
 ## What SPARES says
 
-> Les données de résistance bactérienne sont recueillies rétrospectivement sur une
-> période annuelle allant du 1er janvier au 31 décembre de l'année considérée.
-> Les données de consommation et d'activité couvrent la même année civile.
+> Cette étude recueille rétrospectivement les données du 1er janvier au 31 décembre
+> 2024. (p. 9)
 
 ---
 

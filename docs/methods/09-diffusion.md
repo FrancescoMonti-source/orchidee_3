@@ -6,12 +6,17 @@ Status: **settled**. Four decisions, two tripwires, zero unproven. Two follow-up
 
 ## What SPARES says
 
-> L'analyse des données est réalisée par la mission nationale SPARES. Elle débute par un
-> contrôle de cohérence et de plausibilité de l'ensemble de la base de données.
->
-> Les résultats font l'objet d'un rapport national annuel et de restitutions régionales et
-> locales destinées aux établissements participants. Ils alimentent également la surveillance
-> européenne (EARS-Net, GLASS).
+> L'analyse des données est assurée par la mission nationale SPARES. Elle comprend, en
+> premier lieu, un contrôle de cohérence/vraisemblance de l'ensemble de la base de
+> données avec possibilité de contacter les ES en cas de besoin. (p. 16)
+
+> Des tableaux de bord régionaux utiles aux acteurs régionaux sont produits chaque
+> année par la mission SPARES. [...] Un rapport national comprenant l'analyse des
+> données validées et anonymisées est produit chaque année [6]. (p. 16)
+
+> Au niveau international, la mission SPARES décrit et fournit à Santé publique France
+> (SpF) les indicateurs de résistance bactérienne pour la France afin de contribuer aux
+> réseaux de surveillance européens (EARS-Net) et mondiaux (GLASS) [3, 4]. (p. 8)
 
 ---
 

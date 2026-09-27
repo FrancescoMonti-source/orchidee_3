@@ -290,3 +290,42 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
    are not reviewed, and which pipeline builds ORCHIDEE's data is not decided. The first
    version of this entry and the documents it points to called it the "raw-backed build".
    → `07-dedoublonnage.md` (Witnesses to re-measure)
+
+### 2026-09-27 — Eleven block quotes were not in their sources; SPARES disagrees with itself on phenotype scope
+
+Found by the first full run of `tools/citecheck` (check C3), then read page by page.
+
+1. **Eleven block quotes were not in any of the seven source PDFs in `docs/`.** Most kept the
+   meaning in other words. Three did more: the period quote added a sentence the source does
+   not contain; the establishments quote named MECSS « à caractère sanitaire spécialisé »
+   (SPARES p. 9 says « sanitaire et social »); the SPF quote changed the meaning (item 4). The
+   Note Xa quote, repeated in four documents, was reworded, dropped Pseudomonas, and was cited to
+   p. 16: the passage is footnote *a* of the SPARES variable dictionary (Annexe 6, p. 31). All
+   SPARES quotes are now verbatim, with pages.
+   → `00-audit-qualite.md`, `01-periode-surveillance.md`, `02-etablissements.md`,
+   `06-donnees-resistance.md`, `08-indicateurs.md`, `09-diffusion.md`,
+   `docs/worked-examples/phenotypes-and-screening.md`
+
+2. **SPARES disagrees with itself on which species carry a BLSE or carbapenemase phenotype.**
+   Page 14 lists « un phénotype de résistance pour les Enterobacterales »; p. 15 and footnote *a*
+   on p. 31 name Enterobacterales and Pseudomonas. The national indicators (p. 8) name only
+   Enterobacterales and *K. pneumoniae*. Invariant 3 and ADR-0005 limit Note Xa to
+   Enterobacterales. Open: whether to follow p. 15 and p. 31.
+
+3. **What Note Xa changes for *P. aeruginosa***, measured on the raw `data/bact22_24`: isolates
+   `(ELTID, DLVL)` with an antibiogram, before deduplication, screening not removed. In 2024,
+   1 293 isolates; carbapenemase 4 positive of 85 tested (4.71 % of tested, 0.31 % of all);
+   BLSE 2 of 222 (0.90 %, 0.15 %). 2022 and 2023 give carbapenemase 9.71 % against 0.75 %, and
+   9.09 % against 0.59 %. Phenotype rows: `BLSE.BLSE1`, `CARBA.CARBA1`, `PSE_COM` (BLSE, CARBA)
+   and `BGCARBA*`; positive = « PRESENCE DE … », `R` or `POSITIVE`.
+
+4. **SPF asks for numerators and denominators, not a consolidated annual report.** The chapter
+   01 quote read « les résultats mensuels ainsi que le bilan annuel consolidé ». SPF p. 5 asks
+   for « le numérateur et dénominateur utilisés » for every aggregated indicator and says
+   separately « La fréquence d'estimation des indicateurs devra être mensuelle ». The SPF PDF
+   contains neither « bilan annuel » nor « consolidé ». Not yet corrected.
+   → `01-periode-surveillance.md`
+
+5. **The GLASS rule in the entry above is second-hand.** It comes from a paper about GLASS
+   (Kajihara et al., PLoS ONE 2020;15(6):e0228234), not from a GLASS document; to be checked
+   against the GLASS manual.
