@@ -245,11 +245,13 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
    (SPARES p. 16, SPF p. 15). The "Open" section of `07-dedoublonnage.md` and the premise of
    issue #5 read that passage as a rival SPF rule; 4 438 and 4 039 were isolates after
    deduplication and distinct patients, not two methods. ONERBA's 2000 recommendations
-   (pp. 25-27), which both documents cite, show what the passage means: "pour une même souche"
-   is the operational souche (species + antibiotype + resistance phenotypes), so it never
-   collapses isolates with a major discrepancy. The global analysis excludes duplicates, the
-   analysis by sample type excludes sample-type duplicates.
-   → `CONTEXT.md` (Operational souche, Duplicate, Sample-type duplicate)
+   (pp. 25-27), which both documents cite, support reading "pour une même souche" as applying
+   within compatible isolates (same species, no major discrepancy, same resistance
+   phenotypes), so the passage never collapses isolates with a major discrepancy. This is an
+   inference: SPARES p. 11 glosses « même souche » as « même bactérie, même prélèvement ». The
+   global analysis excludes duplicates, the analysis by sample type excludes sample-type
+   duplicates.
+   → `CONTEXT.md` (Compatible isolates, Duplicate group, Duplicate, Sample-type duplicate)
 
 2. **The 30-day rolling window is not the EARS-Net rule** (correcting the 2026-09-21 item 4 and
    the 2026-09-25 entry above). EARS-Net defines no episode: it keeps the first blood or CSF
@@ -261,8 +263,8 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
    → `docs/methods/01-periode-surveillance.md`, `07-dedoublonnage.md` 07.2 note,
    `docs/evidence/dedup_window_30day_refractory_witness.md`, `docs/worked-examples/deduplication.md`
 
-3. **Blank antibiotic results make duplicate groups ambiguous**: a bridging isolate can be a
-   duplicate of two isolates that have a major discrepancy with each other. The sources do not
+3. **Blank antibiotic results make duplicate groups ambiguous**: a bridging isolate can be
+   compatible with two isolates that have a major discrepancy with each other. The sources do not
    say which isolate a new isolate is compared with after the retention rule replaces the
    retained isolate. At Rouen, 2022-2024, 5, 2 and 2 bridging isolates; comparing with every
    isolate of the group gives the same retained isolates as the current witness code in every
@@ -274,3 +276,17 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
 4. **Blank phenotype read as negative is weak when no screening molecule was tested**: 0, 2 and
    0 pairs of isolates kept apart only by such a BLSE flag. Traced, not fixed.
    → `docs/adr/0005-phenotype-indicators-use-spares-note-xa.md` (Known weakness)
+
+5. **The source gives two retention rules, and its two analyses can retain different
+   isolates**: SPARES p. 11 keeps the isolate with more molecules tested, then the oldest;
+   p. 16 keeps « le plus ancien » (SPF repeats both on p. 15). ORCHIDEE applies p. 11. With a
+   bridging isolate, the analysis by sample type and the global analysis can retain different
+   isolates: an isolate can be a sample-type duplicate without being a duplicate. Not measured.
+   → `07-dedoublonnage.md` (Open)
+
+6. **The bundle behind the counts above is provisional**: `outputs/rouen_stage2_2024/bundle_v3`
+   was built on 2026-09-26 by the v2 pipeline (repository `orchidee` at 500f7fd, v2 mappings)
+   from `data/bact22_24` and `data/pmsi`. Only the raw inputs are ORCHIDEE's; the mappings
+   are not reviewed, and which pipeline builds ORCHIDEE's data is not decided. The first
+   version of this entry and the documents it points to called it the "raw-backed build".
+   → `07-dedoublonnage.md` (Witnesses to re-measure)

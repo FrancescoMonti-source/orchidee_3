@@ -36,7 +36,7 @@ BLSE confirmation, so its absent signal means *unknown*, not *negative*. The
 flag still reads `FALSE`, and the same reading enters deduplication, where the
 source also counts a blank phenotype cell as absent. There, it keeps apart two
 isolates that the antibiotic rule, which never counts a blank result as a
-difference, would treat as duplicates.
+difference, would treat as compatible.
 
 Measured at Rouen, eligible perimeter: 0, 2 and 0 pairs of isolates in 2022,
 2023 and 2024 are kept apart only by a BLSE flag whose negative side had no

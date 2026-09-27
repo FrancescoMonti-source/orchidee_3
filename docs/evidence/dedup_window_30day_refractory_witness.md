@@ -8,7 +8,8 @@
 the EARS-Net rule and cited a wrong reference for it. Neither held when checked
 against the sources; section 1 and the labels below are corrected. The counts
 were measured on the v2 bundle (`outputs/rouen_current`) and have not been
-re-measured on the raw-backed build.
+re-measured. They also compare a new isolate with the retained isolates only,
+the comparison that decision 07.6 replaces.
 
 ---
 

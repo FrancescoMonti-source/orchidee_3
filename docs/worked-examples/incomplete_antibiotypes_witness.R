@@ -1,8 +1,10 @@
 # incomplete_antibiotypes_witness.R
 # Reproduction script for docs/worked-examples/incomplete-antibiotypes.md.
 # Measures how often blank antibiotic results make the duplicate comparison
-# ambiguous, and how five ways of resolving it differ, on the Rouen V3 bundle
-# built directly from data/bact22_24 and data/pmsi. Run from the repository root.
+# ambiguous, and how five ways of resolving it differ. Reads a provisional bundle
+# that the v2 pipeline built from data/bact22_24 and data/pmsi (see
+# build_manifest.txt: commit and mappings); its counts are provisional.
+# Run from the repository root.
 
 suppressMessages(library(dplyr))
 
@@ -36,52 +38,53 @@ major <- function(a, b) {
 }
 
 # Five ways to decide which isolates of one comparison group are kept. `idx` is in
-# chronological order; `ok(i, j)` is TRUE when i and j are duplicates; `nt` counts
-# tested molecules. Retention rule among duplicates: more molecules tested, then oldest.
+# chronological order; `compatible(i, j)` is TRUE when i and j are compatible; `nt`
+# counts tested molecules. Retention rule within a group: more molecules tested,
+# then oldest.
 best <- function(v, nt) v[which.max(nt[v])]
 policies <- list(
-  # Current witness code: compare with the kept isolate; it is replaced when a
-  # duplicate has more molecules, and the replacement becomes the comparison.
-  kept_isolate = function(idx, ok, nt) {
+  # Previous witness code: compare with the kept isolate; it is replaced when a
+  # compatible isolate has more molecules, and the replacement becomes the comparison.
+  kept_isolate = function(idx, compatible, nt) {
     ret <- integer(0)
     for (i in idx) {
       hit <- NA_integer_
-      for (j in ret) if (ok(i, j)) { hit <- j; break }
+      for (j in ret) if (compatible(i, j)) { hit <- j; break }
       if (is.na(hit)) ret <- c(ret, i) else if (nt[i] > nt[hit]) ret[ret == hit] <- i
     }
     ret
   },
   # ONERBA reading: the first isolate is kept and never replaced.
-  first_never_replaced = function(idx, ok, nt) {
+  first_never_replaced = function(idx, compatible, nt) {
     ret <- integer(0)
-    for (i in idx) if (!any(vapply(ret, function(j) ok(i, j), TRUE))) ret <- c(ret, i)
+    for (i in idx) if (!any(vapply(ret, function(j) compatible(i, j), TRUE))) ret <- c(ret, i)
     ret
   },
-  # Compare with every isolate already in the group.
-  every_group_member = function(idx, ok, nt) {
+  # Decision 07.6: compare with every isolate already in the group.
+  every_group_member = function(idx, compatible, nt) {
     grp <- list()
     for (i in idx) {
       k <- NA_integer_
-      for (g in seq_along(grp)) if (all(vapply(grp[[g]], function(j) ok(i, j), TRUE))) { k <- g; break }
+      for (g in seq_along(grp)) if (all(vapply(grp[[g]], function(j) compatible(i, j), TRUE))) { k <- g; break }
       if (is.na(k)) grp[[length(grp) + 1L]] <- i else grp[[k]] <- c(grp[[k]], i)
     }
     vapply(grp, best, 1L, nt = nt)
   },
   # Compare with the first isolate of the group only.
-  first_group_member = function(idx, ok, nt) {
+  first_group_member = function(idx, compatible, nt) {
     grp <- list()
     for (i in idx) {
       k <- NA_integer_
-      for (g in seq_along(grp)) if (ok(i, grp[[g]][1])) { k <- g; break }
+      for (g in seq_along(grp)) if (compatible(i, grp[[g]][1])) { k <- g; break }
       if (is.na(k)) grp[[length(grp) + 1L]] <- i else grp[[k]] <- c(grp[[k]], i)
     }
     vapply(grp, best, 1L, nt = nt)
   },
-  # Merge every chain of duplicates, even when its two ends have a major discrepancy.
-  merge_chains = function(idx, ok, nt) {
+  # Merge every chain of compatible isolates, even when its two ends have a major discrepancy.
+  merge_chains = function(idx, compatible, nt) {
     lab <- seq_along(idx)
     for (a in seq_along(idx)) for (b in seq_along(idx)) {
-      if (a < b && ok(idx[a], idx[b])) lab[lab == lab[b]] <- lab[a]
+      if (a < b && compatible(idx[a], idx[b])) lab[lab == lab[b]] <- lab[a]
     }
     vapply(split(idx, lab), best, 1L, nt = nt)
   }
@@ -93,9 +96,9 @@ policies <- list(
 abc <- matrix(c("S", "S", NA, NA,
                 NA,  "S", "S", "S",
                 "R", NA,  NA,  "S"), nrow = 3, byrow = TRUE)
-abc_ok <- function(i, j) !major(abc[i, ], abc[j, ])
+abc_compatible <- function(i, j) !major(abc[i, ], abc[j, ])
 abc_nt <- rowSums(!is.na(abc))
-abc_kept <- lapply(policies, function(f) LETTERS[sort(f(1:3, abc_ok, abc_nt))])
+abc_kept <- lapply(policies, function(f) LETTERS[sort(f(1:3, abc_compatible, abc_nt))])
 stopifnot(
   identical(abc_kept$kept_isolate, "B"),
   identical(abc_kept$first_never_replaced, c("A", "C")),
@@ -108,12 +111,12 @@ for (p in names(abc_kept)) cat(sprintf("  %-21s %s\n", p, paste(abc_kept[[p]], c
 
 # Every way to split a group into sub-groups with no major discrepancy inside any
 # of them, to compare the date-order rule with forming the groups all at once.
-partitions <- function(idx, ok) {
+partitions <- function(idx, compatible) {
   res <- list()
   rec <- function(k, blocks) {
     if (k > length(idx)) { res[[length(res) + 1L]] <<- blocks; return(invisible()) }
     i <- idx[k]
-    for (b in seq_along(blocks)) if (all(vapply(blocks[[b]], function(j) ok(i, j), TRUE))) {
+    for (b in seq_along(blocks)) if (all(vapply(blocks[[b]], function(j) compatible(i, j), TRUE))) {
       nb <- blocks; nb[[b]] <- c(nb[[b]], i); rec(k + 1L, nb)
     }
     rec(k + 1L, c(blocks, list(i)))
@@ -121,12 +124,12 @@ partitions <- function(idx, ok) {
   rec(1L, list())
   res
 }
-minimal_answers <- function(idx, ok, nt) {
-  p <- partitions(idx, ok)
+minimal_answers <- function(idx, compatible, nt) {
+  p <- partitions(idx, compatible)
   k <- lengths(p)
   unique(lapply(p[k == min(k)], function(x) sort(vapply(x, best, 1L, nt = nt))))
 }
-abc_min <- lapply(minimal_answers(1:3, abc_ok, abc_nt), function(v) LETTERS[v])
+abc_min <- lapply(minimal_answers(1:3, abc_compatible, abc_nt), function(v) LETTERS[v])
 stopifnot(length(abc_min) == 2L)
 cat("A/B/C case, minimal groupings retain:", vapply(abc_min, paste, "", collapse = " "), sep = "\n  ")
 
@@ -137,7 +140,7 @@ for (yr in 2022:2024) {
   M <- as.matrix(d[, panel])
   nt <- rowSums(!is.na(M))
   ph <- cbind(d$blse_flag %in% TRUE, d$carbapenemase_flag %in% TRUE)
-  ok <- function(i, j) !major(M[i, ], M[j, ]) && all(ph[i, ] == ph[j, ])
+  compatible <- function(i, j) !major(M[i, ], M[j, ]) && all(ph[i, ] == ph[j, ])
   spec <- ifelse(is.na(d$naturepvt_norm), paste0("unknown:", seq_len(nrow(d))), d$naturepvt_norm)
   G <- split(seq_len(nrow(d)), paste(d$PATID, d$bact_norm, spec, sep = "|"))
   G <- G[lengths(G) >= 2]
@@ -149,32 +152,32 @@ for (yr in 2022:2024) {
   orphan <- c(retention_rule = 0L, first_never_replaced = 0L)
   orphan_r <- orphan
   for (idx in G) {
-    out <- lapply(policies, function(f) f(idx, ok, nt))
+    out <- lapply(policies, function(f) f(idx, compatible, nt))
     for (p in names(out)) {
       kept[[p]] <- c(kept[[p]], out[[p]])
       if (!setequal(out[[p]], out$kept_isolate)) differ[p] <- differ[p] + 1L
     }
     n <- length(idx)
-    C <- outer(seq_len(n), seq_len(n), Vectorize(function(a, b) a == b || ok(idx[a], idx[b])))
-    # Bridging isolate: B later than A and earlier than C, duplicate of both, while
-    # A and C have a major discrepancy.
+    C <- outer(seq_len(n), seq_len(n), Vectorize(function(a, b) a == b || compatible(idx[a], idx[b])))
+    # Bridging isolate: B later than A and earlier than C, compatible with both, while
+    # A and C are not compatible.
     for (b in seq_len(n)) for (a in seq_len(b - 1)) if (C[a, b]) for (c in seq_len(n)[-seq_len(b)]) {
       if (C[b, c] && !C[a, c]) bridges <- bridges + 1L
     }
-    # Ambiguous group: some isolate is a duplicate of two isolates that are not
-    # duplicates of each other, so the groups of duplicates are not unique.
+    # Ambiguous group: some isolate is compatible with two isolates that are not
+    # compatible with each other, so the duplicate groups are not unique.
     if (any(vapply(seq_len(n), function(b) { nb <- which(C[b, ]); any(!C[nb, nb]) }, TRUE))) {
       ambiguous <- ambiguous + 1L
-      ans <- minimal_answers(idx, ok, nt)
+      ans <- minimal_answers(idx, compatible, nt)
       if (length(ans) == 1L) single_answer <- single_answer + 1L
       if (any(vapply(ans, function(x) setequal(x, out$every_group_member), TRUE))) {
         rule_is_minimal <- rule_is_minimal + 1L
       }
     }
-    # An isolate that is a duplicate of two kept isolates of different antibiotypes.
+    # An isolate compatible with two kept isolates that are not compatible.
     ret <- integer(0)
     for (i in idx) {
-      h <- sum(vapply(ret, function(j) ok(i, j), TRUE))
+      h <- sum(vapply(ret, function(j) compatible(i, j), TRUE))
       if (h >= 2) attach2 <- attach2 + 1L
       if (h == 0) ret <- c(ret, i)
     }
@@ -203,13 +206,13 @@ for (yr in 2022:2024) {
       }
     }
   }
-  # Same-day, same-hour ties: reverse the tie-break and see what changes.
+  # Same-day, same-hour ties: reverse the tie-break and see what changes under 07.6.
   rev_ord <- order(d$DATEPRELEV, d$HEUREPRELEV, -rank(d$ELTID), -rank(d$souche_id))
   pos <- match(seq_len(nrow(d)), rev_ord)
   tie_changed <- 0L; tie_count <- 0L; tie_molecules <- 0L
   for (idx in G) {
-    cur <- policies$kept_isolate(idx, ok, nt)
-    alt <- policies$kept_isolate(idx[order(pos[idx])], ok, nt)
+    cur <- policies$every_group_member(idx, compatible, nt)
+    alt <- policies$every_group_member(idx[order(pos[idx])], compatible, nt)
     if (!setequal(alt, cur)) {
       tie_changed <- tie_changed + 1L
       if (length(alt) != length(cur)) tie_count <- tie_count + 1L
@@ -225,7 +228,7 @@ for (yr in 2022:2024) {
   cat(sprintf("bridging isolates (A~B~C with A-C major discrepancy): %d\n", bridges))
   cat(sprintf("ambiguous groups: %d; minimal grouping has a single answer: %d; it is the every-member answer: %d\n",
               ambiguous, single_answer, rule_is_minimal))
-  cat(sprintf("isolates that are duplicates of two different kept isolates: %d\n", attach2))
+  cat(sprintf("isolates compatible with two different kept isolates: %d\n", attach2))
   cat(sprintf("orphaned results, retention rule: %d isolates (%d with an R)\n", orphan["retention_rule"], orphan_r["retention_rule"]))
   cat(sprintf("orphaned results, first never replaced: %d isolates (%d with an R)\n", orphan["first_never_replaced"], orphan_r["first_never_replaced"]))
   cat(sprintf("groups whose kept isolates change when same-time ties are reversed: %d (count changes: %d; tested molecules change: %d)\n",

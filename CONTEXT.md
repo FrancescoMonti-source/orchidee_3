@@ -106,52 +106,58 @@ the raw `bact22_24` table.
 **Isolate**:
 The bacteria of one species recovered from one sample of one patient and tested
 against antibiotics. The unit that indicators count, and the unit deduplication
-removes. The source documents also call it *souche*, a word they use for the
-operational souche too.
+removes. The source documents call it *souche*; their « même souche » is a
+relation between two isolates (see Compatible isolates), not the same strain.
 _Avoid_: souche (in English text), strain, germ
 
 **Strain**:
 A bacterial lineage, which can persist across several samples and several
 patients and can change over time. Not interchangeable with isolate: the same
 strain recovered twice gives two isolates. Nothing in the surveillance data can
-establish it; deduplication works on the operational souche instead.
-_Avoid_: using "strain" where the counted unit or the operational souche is meant
+establish it; deduplication compares isolates instead.
+_Avoid_: using "strain" where the counted unit is meant
 
-**Operational souche**:
-What the SPARES method treats as one: isolates of one patient with the same
-species, the same antibiotype and the same resistance phenotypes. A proxy read
-from the antibiogram, not a strain: it splits a strain that acquires a
-resistance, and joins two strains that share a profile.
-_Avoid_: strain, souche (in English text) when this is meant
+**Compatible isolates**:
+Two isolates of the same patient and species with no major discrepancy on any
+molecule tested in both, and the same resistance phenotypes. What the sources
+mean by « même souche » or « même antibiotype » between two isolates. A relation
+between two isolates, not a class: A compatible with B and B compatible with C
+does not make A compatible with C.
+_Avoid_: same antibiotype, same souche, identical
+
+**Duplicate group**:
+Isolates of one patient and species in the window (and in one sample type, for
+an analysis by sample type), every two of which are compatible. It has one
+retained isolate. The sources define compatibility, not the groups: where a
+bridging isolate allows more than one grouping, an ORCHIDEE rule picks one.
+_Avoid_: operational souche, antibiotype group, clone, episode
 
 **Duplicate**:
-An isolate whose operational souche was already counted for the patient in the
-window, whatever the sample type. Excluded from analyses across sample types.
+An isolate of a duplicate group formed across sample types that is not its
+retained isolate. Excluded from analyses across sample types.
 _Avoid_: doublon (in English text), repeat isolate
 
 **Sample-type duplicate**:
-An isolate whose operational souche was already counted for the patient in the
-window and in the same sample type. Excluded from analyses by sample type. Every
-sample-type duplicate is a duplicate; an isolate of an operational souche seen
-before only in another sample type is a duplicate but not a sample-type
-duplicate.
+An isolate of a duplicate group formed within one sample type that is not its
+retained isolate. Excluded from analyses by sample type. It is not necessarily
+a duplicate, nor the reverse: the two groupings can retain different isolates.
 _Avoid_: doublon prélèvement (in English text)
 
 **Retained isolate**:
-The one isolate kept for a group of duplicates. It alone carries the group's
+The one isolate kept for a duplicate group. It alone carries the group's
 results into the indicators.
 _Avoid_: representative, survivor
 
 **Retention rule**:
-How the retained isolate is chosen among duplicates: the isolate with more
+How the retained isolate of a duplicate group is chosen: the isolate with more
 molecules tested; if the counts are equal, the oldest.
 _Avoid_: survivor rule, tie-break
 
 **Bridging isolate**:
-An isolate with no major discrepancy with two isolates that have a major
-discrepancy with each other, because it has no result for the molecule that
-separates them. It is why duplicates do not fall into unique groups when
-antibiograms are incomplete.
+An isolate compatible with two isolates that are not compatible with each other,
+because it has no result for the molecule that separates them. It is why
+compatibility alone does not decide the duplicate groups.
+_Avoid_: non-transitivity, chaining
 
 **Orphaned result**:
 A molecule result carried only by isolates that are not retained, so that no
@@ -170,18 +176,19 @@ never touched.
 _Avoid_: the antibiotic list, the columns
 
 **Deduplication**:
-Discarding an isolate because the same patient already contributed one of the
-same operational souche within the window: in the same sample type for an
-analysis by sample type (a sample-type duplicate), in any sample type for an
-analysis across sample types (a duplicate). Always
+Keeping the retained isolate of each duplicate group and discarding the others:
+groups formed within one sample type for an analysis by sample type (discarding
+sample-type duplicates), across sample types for an analysis across sample types
+(discarding duplicates). Always
 relative to a panel and a window; never absolute. Deduplication is strictly
 partitioned by patient, species, and specimen scope: isolates of different
 species never compete, deduplicate, or affect each other.
 _Avoid_: dédoublonnage (in English text), de-duping, filtering
 
 **Major discrepancy**:
-A difference of S↔R or SFP↔R on at least one molecule, which makes two
-antibiotypes distinct. A S↔SFP difference is minor and does not.
+A difference of S↔R or SFP↔R on at least one molecule tested in both isolates,
+which makes them not compatible. A S↔SFP difference is minor and does not. A
+blank result is never a difference.
 
 **Diagnostic sample**:
 A sample taken to identify the cause of a suspected infection. Distinguished
