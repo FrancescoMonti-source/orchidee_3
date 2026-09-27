@@ -28,3 +28,22 @@ rate of **7.61 %** (+75.4 pp distortion avoided; `Finding 18`).
 - Pre-flight audit tripwire `TW-06.1` asserts biological plausibility, ensuring that
   susceptible isolates never carry positive phenotype flags.
 
+## Known weakness
+
+The argument above holds only when the screening molecules were tested. An
+isolate with no third-generation cephalosporin result could not have triggered a
+BLSE confirmation, so its absent signal means *unknown*, not *negative*. The
+flag still reads `FALSE`, and the same reading enters deduplication, where the
+source also counts a blank phenotype cell as absent. There, it keeps apart two
+isolates that the antibiotic rule, which never counts a blank result as a
+difference, would treat as duplicates.
+
+Measured at Rouen, eligible perimeter: 0, 2 and 0 pairs of isolates in 2022,
+2023 and 2024 are kept apart only by a BLSE flag whose negative side had no
+third-generation cephalosporin tested
+(`docs/worked-examples/incomplete-antibiotypes.md`). The fix would be a third
+state, *not assessable*, which needs a list of marker molecules per species and
+changes the phenotype indicators as well as deduplication. Not done: the effect
+is at most 2 isolates in three years at one site. A site whose panels often omit
+third-generation cephalosporins would see more.
+

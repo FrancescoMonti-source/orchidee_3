@@ -119,8 +119,8 @@ To prevent this instability:
    Monthly surveillance runs under an independent monthly window (`window = "monthly"`). Deduplication is performed within each calendar month in isolation. Published monthly indicators are **final, closed, and immutable** upon month close; no subsequent hospitalization in September can alter April's count.
 2. **Annual Surveillance (Model 2)**:
    The annual indicator table is a distinct measurement under `window = "annual"`, not the arithmetic sum of the twelve monthly tables.
-3. **Target Evolution (EU / ECDC Rolling Refractory Window)**:
-   At term, ORCHIDEE aims to align with the European ECDC / EARS-Net standard using a rolling refractory window (e.g. 30-day episode window from the initial isolate, as outlined in Decision 07.2). This eliminates calendar boundary artifacts altogether while preserving temporal stability.
+3. **Rolling Refractory Window (Experiment)**:
+   A rolling refractory window (e.g. 30-day episode window from the initial isolate, as outlined in Decision 07.2) would eliminate calendar boundary artifacts. It is an ORCHIDEE experiment, not the ECDC / EARS-Net standard, which keeps the first blood or CSF isolate per patient and pathogen in the calendar year (ECDC reporting protocol 2025, pp. 22, 24-25). The nearest published rule is Japan's JANIS (Kajihara et al., PLoS ONE 2020;15(6):e0228234).
 
 Without them, two ORCHIDEE numbers are not comparable to each other, let alone
 to ConsoRes, and a mapping correction cannot be distinguished from a method

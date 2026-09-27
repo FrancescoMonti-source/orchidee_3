@@ -104,16 +104,59 @@ the raw `bact22_24` table.
 ### Resistance measurement
 
 **Isolate**:
-One bacterial strain recovered from one patient in one sample and tested against
-antibiotics. The unit that indicators count, and the unit deduplication removes.
-The French *souche* translates to this term.
-_Avoid_: souche (in English text), germ
+The bacteria of one species recovered from one sample of one patient and tested
+against antibiotics. The unit that indicators count, and the unit deduplication
+removes. The source documents also call it *souche*, a word they use for the
+operational souche too.
+_Avoid_: souche (in English text), strain, germ
 
 **Strain**:
-A genetically distinct bacterial lineage, which can persist across several
-samples and several patients. Not interchangeable with isolate: the same strain
-recovered twice gives two isolates, and deduplication exists to collapse them.
-_Avoid_: using "strain" where the counted unit is meant
+A bacterial lineage, which can persist across several samples and several
+patients and can change over time. Not interchangeable with isolate: the same
+strain recovered twice gives two isolates. Nothing in the surveillance data can
+establish it; deduplication works on the operational souche instead.
+_Avoid_: using "strain" where the counted unit or the operational souche is meant
+
+**Operational souche**:
+What the SPARES method treats as one: isolates of one patient with the same
+species, the same antibiotype and the same resistance phenotypes. A proxy read
+from the antibiogram, not a strain: it splits a strain that acquires a
+resistance, and joins two strains that share a profile.
+_Avoid_: strain, souche (in English text) when this is meant
+
+**Duplicate**:
+An isolate whose operational souche was already counted for the patient in the
+window, whatever the sample type. Excluded from analyses across sample types.
+_Avoid_: doublon (in English text), repeat isolate
+
+**Sample-type duplicate**:
+An isolate whose operational souche was already counted for the patient in the
+window and in the same sample type. Excluded from analyses by sample type. Every
+sample-type duplicate is a duplicate; an isolate of an operational souche seen
+before only in another sample type is a duplicate but not a sample-type
+duplicate.
+_Avoid_: doublon prélèvement (in English text)
+
+**Retained isolate**:
+The one isolate kept for a group of duplicates. It alone carries the group's
+results into the indicators.
+_Avoid_: representative, survivor
+
+**Retention rule**:
+How the retained isolate is chosen among duplicates: the isolate with more
+molecules tested; if the counts are equal, the oldest.
+_Avoid_: survivor rule, tie-break
+
+**Bridging isolate**:
+An isolate with no major discrepancy with two isolates that have a major
+discrepancy with each other, because it has no result for the molecule that
+separates them. It is why duplicates do not fall into unique groups when
+antibiograms are incomplete.
+
+**Orphaned result**:
+A molecule result carried only by isolates that are not retained, so that no
+retained isolate reports that molecule for the patient. The cost of the
+retention rule.
 
 **Antibiotype**:
 An isolate's pattern of S / SFP / R results across a declared set of molecules.
@@ -128,7 +171,9 @@ _Avoid_: the antibiotic list, the columns
 
 **Deduplication**:
 Discarding an isolate because the same patient already contributed one of the
-same species, same sample type and same antibiotype within the window. Always
+same operational souche within the window: in the same sample type for an
+analysis by sample type (a sample-type duplicate), in any sample type for an
+analysis across sample types (a duplicate). Always
 relative to a panel and a window; never absolute. Deduplication is strictly
 partitioned by patient, species, and specimen scope: isolates of different
 species never compete, deduplicate, or affect each other.

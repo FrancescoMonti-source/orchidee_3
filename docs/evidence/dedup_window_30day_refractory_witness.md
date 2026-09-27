@@ -3,7 +3,12 @@
 **Status**: Settled empirical witness for Decision 07.2 (`docs/methods/07-dedoublonnage.md`).  
 **Primary Dataset**: CHU de Rouen bacteriology diagnostic scope (`outputs/rouen_current/bundle_v3/sir_wide.rds`, 48,595 raw diagnostic records, 35 antibiotic columns).  
 **Perimeter Exposure**: 355,246 Inpatient Days (JH) for Rouen 2024.  
-**Issue Reference**: Issue #4 ("Empirical Witness for Deduplication Window Shape").
+**Issue Reference**: Issue #4 ("Empirical Witness for Deduplication Window Shape").  
+**Correction (2026-09-27)**: this document first called the pure 30-day window
+the EARS-Net rule and cited a wrong reference for it. Neither held when checked
+against the sources; section 1 and the labels below are corrected. The counts
+were measured on the v2 bundle (`outputs/rouen_current`) and have not been
+re-measured on the raw-backed build.
 
 ---
 
@@ -19,10 +24,21 @@ Two foundational traditions exist in European and French surveillance:
    - Tie-breaker: oldest isolate if identical number of tested antibiotics; otherwise the isolate with more molecules tested.
    - *Limitation*: Collapses two separate episodes occurring 6 months apart into one, while artificially splitting an episode that crosses December 31 / January 1. Furthermore, slicing an annual window into monthly reports causes retrospective instability (`docs/worked-examples/deduplication.md`, Result 3).
 
-2. **EARS-Net / ECDC European Tradition (Episode-Based / 30-Day Rolling Refractory Window)**:
-   - EARS-Net Reporting Protocol (ECDC) historically mandates the first invasive isolate (blood/CSF) per patient per quarter or year for national aggregate resistance proportions.
-   - For healthcare-associated infection (HAI) and bloodstream infection (BSI) surveillance (ECDC HAI-Net, European BSI surveillance, WHO GLASS, and UK ESPAUR), an **episode of infection** is standardized using a **30-day window**.
-   - Standard literature (e.g., Ohmagari et al., *PLOS ONE* 2020 comparing WHO GLASS vs. JANIS 30-day deduplication across 1,795 hospitals; CDC NHSN 14-day Repeat Infection Timeframe) establishes that repeated isolates of the same pathogen recovered within a refractory timeframe belong to the same clinical episode.
+2. **Other surveillance systems (checked 2026-09-27)**:
+   - **EARS-Net (ECDC)** defines no episode and uses no 30-day window. It keeps
+     the first blood or cerebrospinal fluid isolate per patient and pathogen in
+     the calendar year; ties at that date go to CSF, then R before I before S
+     (reporting protocol 2025, 2024 data, p. 22 and pp. 24-25).
+   - **WHO GLASS** keeps the first isolate per patient, specimen type and
+     surveillance period (as described by Kajihara et al. 2020; the GLASS
+     manual itself was not consulted).
+   - **JANIS** (Japan) removes repeated isolates of the same species from a
+     patient within 30 days, whatever the specimen type, but keeps an isolate
+     whose resistance phenotype changed. Its 30 days are justified by the
+     average length of stay in Japan, not by a formal episode definition
+     (Kajihara et al. 2020). This is the published rule closest to Model 3B.
+   - Claims made here earlier about ECDC HAI-Net, UK ESPAUR and the CDC NHSN
+     repeat infection timeframe were not sourced and have not been checked.
 
 ---
 
@@ -48,7 +64,7 @@ The rolling refractory window is therefore implemented not as a static grouping 
 2. **Episode Inception**: The initial isolate $i_0$ at $T_{\text{onset}} = \text{date}(i_0)$ opens an active refractory window:
    $$W = [T_{\text{onset}}, \; T_{\text{onset}} + 30\text{ days}]$$
 3. **In-Window Evaluation**:
-   - **Variant A (Pure EARS-Net / Time-Based Episode)**: Every isolate $i$ with $\text{date}(i) \in W$ is suppressed as a duplicate. (Tie-break variant: optionally replaces the index isolate if $i$ has more tested molecules, while anchoring $T_{\text{onset}}$ strictly to the initial sample date).
+   - **Variant A (Pure Time-Based Episode)**: Every isolate $i$ with $\text{date}(i) \in W$ is suppressed as a duplicate. (Tie-break variant: optionally replaces the index isolate if $i$ has more tested molecules, while anchoring $T_{\text{onset}}$ strictly to the initial sample date).
    - **Variant B (Phenotype-Aware / SPARES-Hybrid Rolling Refractory)**:
      For any isolate $i$ with $\text{date}(i) \in W$, compare $i$ against active retained isolates in $W$:
      - If compatible ($\text{major}(i, j) = \text{FALSE}$): $i$ is a duplicate. If $\text{ntest}(i) > \text{ntest}(j)$, $i$ replaces $j$ as the episode representative, but $T_{\text{onset}}$ is preserved.
@@ -68,7 +84,7 @@ The rolling refractory window is therefore implemented not as a static grouping 
 |---|---|---|---|---|---|
 | **Model 1: Annual Calendar (SPARES)** | Calendar Year (`2024`), Phenotype-aware | **4 438** | Baseline | −375 (−7.79 %) | **12.49** |
 | **Model 2: Monthly Calendar (Pooled)** | Calendar Month (`YYYY-MM`), Independent | **4 813** | +375 (+8.45 %) | Baseline | **13.55** |
-| **Model 3A: 30d Rolling Refractory (Pure)** | 30-Day Window, First Isolate (EARS-Net) | **4 577** | +139 (+3.13 %) | −236 (−4.90 %) | **12.88** |
+| **Model 3A: 30d Rolling Refractory (Pure)** | 30-Day Window, First Isolate | **4 577** | +139 (+3.13 %) | −236 (−4.90 %) | **12.88** |
 | **Model 3B: 30d Rolling Refractory (Pheno)** | 30-Day Window, Major Discrepancy (SPARES-Hybrid) | **4 718** | +280 (+6.31 %) | −95 (−1.97 %) | **13.28** |
 
 *\*Incidence density evaluated over Rouen 2024 inpatient exposure (355 246 JH).*
@@ -90,7 +106,7 @@ The rolling refractory window is therefore implemented not as a static grouping 
 
 Blood cultures represent the primary surveillance specimen for EARS-Net and ConsoRes/SPARES bacteremia indicators.
 
-| Organism / Pathogen | Raw Blood Isolates | Distinct Patients | Annual (SPARES) | Monthly (Calendar) | 30d Rolling (Pheno) | 30d Rolling (Pure EARS-Net) | $\Delta$ (30d Pheno vs Ann) | $\Delta$ (30d Pure vs Ann) |
+| Organism / Pathogen | Raw Blood Isolates | Distinct Patients | Annual (SPARES) | Monthly (Calendar) | 30d Rolling (Pheno) | 30d Rolling (Pure) | $\Delta$ (30d Pheno vs Ann) | $\Delta$ (30d Pure vs Ann) |
 |---|---|---|---|---|---|---|---|---|
 | ***Escherichia coli*** | 672 | 530 | **570** | 588 (+3.16 %) | **584** (+2.46 %) | **551** (−3.33 %) | +14 | −19 |
 | ***Staphylococcus aureus*** | 450 | 315 | **317** | 333 (+5.05 %) | **327** (+3.15 %) | **325** (+2.52 %) | +10 | +8 |
@@ -145,12 +161,12 @@ Measured on Rouen longitudinal data (2023–2024):
 
 ### 4.3 Discovery 3: The Intra-Episode Resistance Emergence Blindspot (Pure vs. Phenotype-Aware)
 
-A striking finding appears when comparing Pure EARS-Net (time-based) against Annual SPARES and Phenotype-Aware Rolling:
-- In *E. coli* blood cultures, Pure 30-day EARS-Net retains **551 isolates**, which is **19 fewer isolates (−3.33 %)** than Annual SPARES (**570 isolates**) and **33 fewer** than Phenotype-Aware Rolling (**584 isolates**).
-- In *Enterobacter cloacae complex* blood cultures, Pure 30-day EARS-Net retains **91 isolates** vs. **105 in Annual SPARES (−13.33 %)** and **107 in Phenotype-Aware Rolling**.
+A striking finding appears when comparing the pure 30-day window (time-based) against Annual SPARES and Phenotype-Aware Rolling:
+- In *E. coli* blood cultures, the pure 30-day window retains **551 isolates**, which is **19 fewer isolates (−3.33 %)** than Annual SPARES (**570 isolates**) and **33 fewer** than Phenotype-Aware Rolling (**584 isolates**).
+- In *Enterobacter cloacae complex* blood cultures, the pure 30-day window retains **91 isolates** vs. **105 in Annual SPARES (−13.33 %)** and **107 in Phenotype-Aware Rolling**.
 
 **Mechanism**: In severe bacteremic episodes, intensive beta-lactam therapy frequently selects for resistant sub-populations (e.g., AmpC derepression in *E. cloacae*, emergence of 3GC resistance in *E. coli*).
-- Under **Pure EARS-Net**, the second sample taken 5 days later is strictly suppressed because it occurred within 30 days. The emergent resistance is completely invisible.
+- Under the **pure 30-day window**, the second sample taken 5 days later is strictly suppressed because it occurred within 30 days. The emergent resistance is completely invisible.
 - Under **Phenotype-Aware (SPARES-Hybrid) Rolling**, the major phenotypic discrepancy (`S -> R`) overrides duplicate suppression. Both the wild-type and the resistant isolate are retained.
 - Pure time-based deduplication systematically depresses resistance rates in acute hospital settings: *E. coli* 3GC %R is 10.36 % in Pure 30d vs. 11.49 % in Phenotype-Aware Rolling; *K. pneumoniae* 3GC %R is 17.19 % vs. 18.57 %.
 
@@ -165,16 +181,16 @@ With these empirical measurements, Decision 07.2 in `docs/methods/07-dedoublonna
 2. **Standardize Target Annual / Longitudinal Surveillance on Phenotype-Aware 30-Day Rolling Refractory Windows (Model 3B)**:
    - Eliminates calendar boundary artifacts (both month-end straddling and Dec 31/Jan 1 resetting).
    - Provides true incidence density of infectious episodes (13.28 / 1,000 JH on *E. coli* urines, +6.31 % vs. annual calendar undercount).
-   - Protects surveillance against intra-episode resistance selection, unlike pure time-based EARS-Net.
+   - Protects surveillance against intra-episode resistance selection, unlike a pure time-based window.
 
 ---
 
 ## 6. References & Primary Sources
 
-1. **ECDC EARS-Net**: *Reporting Protocol for Antimicrobial Resistance Surveillance*, European Centre for Disease Prevention and Control.
-2. **ECDC HAI-Net & BSI Surveillance Protocol**: *Surveillance of healthcare-associated infections in intensive care units and bloodstream infections in Europe*.
-3. **WHO GLASS**: *Global Antimicrobial Resistance and Use Surveillance System: Manual for Early Implementation*, World Health Organization.
-4. **Ohmagari et al. (2020)**: *Comparison of de-duplication methods used by WHO Global Antimicrobial Resistance Surveillance System (GLASS) and Japan Nosocomial Infections Surveillance (JANIS) in the surveillance of antimicrobial resistance*. PLoS ONE 15(10): e0240902.
+1. **ECDC EARS-Net**: *European Antimicrobial Resistance Surveillance Network (EARS-Net), Antimicrobial resistance (AMR) reporting protocol 2025, surveillance data for 2024*, European Centre for Disease Prevention and Control. Checked: p. 22 and pp. 24-25. <https://www.ecdc.europa.eu/sites/default/files/documents/EARS-Net-reporting-protocol.pdf>
+2. **ECDC HAI-Net & BSI Surveillance Protocol**: not consulted.
+3. **WHO GLASS**: *Manual for Early Implementation*: not consulted; its rule is cited through reference 4.
+4. **Kajihara T, Yahara K, Stelling J, et al. (2020)**: *Comparison of de-duplication methods used by WHO Global Antimicrobial Resistance Surveillance System (GLASS) and Japan Nosocomial Infections Surveillance (JANIS) in the surveillance of antimicrobial resistance*. PLoS ONE 15(6): e0228234. doi:10.1371/journal.pone.0228234. Checked. (Previously cited as "Ohmagari et al., 15(10): e0240902"; that DOI is an unrelated article.)
 5. **CLSI M39-A4**: *Analysis and Presentation of Cumulative Antimicrobial Susceptibility Test Data; Approved Guideline — Fourth Edition*, Clinical and Laboratory Standards Institute.
 6. **SPARES Methodology**: *Surveillance de la Prévention de l'Antibiorésistance et des Infections Associées aux Soins*, Annexe 1 (Méthodologie du dédoublonnage), Santé publique France.
 7. **ORCHIDEE Architecture**:

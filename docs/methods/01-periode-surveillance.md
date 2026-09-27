@@ -25,7 +25,7 @@ SPF requires **monthly surveillance indicators** alongside the national annual c
 
 ORCHIDEE disentangles temporal surveillance along three independent axes:
 1. **Cadence (When to report)**: Dual reporting — monthly for operational hospital monitoring, annual for national campaigns.
-2. **Episode Horizon (Over what timeframe to group duplicates)**: French calendar boundaries (SPARES) and continuous 30-day rolling refractory windows (European EARS-Net/ECDC).
+2. **Episode Horizon (Over what timeframe to group duplicates)**: French calendar boundaries (SPARES) and continuous 30-day rolling refractory windows (an ORCHIDEE experiment; not the EARS-Net rule, see §3).
 3. **State Lifecycle (Can past monthly numbers change?)**: Strictly immutable upon month close — no retrospective revision from later cultures.
 
 ### 1. Dual Temporal Cadence
@@ -40,10 +40,10 @@ To prevent the **retrospective instability hazard** identified in `docs/worked-e
 - Once a calendar month is closed, its published indicators are **final, closed, and immutable**. Subsequent hospitalizations or bacteriology cultures in later months never retroactively alter past monthly figures.
 - The annual indicator table is an independent measurement under `window = "annual"`, not an arithmetic sum of the twelve monthly tables.
 
-### 3. Dual Episode Modeling: European Alignment (EARS-Net / ECDC)
-To eliminate calendar boundary artifacts while supporting international benchmarks:
+### 3. Dual Episode Modeling: Calendar and 30-Day Rolling Windows
+To measure calendar boundary artifacts:
 - **Calendar Windows (Production Standard)**: Satisfies the French national SPARES/SPF convention. As measured in Decision 07.2, monthly calendar deduplication introduces an artificial **+1.97 % episode inflation** in urines and **+1.50 % in blood cultures** due to cultures 2–4 days apart straddling month ends (e.g. Jan 29 and Feb 2) counted twice.
-- **30-Day Rolling Refractory Window (European Reference)**: ORCHIDEE implements the European EARS-Net / ECDC 30-day episode standard using the **chronological sweep automaton** (`docs/evidence/dedup_window_30day_refractory_witness.md`), while preserving phenotype-awareness for emergent resistance under therapy.
+- **30-Day Rolling Refractory Window (Experiment)**: an ORCHIDEE experiment using the **chronological sweep automaton** (`docs/evidence/dedup_window_30day_refractory_witness.md`), preserving phenotype-awareness for emergent resistance under therapy. It is **not** a European standard. EARS-Net defines no episode: it keeps the first blood or CSF isolate per patient and pathogen in the calendar year (ECDC reporting protocol 2025, p. 22 and pp. 24-25). The nearest published rule is Japan's JANIS: 30 days, whatever the specimen type, keeping isolates whose resistance phenotype changed (Kajihara et al., PLoS ONE 2020;15(6):e0228234).
 - Both episode models are computable from the same underlying dataset; either can be selected or retired by configuration at zero architectural cost.
 
 ### 4. Minimum Window and Real-Time Surveillance
@@ -61,7 +61,7 @@ All witnesses measured on real Rouen data (`data/bact22_24`, `data/pmsi`).
 |---|---|---|---|---|
 | 01.1 | Temporal cadence | dual: monthly **and** annual | annual only | monthly provides real-time detection of resistance surges; annual keeps 4 438 isolates vs monthly 4 813 (+8.45 %) on *E. coli* urines (`07-dedoublonnage.md` 07.1) |
 | 01.2 | Monthly finality | immutable upon month close (`window = "monthly"`) | provisional, revised at year-end | prevents retrospective alteration of past published monthly tables (Result 3 in `docs/worked-examples/deduplication.md`) |
-| 01.3 | Episode model | calendar windows (SPARES), with 30-day rolling refractory window (EARS-Net) | calendar only | 30d rolling refractory eliminates +1.97 % month-end calendar inflation and cross-year resetting; `docs/evidence/dedup_window_30day_refractory_witness.md` |
+| 01.3 | Episode model | calendar windows (SPARES), with 30-day rolling refractory window (ORCHIDEE experiment, nearest to JANIS) | calendar only | 30d rolling refractory eliminates +1.97 % month-end calendar inflation and cross-year resetting; `docs/evidence/dedup_window_30day_refractory_witness.md` |
 | 01.4 | Minimum run grain | $\ge 1$ full calendar month | full calendar years only | allows ongoing 2026 operational surveillance; partial months rejected to protect exposure denominators |
 
 Unproven: **0 of 4**.

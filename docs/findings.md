@@ -237,4 +237,40 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
 4. **Turnkey Local Clinical Feedback**: Built-in parameterized Quarto HTML report consuming unmasked indicator tables delivers zero-server clinical steering for hospital infection control (EOH/CLIN) and bacteriology, while preserving raw table access for custom hospital BI.
 → `docs/methods/09-diffusion.md`, `docs/methods/tripwire-register.md` TW-09.1, TW-09.2
 
+### 2026-09-27 — Issue #5 premise was false; the 30-day window is not EARS-Net; incomplete antibiograms
 
+1. **No conflict between SPF and SPARES on deduplication**: both documents give the same
+   antibiotype rule, retention rule and phenotype rule (SPARES pp. 10-11, SPF pp. 14-15), and
+   both follow it with the same passage on analyses by sample type and across sample types
+   (SPARES p. 16, SPF p. 15). The "Open" section of `07-dedoublonnage.md` and the premise of
+   issue #5 read that passage as a rival SPF rule; 4 438 and 4 039 were isolates after
+   deduplication and distinct patients, not two methods. ONERBA's 2000 recommendations
+   (pp. 25-27), which both documents cite, show what the passage means: "pour une même souche"
+   is the operational souche (species + antibiotype + resistance phenotypes), so it never
+   collapses isolates with a major discrepancy. The global analysis excludes duplicates, the
+   analysis by sample type excludes sample-type duplicates.
+   → `CONTEXT.md` (Operational souche, Duplicate, Sample-type duplicate)
+
+2. **The 30-day rolling window is not the EARS-Net rule** (correcting the 2026-09-21 item 4 and
+   the 2026-09-25 entry above). EARS-Net defines no episode: it keeps the first blood or CSF
+   isolate per patient and pathogen in the calendar year (ECDC reporting protocol 2025, p. 22
+   and pp. 24-25). WHO GLASS keeps the first isolate per patient, specimen type and period. The
+   nearest published rule to the phenotype-aware 30-day window is Japan's JANIS (Kajihara et
+   al., PLoS ONE 2020;15(6):e0228234). The evidence file cited that paper as "Ohmagari et al.,
+   15(10): e0240902", a DOI that belongs to an unrelated article.
+   → `docs/methods/01-periode-surveillance.md`, `07-dedoublonnage.md` 07.2 note,
+   `docs/evidence/dedup_window_30day_refractory_witness.md`, `docs/worked-examples/deduplication.md`
+
+3. **Blank antibiotic results make duplicate groups ambiguous**: a bridging isolate can be a
+   duplicate of two isolates that have a major discrepancy with each other. The sources do not
+   say which isolate a new isolate is compared with after the retention rule replaces the
+   retained isolate. At Rouen, 2022-2024, 5, 2 and 2 bridging isolates; comparing with every
+   isolate of the group gives the same retained isolates as the current witness code in every
+   group, while comparing with the first isolate of the group merges a major discrepancy in 1,
+   0 and 1 groups. The retention rule leaves orphaned results on 99-116 isolates a year, fewer
+   than keeping the oldest (148-187).
+   → `docs/worked-examples/incomplete-antibiotypes.md`
+
+4. **Blank phenotype read as negative is weak when no screening molecule was tested**: 0, 2 and
+   0 pairs of isolates kept apart only by such a BLSE flag. Traced, not fixed.
+   → `docs/adr/0005-phenotype-indicators-use-spares-note-xa.md` (Known weakness)
