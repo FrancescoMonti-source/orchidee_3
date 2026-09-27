@@ -31,8 +31,11 @@ Two foundational traditions exist in European and French surveillance:
      the calendar year; ties at that date go to CSF, then R before I before S
      (reporting protocol 2025, 2024 data, p. 22 and pp. 24-25).
    - **WHO GLASS** keeps the first isolate per patient, specimen type and
-     surveillance period (as described by Kajihara et al. 2020; the GLASS
-     manual itself was not consulted).
+     pathogen in the surveillance period, even if the resistance
+     characteristics differ, and recommends a one-year period (GLASS manual
+     2023, section 9.5.1, printed p. 31). Two exceptions: the same pathogen
+     from blood and CSF on the same day keeps the CSF isolate only, and a
+     change of infection origin from hospital to community keeps both.
    - **JANIS** (Japan) removes repeated isolates of the same species from a
      patient within 30 days, whatever the specimen type, but keeps an isolate
      whose resistance phenotype changed. Its 30 days are justified by the
@@ -190,7 +193,7 @@ With these empirical measurements, Decision 07.2 in `docs/methods/07-dedoublonna
 
 1. **ECDC EARS-Net**: *European Antimicrobial Resistance Surveillance Network (EARS-Net), Antimicrobial resistance (AMR) reporting protocol 2025, surveillance data for 2024*, European Centre for Disease Prevention and Control. Checked: p. 22 and pp. 24-25. <https://www.ecdc.europa.eu/sites/default/files/documents/EARS-Net-reporting-protocol.pdf>
 2. **ECDC HAI-Net & BSI Surveillance Protocol**: not consulted.
-3. **WHO GLASS**: *Manual for Early Implementation*: not consulted; its rule is cited through reference 4.
+3. **WHO GLASS**: *GLASS manual for antimicrobial resistance surveillance in common bacteria causing human infection*, World Health Organization, 2023. Checked: section 9.5.1, printed p. 31 (PDF p. 41). Local copy in `docs/`. The 2015 *Manual for Early Implementation*, which reference 4 compares with JANIS, was not consulted.
 4. **Kajihara T, Yahara K, Stelling J, et al. (2020)**: *Comparison of de-duplication methods used by WHO Global Antimicrobial Resistance Surveillance System (GLASS) and Japan Nosocomial Infections Surveillance (JANIS) in the surveillance of antimicrobial resistance*. PLoS ONE 15(6): e0228234. doi:10.1371/journal.pone.0228234. Checked. (Previously cited as "Ohmagari et al., 15(10): e0240902"; that DOI is an unrelated article.)
 5. **CLSI M39-A4**: *Analysis and Presentation of Cumulative Antimicrobial Susceptibility Test Data; Approved Guideline — Fourth Edition*, Clinical and Laboratory Standards Institute.
 6. **SPARES Methodology**: *Surveillance de la Prévention de l'Antibiorésistance et des Infections Associées aux Soins*, Annexe 1 (Méthodologie du dédoublonnage), Santé publique France.

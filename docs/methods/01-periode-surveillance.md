@@ -13,10 +13,15 @@ Status: **settled**. Four decisions, four witnesses, zero unproven. Zero open.
 
 ## What SPF asks
 
-SPF requires **monthly surveillance indicators** alongside the national annual campaign:
+SPF asks for monthly estimation, and for the numerator and denominator of every
+aggregated indicator (SPF p. 5):
 
-> nous souhaiterions recevoir, pour tous les indicateurs agrégés demandés, les
-> résultats mensuels ainsi que le bilan annuel consolidé.
+> La fréquence d'estimation des indicateurs devra être mensuelle. [...] nous
+> souhaiterions recevoir, pour tous les indicateurs agrégés demandés, le numérateur et
+> dénominateur utilisés (le nombre de souches avec une résistance, le nombre de souches
+> testés, le nombre total de JH). (p. 5)
+
+The annual cadence comes from SPARES, whose campaign covers one calendar year (p. 9).
 
 ---
 

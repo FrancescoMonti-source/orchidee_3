@@ -27,3 +27,8 @@ pdf = "docs/Expression de besoins SPF.pdf"
 name = "CA-SFM 2025"
 aliases = ["CA-SFM"]
 pdf = "docs/Rouen/CASFM2025_V1.1.pdf"
+
+[[source]]
+name = "GLASS manual 2023"
+aliases = ["GLASS manual", "GLASS"]
+pdf = "docs/GLASS manual for antimicrobial resistance surveillance in common bacteria causing human infection.pdf"

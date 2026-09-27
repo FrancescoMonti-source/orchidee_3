@@ -102,7 +102,8 @@ patient, not from 1 January. It is an ORCHIDEE experiment, not a European
 standard: EARS-Net defines no episode and keeps the first blood or CSF isolate
 per patient and pathogen in the calendar year (ECDC reporting protocol 2025,
 p. 22 and pp. 24-25); WHO GLASS keeps the first isolate per patient, specimen
-type and surveillance period. The nearest published rule is Japan's JANIS,
+type and pathogen in the surveillance period, even if the resistance
+characteristics differ (GLASS manual 2023, section 9.5.1). The nearest published rule is Japan's JANIS,
 which removes repeats within 30 days but keeps an isolate whose resistance
 phenotype changed (Kajihara et al., PLoS ONE 2020;15(6):e0228234).
 

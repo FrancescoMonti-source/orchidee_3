@@ -329,3 +329,17 @@ Found by the first full run of `tools/citecheck` (check C3), then read page by p
 5. **The GLASS rule in the entry above is second-hand.** It comes from a paper about GLASS
    (Kajihara et al., PLoS ONE 2020;15(6):e0228234), not from a GLASS document; to be checked
    against the GLASS manual.
+
+6. **GLASS checked against its manual** (closes item 5): one result per patient, surveyed
+   specimen type and surveyed pathogen in the surveillance period, one year recommended,
+   « even if the resistance characteristics differ » (GLASS manual 2023, section 9.5.1,
+   printed p. 31). Two exceptions the second-hand summary missed: blood and CSF on the same
+   day keep the CSF isolate only, and a change of infection origin keeps both. Local sites
+   may use other algorithms for their own purposes.
+   → `07-dedoublonnage.md` 07.2 note, `docs/evidence/dedup_window_30day_refractory_witness.md`
+
+7. **Decided: Note Xa covers Enterobacterales and Pseudomonas** (closes item 2), following
+   SPARES p. 15 and footnote *a* on p. 31. SPF's monthly frequency and numerator/denominator
+   request replace the invented chapter 01 quote (closes item 4).
+   → `docs/adr/0005-phenotype-indicators-use-spares-note-xa.md` (Scope), invariant 3 in
+   `AGENTS.md`, `01-periode-surveillance.md`
