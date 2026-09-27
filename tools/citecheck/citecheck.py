@@ -486,7 +486,7 @@ def check_quote(path: str, units: list[Unit], i: int, config: Config, root: Path
     for part in parts:
         fragment = fold(part)
         if pages:
-            window = "".join(folded[max(0, pages[0] - 2):pages[1] + 1])
+            window = "".join(folded[pages[0] - 1:pages[1]])
             if fragment in window:
                 continue
         elif fragment in "".join(folded):

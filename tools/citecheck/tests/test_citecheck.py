@@ -150,6 +150,10 @@ class QuotesAgainstPdf(unittest.TestCase):
         self.assertEqual(len(found), 1, found)
         self.assertIn("p. 10", found[0].message)
 
+    def test_off_by_one_page_is_flagged(self):
+        self.assertEqual(len(findings("SPARES p. 11:\n\n" + self.QUOTE, "C3")), 1)
+        self.assertEqual(findings("SPARES pp. 9-10:\n\n" + self.QUOTE, "C3"), [])
+
     def test_translated_quote_is_flagged(self):
         text = (
             "## What SPARES says\n\n> A duplicate is an isolate from a patient for whom "
