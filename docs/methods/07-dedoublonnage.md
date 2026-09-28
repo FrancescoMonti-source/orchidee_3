@@ -1,7 +1,9 @@
 # 07 - Deduplication
 
-Status: **settled**. Five decisions, four witnesses, one unproven. One
-unresolved conflict between the two source documents, recorded under Open.
+Status: **under review** (issue #1). Seven decisions, six witnesses, two
+unproven. Decisions 07.1, 07.4 and 07.5 have been remeasured with phenotype
+flags and decision 07.6 on the current provisional v3 bundle. Decision 07.2's
+historical rolling-window result is under audit; 07.3 remains unmeasured.
 
 ## What SPARES says
 
@@ -24,8 +26,24 @@ unresolved conflict between the two source documents, recorded under Open.
 > Une absence de résultat [case vide] [...] ne fait pas partie des caractères
 > discriminants pour le dédoublonnage.
 
-Scope rule, same annexe: for analysis by sample type, one sample per type per
-patient; for the global analysis, one sample per patient regardless of type.
+The same passage adds that deduplication also compares the BLSE and
+carbapenemase phenotypes, and that a blank phenotype cell means the phenotype is
+absent (SPARES p. 11, SPF p. 15).
+
+Scope rule (SPARES p. 16, SPF p. 15): « pour une même souche », one sample per
+patient — the oldest per sample type for the analysis by sample type, the oldest
+across sample types for the global analysis.
+
+What « même souche » means there is an inference, not text. SPARES p. 11 glosses
+the same phrase as « même bactérie, même prélèvement », in a sentence that opens
+with « en cas de doublon ». ONERBA's recommendations (2000, pp. 25-27), which
+both documents cite, count an isolate as original when its species and
+antibiotype combination is new for the patient, and distinguish the « doublon »
+(per patient) from the « doublon prélèvement » (per patient and sample site).
+ORCHIDEE therefore reads the scope rule as applying within compatible isolates:
+the analysis by sample type excludes sample-type duplicates, the global analysis
+excludes duplicates, and two isolates with a major discrepancy are never
+collapsed.
 
 ## What ORCHIDEE does
 
@@ -38,6 +56,7 @@ number it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
 | Window | calendar, annual and monthly |
 | Antibiotype panel | every antibiotic the site tests |
 | Conflict rule | `S <-> R` and `SFP <-> R` major; `S <-> SFP` minor; `ZIT` read as `SFP` |
+| Phenotypes | BLSE and carbapenemase compared; a blank flag is absent (`ADR-0005`) |
 | Population selection | the perimeter object and the diagnostic scope; see `03-activites.md` |
 
 The window is expressed as a predicate over a pair of isolates,
@@ -68,28 +87,30 @@ All witnesses are measured on real Rouen rows. Method and scripts:
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 07.1 | Window length | annual **and** monthly | one only | annual keeps 4438 isolates, monthly 4813 (+8.4 %); proportions move 0.3 pp while every incidence density moves 8.4 % |
-| 07.2 | Window shape | calendar (production) with 30-day rolling refractory reference | pure calendar only | 30d rolling refractory keeps 4 718 isolates on E. coli urines (+6.31 % vs annual), eliminating 1.97 % calendar month-end inflation and cross-year resetting; witness in `docs/evidence/dedup_window_30day_refractory_witness.md` |
+| 07.1 | Window length | annual **and** monthly | one only | annual keeps 4 441 isolates, monthly 4 814 (+8.40 %); resistance proportions move +0.27 to +1.14 pp and incidence density moves +8.40 % |
+| 07.2 | Window shape | calendar (production); rolling refractory comparison remains an experiment | pure calendar only | the historical 4 718 rolling result is not reproduced; current direct implementations keep 4 729 with phenotypes and 07.6, or 4 727 without phenotypes; exact historical rule is unknown |
 | 07.3 | Grouping key | patient | patient and stay | not measured; `EVTID` is retained so it stays computable. `unproven` |
-| 07.4 | Antibiotype panel | everything the site tests | the SPARES panel per species | identical at Rouen today (4438 both ways); guarded by a tripwire |
-| 07.5 | Conflict rule | `SFP <-> R` is major, per the SPARES text | `ZIT` never conflicts, as v2 decided | 4438 isolates against 4428 |
+| 07.4 | Antibiotype panel | everything the site tests | the SPARES panel per species | the 35-column supported panel and 19-molecule SPARES panel retain 4 441 isolates each, with identical retained IDs; guarded by a tripwire |
+| 07.5 | Conflict rule | `SFP <-> R` is major; `ZIT` is read as `SFP` | `ZIT` never conflicts | 4 441 vs 4 431 retained isolates; AMC %R is 39.23 % vs 39.16 % |
+| 07.6 | Comparison when antibiograms are incomplete | compare a new isolate with **every** isolate of a duplicate group | with the retained isolate only (the witness code until now); with the first isolate of the group; merge every chain of compatible isolates | Rouen 2022-2024: same retained isolates as the witness code in every group; comparing with the first isolate merges a major discrepancy in 1, 0 and 1 groups; `docs/worked-examples/incomplete-antibiotypes.md` |
+| 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `souche_id` | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
 
-Unproven: **1 of 5**.
+Unproven: **2 of 7**.
 
 ### 07.2 note
 
-A rolling refractory window is measured from the initial episode onset for that
-patient, not from 1 January. It resolves the definition of an *infectious episode*
-used by European surveillance (EARS-Net, HAI-Net, WHO GLASS).
+The 30-day rolling comparison is an ORCHIDEE experiment. It differs from the
+EARS-Net calendar-year rule for the first blood or CSF isolate per patient and
+pathogen (ECDC reporting protocol 2025, pp. 22 and 24-25).
 
-The non-transitivity dilemma noted previously (chaining across sequential cultures)
-is settled mathematically by the **chronological sweep automaton**: an episode window
-$[T_{\text{onset}}, T_{\text{onset}} + 30\text{d}]$ is anchored at the initial culture.
-Subsequent isolates within 30 days are compared against active isolates (retaining
-emergent resistance under phenotype-aware rules), while isolates arriving $> 30$ days
-close the episode and initiate a new one. Full empirical comparison across *E. coli*,
-*S. aureus*, *K. pneumoniae*, and *E. cloacae* blood cultures and urines is
-cataloged in `docs/evidence/dedup_window_30day_refractory_witness.md`.
+The historical 4 718 count is not reproducible from the tracked witness
+scripts. It used a v2 bundle and a comparison rule that decision 07.6
+replaces. On the current provisional v3 bundle, the annual and monthly
+calendar baselines are 4 441 and 4 814. A direct implementation of the
+written rolling-window description yields 4 729 with phenotype flags and
+07.6, or 4 727 without phenotype flags. Neither reproduces 4 718. The
+historical boundary and group-reset rules are not recorded, so the rolling
+comparison remains under audit and does not establish a month-end effect.
 
 ### 07.3 note
 
@@ -102,8 +123,8 @@ it. ORCHIDEE follows the choice and records the objection.
 
 ### 07.4 tripwire (TW-07.1)
 
-**Statement**: the SPARES panel and the full panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
-**Today**: 4438 and 4438, *E. coli* / urines / 2024.
+**Statement**: the SPARES panel and the full supported panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
+**Today**: 4 441 under each panel, with identical retained isolate IDs, *E. coli* / urines / 2024. The full panel has 35 supported columns; 21 have results in this slice.
 
 The check fails on the day a site starts testing a molecule that separates two
 antibiotypes which were identical before. That is the CLAVENTIN situation, which
@@ -111,47 +132,116 @@ in v2 changed 51 isolates and the denominators of 20 antibiotic columns with
 nothing able to object
 (`docs/evidence/2026-08-02_amc_remapping_cascade.txt`).
 
+### 07.6 note
+
+The source says a blank result never counts as a difference, and that among
+duplicates the isolate with more molecules tested is retained. It does not say
+what a new isolate is compared with once the retained isolate has been
+replaced. The gap matters when a **bridging isolate** has no result for the
+molecule that separates two others:
+
+| Isolate | Ofloxacine | Molecules tested |
+|---|---|---:|
+| A, first | S | 2 |
+| B, second | blank | 3 |
+| C, third | R | 2 |
+
+B is compatible with A and with C, but A and C have a major discrepancy.
+Compared with the retained isolate only, C meets B, is compatible, and only B is
+retained: both the S and the R disappear. Merging every chain gives the same
+result.
+
+The rule ORCHIDEE applies:
+
+1. Take the isolates of one patient, species and window (and one sample type,
+   for an analysis by sample type) from the oldest to the most recent (ties:
+   decision 07.7).
+2. Each isolate tries the existing groups from the oldest to the most recent,
+   and joins the first group where it is compatible with **every** isolate
+   already in it.
+3. If no group accepts it, it opens a new group.
+4. Each group then retains one isolate by the retention rule.
+
+In the case above, A opens group 1, B joins it, C has a major discrepancy with
+A and opens group 2: B and C are retained. Two isolates with a major discrepancy
+are never in the same duplicate group, which is what the source's definition of
+a doublon requires.
+
+A real case, Rouen 2024, *Serratia marcescens*, urines, mecillinam: isolate 1
+(June, not tested, 17 molecules) opens group 1; isolates 2 and 3 (7 November,
+R, 18 molecules) join it; isolate 4 (19 November, S, 18 molecules) has a major
+discrepancy with 2 and opens group 2. Retained: 2 and 4. Comparing with the
+first isolate of the group only would have put 4 in group 1 and lost its S.
+
+The groups could also be formed all at once: the fewest groups with no major
+discrepancy inside any of them. That does not remove the choice. In the case
+above, {A, B} + {C} and {A} + {B, C} are both minimal and retain different
+isolates, so a tie-break is still needed, and date order is the natural one.
+At Rouen, in the 13 ambiguous groups of 2022-2024, the minimal grouping has a
+single answer and it is the one this rule gives.
+
 ## Open
 
-### The two source documents do not specify the same rule
+### Withdrawn: "the two source documents do not specify the same rule"
 
-SPF's Annexe 1 restates deduplication, and drops the antibiotype entirely:
+This section used to say that SPF's Annexe 1 replaces the antibiotype rule
+with "the oldest sample per patient", and measured 4 438 against 4 039 isolates
+as the gap between two rules. That was wrong. SPF (pp. 14-15) contains the same
+antibiotype, retention and phenotype rules as SPARES (pp. 10-11), and SPARES
+(p. 16) contains the same scope passage as SPF. Read with ONERBA, the scope
+passage applies within compatible isolates (see What SPARES says), so it never
+collapses isolates with a major discrepancy. 4 039 was the number of distinct patients in the slice,
+not the output of a rule. Issue #5 was opened on this premise.
+`docs/findings.md`, 2026-09-27.
 
-> Pour une même souche, l'analyse ne prend en compte qu'un prélèvement par
-> patient selon le type de recherche souhaitée :
-> • analyse des résistances par type de prélèvement : les doublons
-> « prélèvement » sont exclus, un seul prélèvement (le plus ancien) par type de
-> prélèvement et par patient, est conservé ;
-> • analyse globale des résistances tous types de prélèvements confondus : seul
-> un prélèvement par patient est conservé, le plus ancien quel que soit le type
-> de prélèvement.
+### Witness status
 
-No antibiotype criterion, no major-discrepancy test, no more-molecules-tested
-tiebreak. Under the SPARES methodology quoted above, two isolates from one
-patient differing by a major discrepancy are **both retained** — they are
-different antibiotypes, so neither is a duplicate. Under SPF's restatement only
-the oldest survives.
+Decisions 07.1, 07.4 and 07.5 were remeasured on 2026-09-27 against
+`outputs/rouen_stage2_2024/bundle_v3`, comparing BLSE and carbapenemase
+flags and using decision 07.6's all-members grouping. The 07.1, 07.4 and
+07.5 counts in this chapter and `docs/worked-examples/deduplication.md`
+reflect that run. The source bundle was built from raw files by the v2
+pipeline; the site mappings remain unreviewed, so these results are
+provisional.
 
-This is not a wording difference. On the *E. coli* / urines / 2024 slice:
+The 07.2 rolling-window witness is under audit: no tracked script or exact
+historical boundary/group-reset rule reproduces its 4 718 count. Decision
+07.3 remains unmeasured. The witnesses in `perimeter-ordering.md`,
+`screening-exclusion.md` and `unit-attribution.md` also remain on the older
+baseline and have not been remeasured with phenotype comparison and 07.6.
 
-| rule | isolates retained |
-|---|---|
-| SPARES methodology (antibiotype-aware) | **4 438** |
-| SPF Annexe 1 (oldest per patient) | **4 039** — one per patient |
-| difference | **−399, −9.0 %** |
+### The source is incomplete
 
-Measured from `docs/worked-examples/deduplication.md`: the slice holds 4 963
-isolates across 4 039 patients, so the SPF rule's output is the patient count by
-construction.
+The SPARES text does not settle 07.6 and 07.7, nor the reading of a blank
+phenotype when no screening molecule was tested (`ADR-0005`, Known weakness).
+Two implementations faithful to the text can retain different isolates.
 
-ORCHIDEE follows the SPARES methodology, which is the document SPF's own
-requirements name as the method to reproduce. The conflict is recorded rather
-than resolved: it is a question for SPF, and it is a worked example of the
-problem this project exists to address — two official documents describing the
-same operation, differing by 9 % of the published numerator, with nothing
-anywhere obliged to notice.
+It also gives two retention rules. p. 11 keeps the isolate with more molecules
+tested, then the oldest; p. 16 keeps « le plus ancien » in both analyses. SPF
+repeats both on p. 15. Within one duplicate group the two conflict. ORCHIDEE applies the
+p. 11 rule, the only one that says what happens when the panels differ.
+
+### The two analyses can retain different isolates
+
+The analysis by sample type and the global analysis form their duplicate groups
+separately, so an isolate can be discarded in one and retained in the other.
+Same patient and species, in date order:
+
+| Isolate | Sample type | Ofloxacine | Molecules tested |
+|---|---|---|---:|
+| U1 | urines | blank | 12 |
+| X | blood culture | R | 10 |
+| U2 | urines | S | 15 |
+
+U1 is compatible with X and with U2; X and U2 are not compatible. By sample
+type, U1 and U2 form one group and U2 is retained: U1 is a sample-type
+duplicate. Across sample types, U1 and X form one group and U2 opens another;
+U1 is retained. U1 is discarded from the urine analysis and counted in the
+global one. Without a bridging isolate this cannot happen: compatible isolates
+then fall into fixed classes, and an isolate outranked within its sample type is
+outranked across sample types too. Not measured at Rouen.
 
 ### Unproven decisions
 
-Two decisions carry no witness and are marked `unproven` above; measuring either
-is a self-contained job against `sir_wide.rds`.
+One decision (07.3) carries no witness and is marked `unproven` above;
+measuring it is a self-contained job.

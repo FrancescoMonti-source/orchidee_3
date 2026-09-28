@@ -237,4 +237,80 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
 4. **Turnkey Local Clinical Feedback**: Built-in parameterized Quarto HTML report consuming unmasked indicator tables delivers zero-server clinical steering for hospital infection control (EOH/CLIN) and bacteriology, while preserving raw table access for custom hospital BI.
 → `docs/methods/09-diffusion.md`, `docs/methods/tripwire-register.md` TW-09.1, TW-09.2
 
+### 2026-09-27 — Issue #5 premise was false; the 30-day window is not EARS-Net; incomplete antibiograms
 
+1. **No conflict between SPF and SPARES on deduplication**: both documents give the same
+   antibiotype rule, retention rule and phenotype rule (SPARES pp. 10-11, SPF pp. 14-15), and
+   both follow it with the same passage on analyses by sample type and across sample types
+   (SPARES p. 16, SPF p. 15). The "Open" section of `07-dedoublonnage.md` and the premise of
+   issue #5 read that passage as a rival SPF rule; 4 438 and 4 039 were isolates after
+   deduplication and distinct patients, not two methods. ONERBA's 2000 recommendations
+   (pp. 25-27), which both documents cite, support reading "pour une même souche" as applying
+   within compatible isolates (same species, no major discrepancy, same resistance
+   phenotypes), so the passage never collapses isolates with a major discrepancy. This is an
+   inference: SPARES p. 11 glosses « même souche » as « même bactérie, même prélèvement ». The
+   global analysis excludes duplicates, the analysis by sample type excludes sample-type
+   duplicates.
+   → `CONTEXT.md` (Compatible isolates, Duplicate group, Duplicate, Sample-type duplicate)
+
+2. **The 30-day rolling window is not the EARS-Net rule** (correcting the 2026-09-21 item 4 and
+   the 2026-09-25 entry above). EARS-Net defines no episode: it keeps the first blood or CSF
+   isolate per patient and pathogen in the calendar year (ECDC reporting protocol 2025, p. 22
+   and pp. 24-25). WHO GLASS keeps the first isolate per patient, specimen type and period. The
+   nearest published rule to the phenotype-aware 30-day window is Japan's JANIS (Kajihara et
+   al., PLoS ONE 2020;15(6):e0228234). The evidence file cited that paper as "Ohmagari et al.,
+   15(10): e0240902", a DOI that belongs to an unrelated article.
+   → `docs/methods/01-periode-surveillance.md`, `07-dedoublonnage.md` 07.2 note,
+   `docs/evidence/dedup_window_30day_refractory_witness.md`, `docs/worked-examples/deduplication.md`
+
+3. **Blank antibiotic results make duplicate groups ambiguous**: a bridging isolate can be
+   compatible with two isolates that have a major discrepancy with each other. The sources do not
+   say which isolate a new isolate is compared with after the retention rule replaces the
+   retained isolate. At Rouen, 2022-2024, 5, 2 and 2 bridging isolates; comparing with every
+   isolate of the group gives the same retained isolates as the current witness code in every
+   group, while comparing with the first isolate of the group merges a major discrepancy in 1,
+   0 and 1 groups. The retention rule leaves orphaned results on 99-116 isolates a year, fewer
+   than keeping the oldest (148-187).
+   → `docs/worked-examples/incomplete-antibiotypes.md`
+
+4. **Blank phenotype read as negative is weak when no screening molecule was tested**: 0, 2 and
+   0 pairs of isolates kept apart only by such a BLSE flag. Traced, not fixed.
+   → `docs/adr/0005-phenotype-indicators-use-spares-note-xa.md` (Known weakness)
+
+5. **The source gives two retention rules, and its two analyses can retain different
+   isolates**: SPARES p. 11 keeps the isolate with more molecules tested, then the oldest;
+   p. 16 keeps « le plus ancien » (SPF repeats both on p. 15). ORCHIDEE applies p. 11. With a
+   bridging isolate, the analysis by sample type and the global analysis can retain different
+   isolates: an isolate can be a sample-type duplicate without being a duplicate. Not measured.
+   → `07-dedoublonnage.md` (Open)
+
+6. **The bundle behind the counts above is provisional**: `outputs/rouen_stage2_2024/bundle_v3`
+   was built on 2026-09-26 by the v2 pipeline (repository `orchidee` at 500f7fd, v2 mappings)
+   from `data/bact22_24` and `data/pmsi`. Only the raw inputs are ORCHIDEE's; the mappings
+   are not reviewed, and which pipeline builds ORCHIDEE's data is not decided. The first
+   version of this entry and the documents it points to called it the "raw-backed build".
+   → `07-dedoublonnage.md` (Witnesses to re-measure)
+
+### 2026-09-27 — Corrected TW-08.1 baseline and remeasured deduplication witnesses
+
+The 2024 *E. coli* / urine deduplication witnesses for 07.1, 07.4 and 07.5 were
+remeasured on the provisional `outputs/rouen_stage2_2024/bundle_v3` with BLSE and
+carbapenemase comparison and Decision 07.6's all-members grouping. Annual and pooled
+monthly windows retain 4 441 and 4 814 isolates. The 35-column supported panel and
+19-molecule SPARES panel retain identical isolate IDs (4 441). Reading `ZIT` as
+`SFP` retains 4 441; treating it as never conflicting retains 4 431. Site mappings
+remain unreviewed, so these figures are provisional.
+
+The prior 4 718 result for the 30-day rolling window is not reproduced. The tracked
+repository contains no rolling-window witness script or exact historical boundary
+and group-reset rule. A direct implementation of the prose on the current bundle
+retains 4 729 with phenotype comparison and 07.6, or 4 727 without phenotype
+comparison. Decision 07.2 remains under audit; these direct counts do not establish
+the missing historical comparison.
+
+The TW-08.1 catalog row claiming 91 co-tested *S. aureus* isolates (84 R/R and
+7 S/S) was incorrect. Rouen has zero cefoxitine tests on *S. aureus*; oxacilline
+has 1 093 tested results (84 R, 1 009 S) and 7 untested isolates. The co-tested
+denominator is zero, so concordance is not assessable. SARM fallback remains
+84 / 1 093 (7.69 %).
+→ `docs/methods/07-dedoublonnage.md`, `docs/evidence/dedup_window_30day_refractory_witness.md`, `docs/methods/tripwire-register.md` TW-08.1, `docs/methods/08-indicateurs.md` 08.3
