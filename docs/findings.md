@@ -290,3 +290,27 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
    are not reviewed, and which pipeline builds ORCHIDEE's data is not decided. The first
    version of this entry and the documents it points to called it the "raw-backed build".
    → `07-dedoublonnage.md` (Witnesses to re-measure)
+
+### 2026-09-27 — Corrected TW-08.1 baseline and remeasured deduplication witnesses
+
+The 2024 *E. coli* / urine deduplication witnesses for 07.1, 07.4 and 07.5 were
+remeasured on the provisional `outputs/rouen_stage2_2024/bundle_v3` with BLSE and
+carbapenemase comparison and Decision 07.6's all-members grouping. Annual and pooled
+monthly windows retain 4 441 and 4 814 isolates. The 35-column supported panel and
+19-molecule SPARES panel retain identical isolate IDs (4 441). Reading `ZIT` as
+`SFP` retains 4 441; treating it as never conflicting retains 4 431. Site mappings
+remain unreviewed, so these figures are provisional.
+
+The prior 4 718 result for the 30-day rolling window is not reproduced. The tracked
+repository contains no rolling-window witness script or exact historical boundary
+and group-reset rule. A direct implementation of the prose on the current bundle
+retains 4 729 with phenotype comparison and 07.6, or 4 727 without phenotype
+comparison. Decision 07.2 remains under audit; these direct counts do not establish
+the missing historical comparison.
+
+The TW-08.1 catalog row claiming 91 co-tested *S. aureus* isolates (84 R/R and
+7 S/S) was incorrect. Rouen has zero cefoxitine tests on *S. aureus*; oxacilline
+has 1 093 tested results (84 R, 1 009 S) and 7 untested isolates. The co-tested
+denominator is zero, so concordance is not assessable. SARM fallback remains
+84 / 1 093 (7.69 %).
+→ `docs/methods/07-dedoublonnage.md`, `docs/evidence/dedup_window_30day_refractory_witness.md`, `docs/methods/tripwire-register.md` TW-08.1, `docs/methods/08-indicateurs.md` 08.3

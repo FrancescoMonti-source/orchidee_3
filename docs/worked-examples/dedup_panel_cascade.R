@@ -1,44 +1,26 @@
-.libPaths("C:/Users/franc/AppData/Local/R/win-library/4.6")
-suppressMessages(library(dplyr))
-w <- readRDS("C:/Users/franc/Documents/Git/orchidee/outputs/rouen_current/bundle_v3/sir_wide.rds")
-PANEL <- c("amoxicilline_ampicilline","amoxicilline_acide_clavulanique",
-           "piperacilline_tazobactam","mecillinam","cefotaxime","ceftriaxone",
-           "ceftazidime","cefepime","imipeneme","ertapeneme","gentamicine",
-           "amikacine","ofloxacine","levofloxacine","ciprofloxacine",
-           "trimethoprime_sulfamethoxazole","nitrofurantoine",
-           "fosfomycine_trometamol","fosfomycine_iv")
-d <- w %>% filter(bact_norm=="escherichia_coli", naturepvt_norm=="urines",
-                  format(DATEPRELEV,"%Y")=="2024") %>% arrange(PATID, DATEPRELEV)
-major <- function(a,b){ both <- !is.na(a)&!is.na(b); if(!any(both)) return(FALSE)
-  x<-a[both]; y<-b[both]
-  any((x=="S"&y=="R")|(x=="R"&y=="S")|(x=="ZIT"&y=="R")|(x=="R"&y=="ZIT")) }
-dedup <- function(df,panel,window){
-  M <- as.matrix(df[,panel,drop=FALSE]); nt <- rowSums(!is.na(M))
-  grp <- paste(df$PATID, window, sep="|"); keep <- rep(FALSE,nrow(df))
-  for(g in unique(grp)){ idx <- which(grp==g); idx <- idx[order(df$DATEPRELEV[idx])]
-    ret <- integer(0)
-    for(i in idx){ hit <- NA_integer_
-      for(j in ret) if(!major(M[i,],M[j,])){hit <- j; break}
-      if(is.na(hit)) ret <- c(ret,i) else if(nt[i]>nt[hit]) ret[ret==hit] <- i }
-    keep[ret] <- TRUE }
-  df[keep,,drop=FALSE] }
-pR <- function(df,col){ v <- df[[col]][!is.na(df[[col]])]
-  c(round(100*sum(v=="R")/length(v),2), sum(v=="R"), length(v)) }
-yr <- format(d$DATEPRELEV,"%Y")
+# Reproduction script for deduplication decisions 07.1 and 07.5.
+# Run from the repository root, or set ORCHIDEE_V3_REPO_ROOT and ORCHIDEE_V3_RUN.
+args <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+script_file <- sub("^--file=", "", args[1L])
+script_dir <- dirname(normalizePath(script_file, winslash = "/"))
+source(file.path(script_dir, "deduplication_witness_helpers.R"))
 
-full <- dedup(d, PANEL, yr)
-cat("=== CASCADE: remove ONE antibiotic from the panel, watch the others move ===\n")
-cat("slice: E. coli / urines / 2024, annual window.", nrow(d), "raw isolates\n\n")
-cat(sprintf("%-34s %8s %8s %8s\n","panel used","isolates","OFX %R","SXT %R"))
-r <- pR(full,"ofloxacine"); s <- pR(full,"trimethoprime_sulfamethoxazole")
-cat(sprintf("%-34s %8d %8.2f %8.2f\n","full SPARES panel (19)", nrow(full), r[1], s[1]))
-for (drop in c("amoxicilline_acide_clavulanique","amoxicilline_ampicilline",
-               "nitrofurantoine","fosfomycine_iv","mecillinam")) {
-  x <- dedup(d, setdiff(PANEL, drop), yr)
-  r <- pR(x,"ofloxacine"); s <- pR(x,"trimethoprime_sulfamethoxazole")
-  cat(sprintf("%-34s %8d %8.2f %8.2f\n", paste0("minus ", substr(drop,1,26)), nrow(x), r[1], s[1]))
+full <- deduplicate_witness(d, spares_panel, "annual")
+full_site <- deduplicate_witness(d, all_atb, "annual")
+cat("Provisional v3 bundle:", bundle_dir, "\n")
+cat("Slice: E. coli / urines / 2024;", nrow(d), "input isolates\n")
+same_ids <- identical(sort(full$.witness_row), sort(full_site$.witness_row))
+cat("Full supported panel and SPARES panel retain identical IDs:", same_ids, "\n")
+if (!same_ids) stop("TW-07.1 parity changed: inspect the separating molecules")
+cat("\n")
+
+report <- function(label, data) {
+  cat(sprintf("%-36s %5d | OFX %s | SXT %s\n", label, nrow(data),
+              fmt_resistance(data, "ofloxacine"), fmt_resistance(data, "trimethoprime_sulfamethoxazole")))
 }
-cat("\n=== does any out-of-panel molecule discriminate here? ===\n")
-sup <- readRDS("C:/Users/franc/Documents/Git/orchidee/outputs/rouen_current/bundle_v3/sir_wide_meta.rds")$supported_atb_cols
-for (c0 in setdiff(sup, PANEL)) { n <- sum(!is.na(d[[c0]])); if (n>0)
-  cat(sprintf("  %-32s %6d results, %d R\n", c0, n, sum(d[[c0]]=="R", na.rm=TRUE))) }
+cat("Panel cascade (same annual window and phenotype-aware 07.6 rule):\n")
+report("Full SPARES panel (19)", full)
+for (drop in c("amoxicilline_acide_clavulanique", "amoxicilline_ampicilline",
+               "mecillinam", "nitrofurantoine", "fosfomycine_iv")) {
+  report(paste("minus", drop), deduplicate_witness(d, setdiff(spares_panel, drop), "annual"))
+}
