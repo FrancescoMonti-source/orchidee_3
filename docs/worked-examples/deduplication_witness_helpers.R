@@ -14,7 +14,7 @@ rows <- as.data.frame(readRDS(file.path(bundle_dir, "sir_wide.rds")))
 meta <- readRDS(file.path(bundle_dir, "sir_wide_meta.rds"))
 all_atb <- intersect(meta$supported_atb_cols, names(rows))
 
-spares_panel <- c(
+comparison_panel <- c(
   "amoxicilline_ampicilline", "amoxicilline_acide_clavulanique",
   "piperacilline_tazobactam", "mecillinam", "cefotaxime", "ceftriaxone",
   "ceftazidime", "cefepime", "imipeneme", "ertapeneme", "gentamicine",
@@ -22,7 +22,7 @@ spares_panel <- c(
   "trimethoprime_sulfamethoxazole", "nitrofurantoine",
   "fosfomycine_trometamol", "fosfomycine_iv"
 )
-stopifnot(all(spares_panel %in% all_atb))
+stopifnot(all(comparison_panel %in% all_atb))
 
 sample_date <- as.Date(rows$DATEPRELEV)
 slice <- !is.na(sample_date) &

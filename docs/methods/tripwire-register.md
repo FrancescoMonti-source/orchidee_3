@@ -189,7 +189,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 - **Identifier**: `TW-07.1`
 - **Pipeline Stage**: Deduplication (`07-dedoublonnage.md`, Decision 07.4)
 - **Statement**: Deduplicating on the site's full tested antibiotype panel retains the exact same
-  isolates as deduplicating on the 19-molecule comparison panel (called "SPARES panel" in the witness scripts; its provenance is unverified, and the SPARES methodology, pp. 1-31, recommends no species panel of molecules).
+  isolates as deduplicating on the 19-molecule comparison panel (called "SPARES panel" in the recorded witness outputs; its provenance is unverified, and the SPARES methodology, pp. 1-31, recommends no species panel of molecules).
 - **Rationale & Risk**: Deduplication is sensitive to the antibiotype panel. Testing an additional
   out-of-panel molecule can create a major discrepancy between two isolates that were previously
   identical, splitting an episode into two and increasing the deduplicated numerator. This was
