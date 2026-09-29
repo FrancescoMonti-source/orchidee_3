@@ -4,7 +4,7 @@ Witness for the decision *"only diagnostic samples enter the resistance
 indicators"*.
 
 **Slice**: *Escherichia coli*, all sample types (global scope), sampling year
-2024. Annual window, grouping by patient, SPARES panel. Built from
+2024. Annual window, grouping by patient, 19-molecule comparison panel. Built from
 `site_inputs/microbiology_observations.rds`, which retains screening rows that
 the published bundle drops.
 

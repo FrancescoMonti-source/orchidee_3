@@ -18,11 +18,13 @@ the CATB project.
 
 ## What SPF asks
 
-SPF Annexe 1 §8 restates the SPARES definition, changing only the period:
+SPF Annexe 1 §8 (SPF p. 15) restates the definition quoted above, changing only the period:
 *"facturées lors de la période concernée, telles que déclarées dans le cadre de
 la SAE"*. The body of the requirements asks for monthly indicators:
 
 > La fréquence d'estimation des indicateurs devra être mensuelle.
+>
+> — SPF p. 5
 
 > nous souhaiterions recevoir, pour tous les indicateurs agrégés demandés, le
 > numérateur et dénominateur utilisés (le nombre de souches avec une résistance,
@@ -81,9 +83,11 @@ Unproven: **2 of 11**.
 
 ### 04.1 note — why the specified source is refused
 
-The SAE figure delivered to ConsoRes for Rouen carries no activity filter at
-all. It exceeds even ORCHIDEE's *unfiltered* exposure table (564 968), so it
-includes activity absent from the movement data entirely.
+The figure ConsoRes prints for Rouen (589 397, ConsoRes report p. 15) is presumed
+to be the SAE declaration without activity filter; this is our inference, not
+stated in the sources (SPARES p. 13 says only that the days are SAE-declared).
+It exceeds even ORCHIDEE's *unfiltered* exposure table (564 968), so, if
+it is the SAE, it includes activity absent from the movement data entirely.
 
 The consequence is in the published report:
 
@@ -92,7 +96,8 @@ The consequence is in the published report:
 | SARM, all samples | 0,16 (95/589397) | **0,27** |
 | SARM, blood cultures | 0,024 (14/589397) | **0,039** |
 
-Every incidence density in Rouen's ConsoRes report is understated by **40 %**,
+Against the perimeter-correct denominator, every incidence density in Rouen's
+ConsoRes report is understated by **40 %**,
 and since consumption divides by the same JH, so is the 526,9 DDJ/1000 JH
 establishment figure. The numerator is not at fault.
 

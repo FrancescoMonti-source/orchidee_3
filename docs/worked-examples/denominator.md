@@ -20,7 +20,7 @@ which is what v2 publishes. 124 169 movement rows fall in eligible UFs.
 
 The SAE figure exceeds ORCHIDEE's *unfiltered* exposure table (564 968), so it
 is not "everything we have" either — it covers activity absent from the movement
-data entirely. It carries no activity filter.
+data entirely. That it carries no activity filter is our inference: no source says which units Rouen declared.
 
 In ConsoRes' own published numbers for Rouen 2024:
 
@@ -29,7 +29,7 @@ In ConsoRes' own published numbers for Rouen 2024:
 | SARM, all samples | 0,16 (95/589397) | **0,27** |
 | SARM, blood cultures | 0,024 (14/589397) | **0,039** |
 
-Every incidence density understated by 40 %. The numerator is the SPARES
+Against the perimeter-correct denominator, every incidence density is understated by 40 %. The numerator is the SPARES
 perimeter and is not at fault; only the denominator is.
 
 ## 2. Occupancy hours against midnight presence

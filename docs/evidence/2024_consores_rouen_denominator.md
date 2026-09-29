@@ -20,7 +20,8 @@ defend.
 
 ORCHIDEE's denominator for the same establishment, the same year and the SPARES
 perimeter is **355 246** patient-days — a ratio of **×1.66**. The 589 397 figure
-is an SAE declaration made without any activity filter; it exceeds even
+is presumed to be an SAE declaration made without any activity filter (our
+inference; ConsoRes report p. 15, SPARES p. 13); it exceeds even
 ORCHIDEE's unfiltered exposure table (564 968), so it covers activity that is
 not in the movement data at all.
 
@@ -31,7 +32,8 @@ Consequence, using ConsoRes' own numerators:
 | SARM, all samples | 0,16 | **0,27** |
 | SARM, blood cultures | 0,024 | **0,039** |
 
-Every incidence density in this report is understated by 40 %. Consumption
+Against the perimeter-correct denominator, every incidence density in this
+report is understated by 40 %. Consumption
 divides by the same JH, so the establishment figure of 526,9 DDJ/1000 JH is
 understated by the same factor.
 

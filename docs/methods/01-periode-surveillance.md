@@ -29,7 +29,7 @@ The annual cadence comes from SPARES, whose campaign covers one calendar year (p
 
 ORCHIDEE disentangles temporal surveillance along three independent axes:
 1. **Cadence (When to report)**: Dual reporting — monthly for operational hospital monitoring, annual for national campaigns.
-2. **Deduplication Window (Over what timeframe to group duplicates)**: French calendar boundaries (SPARES Annexe 1) are the production rule. A continuous 30-day rolling refractory window remains an experiment under audit (not the EARS-Net rule; see §3).
+2. **Deduplication Window (Over what timeframe to group duplicates)**: French calendar boundaries are the production rule. SPARES defines a duplicate over « la période de l'enquête » (SPARES p. 10) and gives no calendar rule, so the calendar boundaries are ORCHIDEE's own reading. A continuous 30-day rolling refractory window remains an experiment under audit (not the EARS-Net rule; see §3).
 3. **State Lifecycle (Can past monthly numbers change?)**: Strictly immutable upon month close — no retrospective revision from later cultures.
 
 ### 1. Dual Temporal Cadence

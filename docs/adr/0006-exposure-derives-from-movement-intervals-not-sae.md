@@ -21,8 +21,10 @@ However, the SPARES method restricts surveillance to complete and weekly
 hospitalisation within designated clinical sectors (excluding ambulatory care,
 sessions, consultations, emergency passages, and home care; SPARES pp. 9-10). ORCHIDEE calculates
 exposure directly from hospitalisation movement intervals within that defined
-perimeter (355 246 patient-days at Rouen in 2024). Dividing by the unfiltered
-SAE understates all incidence densities in ConsoRes by **40 %** (`Finding 16`).
+perimeter (355 246 patient-days at Rouen in 2024). If ConsoRes
+divides by the whole-establishment SAE, as our inference above supposes, its incidence
+densities are understated by about **40 %** against the perimeter-correct
+denominator (355 246 / 589 397 = 0.60; `Finding 16`).
 
 Furthermore, calculating exposure in occupancy hours divided by 24 provides
 exact intra-day precision when timestamps exist, while algebraically reducing to

@@ -19,11 +19,11 @@ exist at all.
 
 ## The rule being applied
 
-From the SPARES methodology, Annexe 1:
+From the SPARES methodology, section 6 (p. 10):
 
-> Un doublon est une souche isolee chez un malade pour lequel une souche de la
-> meme espece et de meme antibiotype a deja ete prise en compte durant la
-> periode de l'enquete pour un meme type de prelevement a visee diagnostique.
+> Un doublon est une souche isolée chez un malade pour lequel une souche de la
+> même espèce et de même antibiotype a déjà été prise en compte durant la
+> période de l'enquête pour un même type de prélèvement à visée diagnostique.
 
 Two antibiotypes differ if, **for at least one molecule tested on both**, there
 is a *major* discrepancy (S to R, or ZIT to R). A S/ZIT difference is minor and
@@ -65,7 +65,7 @@ removed molecule is not the one being measured.
 
 | Panel | Isolates | OFX %R (R / tested) | SXT %R (R / tested) |
 |---|---:|---:|---:|
-| full SPARES panel (19 molecules) | 4 441 | **15.94** (632 / 3 964) | **28.84** (1 272 / 4 411) |
+| full comparison panel (19 molecules) | 4 441 | **15.94** (632 / 3 964) | **28.84** (1 272 / 4 411) |
 | minus amoxicilline-acide clavulanique | 4 376 | 16.06 (627 / 3 904) | 28.23 (1 227 / 4 347) |
 | minus amoxicilline-ampicilline | 4 429 | 15.99 (632 / 3 953) | 28.87 (1 270 / 4 399) |
 | minus mecillinam | 4 418 | 15.92 (628 / 3 944) | 28.69 (1 259 / 4 388) |
@@ -76,7 +76,7 @@ Dropping AMC from the panel removes **65 isolates** and moves **ofloxacine up
 0.12 pp while cotrimoxazole moves down 0.61 pp**. Neither indicator involves
 amoxicilline-acide clavulanique. AMC discriminated between antibiotypes that
 are otherwise identical, so removing it merges pairs of isolates. The full
-35-column supported panel and the 19-molecule SPARES panel retain the same
+35-column supported panel and the 19-molecule comparison panel retain the same
 4 441 isolate IDs in this slice.
 
 **The two indicators move in opposite directions**, so no aggregate sanity check
@@ -106,7 +106,7 @@ and moved the denominators of **20 antibiotic columns**.
 Using the current selected interpretation (`ZIT` read as `SFP`) retains
 4 441 isolates. Treating `ZIT` as never conflicting retains 4 431. On AMC,
 the selected interpretation gives 1 740 / 4 435 = 39.23 %R; the alternative
-gives 1 733 / 4 425 = 39.16 %R. The full-panel and SPARES-panel runs agree
+gives 1 733 / 4 425 = 39.16 %R. The full-panel and comparison-panel runs agree
 for both interpretations.
 
 ## Result 3 - why slicing an annual deduplication window produces retrospective instability
@@ -152,13 +152,13 @@ panel; `FOS` is tested only on the last sample.
 | P2 | 2024-04-02 | S | R | S | S | - |
 | P2 | 2024-09-15 | S | R | S | S | **S** |
 
-- **SPARES panel, annual**: P1's two samples are identical on the panel, so keep
+- **comparison panel, annual**: P1's two samples are identical on the panel, so keep
   the oldest (SPARES p. 11). P2's September tested one more, so keep September
   (SPARES p. 11). **2 isolates**,
   AMC 50 %, OFX 50 %.
 - **Full panel, annual**: TCC differs S/R on P1, so they are not duplicates.
   **3 isolates**, AMC 66.7 %, OFX 33.3 %.
-- **SPARES panel, monthly**: **4 isolates**, AMC 50 %, OFX 50 %.
+- **comparison panel, monthly**: **4 isolates**, AMC 50 %, OFX 50 %.
 
 Two bolded cells, neither an AMC nor an OFX cell, and both indicators move - in
 opposite directions.
