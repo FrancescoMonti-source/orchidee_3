@@ -13,7 +13,7 @@ Only one of the four varies at run time.
 | **Window** | calendar, annual and monthly | **Parameter.** SPF requires monthly (SPF p. 5); comparability requires annual. Both are needed at once. |
 | **Grouping key** | patient (`PATID`) | **Decided**, as SPARES asks. `EVTID` is retained in the data so the stay-level witness stays computable. |
 | **Conflict rule** | `S <-> R` and `SFP <-> R` are major; `S <-> SFP` is minor; `ZIT` is read as `SFP` | **Decided**, following the SPF text. |
-| **Panel** | every antibiotic the site tests | **Decided, with a tripwire** asserting that the 19-molecule comparison panel (the witnesses' panel, called "SPARES panel" in the recorded witness outputs; its provenance is unverified, and the SPARES methodology, pp. 1-31, lists no panel of molecules) would keep the same isolates. |
+| **Panel** | every antibiotic the site tests | **Decided, with a tripwire** asserting that the 19-molecule comparison panel (an example subset of *E. coli*-related molecules used by the witnesses, called "SPARES panel" in the recorded witness outputs; its provenance is unverified, and the SPARES methodology, pp. 1-31, lists no panel of molecules) would keep the same isolates. |
 
 ## Why record all four when only one varies
 
