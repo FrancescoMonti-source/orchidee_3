@@ -22,7 +22,7 @@ gets a new entry saying so.
 from the SPF requirements. It exists only in the CA-SFM reference and in
 hospital exports. Reading it as `SFP` is therefore an ORCHIDEE decision that no
 external document prescribes, and the two readings differ: 4 438 isolates
-against 4 428 on the *E. coli* / urines / 2024 slice.
+against 4 428 on the *E. coli* / urines / 2024 slice. <!-- citecheck: ok, absence checked in the 2026-09-29 entry (SPARES pp. 1-31, SPF pp. 1-21) -->
 → `docs/methods/06-donnees-resistance.md` 06.2, `07-dedoublonnage.md` 07.5
 
 ### 2026-09-18 — Widening the antibiotype panel has no effect at Rouen
@@ -64,7 +64,7 @@ table. Every incidence density in Rouen's ConsoRes report is understated by
 
 SPF asks for monthly indicators and defines the denominator as SAE-declared
 days. The SAE is an annual declaration; there is no monthly SAE. Whoever
-implemented ConsoRes had to decide something, and no document says what.
+implemented ConsoRes had to decide something, and no document says what. <!-- citecheck: ok, pages and corrections in the 2026-09-29 entry -->
 → `docs/methods/04-donnees-activite.md`, *What SPF asks*
 
 ### 2026-09-19 — Occupancy hours and midnight presence agree, except where it matters
@@ -248,7 +248,7 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
    (pp. 25-27), which both documents cite, support reading "pour une même souche" as applying
    within compatible isolates (same species, no major discrepancy, same resistance
    phenotypes), so the passage never collapses isolates with a major discrepancy. This is an
-   inference: SPARES p. 11 glosses « même souche » as « même bactérie, même prélèvement ». The
+   inference: SPARES p. 11 glosses « même souche » as « même bactérie, même prélèvement ». <!-- citecheck: ok, the pages are in the sentences above; the earlier reading is ORCHIDEE's own (2026-09-29 entry) --> The
    global analysis excludes duplicates, the analysis by sample type excludes sample-type
    duplicates.
    → `CONTEXT.md` (Compatible isolates, Duplicate group, Duplicate, Sample-type duplicate)
@@ -256,7 +256,7 @@ Decision 07.2 compared annual calendar, monthly calendar, and 30-day rolling ref
 2. **The 30-day rolling window is not the EARS-Net rule** (correcting the 2026-09-21 item 4 and
    the 2026-09-25 entry above). EARS-Net defines no episode: it keeps the first blood or CSF
    isolate per patient and pathogen in the calendar year (ECDC reporting protocol 2025, p. 22
-   and pp. 24-25). WHO GLASS keeps the first isolate per patient, specimen type and period. The
+   and pp. 24-25). WHO GLASS keeps the first isolate per patient, specimen type and period. <!-- citecheck: ok, GLASS checked against its manual in item 6 below; EARS-Net checked in the 2026-09-29 entry --> The
    nearest published rule to the phenotype-aware 30-day window is Japan's JANIS (Kajihara et
    al., PLoS ONE 2020;15(6):e0228234). The evidence file cited that paper as "Ohmagari et al.,
    15(10): e0240902", a DOI that belongs to an unrelated article.
@@ -369,3 +369,27 @@ Found by the first full run of `tools/citecheck` (check C3), then read page by p
    request replace the invented chapter 01 quote (closes item 4).
    → `docs/adr/0005-phenotype-indicators-use-spares-note-xa.md` (Scope), invariant 3 in
    `AGENTS.md`, `01-periode-surveillance.md`
+
+### 2026-09-29 — Older claims about external bodies now carry pages (issue #12)
+
+The citation check flagged claims about named bodies that had no page. Giving them one (PRs #15 to #17 and this one) meant reading each source again. Older entries are not edited; the six flagged paragraphs above carry a marker that points here. Every page below was read in its PDF in the session that added it.
+
+1. **Checked, and the older entries stand.**
+   - ZIT (2026-09-18): the term occurs nowhere in the SPARES methodology (pp. 1-31) or in the SPF requirements (pp. 1-21), by full-text search of both PDFs.
+   - SPF's monthly requirement (2026-09-19): monthly frequency is SPF p. 5; the days are those « telles que déclarées dans le cadre de la statistique annuelle des établissements de santé (SAE) », SPF p. 15, item 8, and SPARES p. 13.
+   - EARS-Net (2026-09-27, item 2): the 2026 ECDC protocol on disk keeps the records of the first date within the year per patient and pathogen, and only the CSF if blood and CSF are both reported that day (ECDC protocol 2026, p. 26). The 2025 edition that entry cites (pp. 22 and 24-25) is not on disk, so those pages stay unchecked.
+
+2. **Corrected while giving pages.** The text in `docs/` is corrected; the entries above are not.
+   - **ConsoRes' denominator.** No document says ConsoRes divides by the whole-establishment SAE: the report prints 589 397 (ConsoRes report p. 15) and labels its perimeter « Sanitaire SPARES » (p. 1), and SPARES p. 13 says only that the days are those declared in the SAE. "No activity filter", the title of the 2026-09-19 entry, is our inference. Lines that still state it as fact: ADR-0006 (« understates … by 40 % »), `denominator.md` (« It carries no activity filter »), `docs/evidence/2024_consores_rouen_denominator.md`.
+   - **No SAE counting rule.** SPARES p. 13 gives none, so "the number the SPARES definition would have given" (midnight presence) was our assumption.
+   - **No SPARES panel of molecules.** SPARES pp. 1-31 lists none; the 19-molecule panel is the witnesses' comparison panel, provenance unverified. "SPARES panel" wording remains in `07-dedoublonnage.md` and some worked examples.
+   - **SPARES compares BLSE and carbapenemase phenotypes in deduplication** and reads an empty phenotype cell as absent (SPARES p. 11), against the claim that strict SPARES compares only molecules.
+   - **Codes.** SPARES p. 12 and Annexe 6 (p. 31) ask for UF, DE and TA codes, not only UF.
+   - **ONERBA has no "standard mapping"** (ONERBA p. 23): it asks for species-level identification and lists species to monitor, with no code list. The target species list is SPARES Annexe 5, pp. 28-30.
+   - **SPF says nothing of PDS or statistical disclosure control** (SPF pp. 1 and 5); that split is ORCHIDEE's own design.
+   - **Cefoxitine.** The precedence rule is footnote 2 of the SPF table on p. 3, not "Annexe 3"; EUCAST is not the source of the surrogate claim in the PDFs on disk, CA-SFM 2025 p. 72 is.
+   - **EUCAST.** The tables on disk are the intrinsic resistance and unusual phenotypes tables v3.3 (p. 3 replaces "exceptional" by "unusual"). The Expert Rules document is not in `docs/`, so its content is unverified.
+
+3. **Locators that pass the check and are wrong, not yet fixed.** `01-periode-surveillance.md` and `docs/worked-examples/deduplication.md` cite « SPARES Annexe 1 » for the deduplication rule; it is on SPARES pp. 10-11.
+
+→ `docs/methods/04-donnees-activite.md`, `05-structure.md`, `06-donnees-resistance.md`, `09-diffusion.md`, `docs/worked-examples/indicators.md`
