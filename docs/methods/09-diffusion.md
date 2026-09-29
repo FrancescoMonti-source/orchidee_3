@@ -56,7 +56,7 @@ Before packaging a delivery bundle, ORCHIDEE runs automated post-flight verifica
   - Foreign-key referential integrity between `indicators` and `exposure`.
   *Action*: Any fatal violation halts delivery packaging immediately.
 - **Microbiological and Epidemiological Tripwires (Soft Warning)**:
-  - **EUCAST Exceptional Phenotypes (`TW-09.1`)**: Detects isolates violating EUCAST intrinsic resistance or exceptional resistance rules (e.g. vancomycin-resistant *S. aureus*, ampicillin-susceptible *K. pneumoniae*).
+  - **EUCAST Exceptional Phenotypes (`TW-09.1`)**: Detects isolates violating EUCAST intrinsic resistance or unusual phenotype tables (v3.3, Table 7 rule 7.1, p. 12, for vancomycin-resistant *S. aureus*; Table 1 rule 1.7, p. 5, for ampicillin-susceptible *K. pneumoniae*).
   - **Surge / Outbreak Anomaly (`TW-09.2`)**: Detects abrupt year-over-year rate jumps ($> 3\times$ increase with $N_{\text{tested}} \ge 30$).
   *Action*: Non-blocking warnings recorded in `manifest.json` (`status = "FLAGGED"`), alerting hospital biologists and PDS/SPF without halting batch submission during real clinical outbreaks.
 
@@ -92,8 +92,8 @@ point where multi-center data is merged and external visualizations are publishe
 ### 09.3 tripwire (TW-09.1) — EUCAST exceptional and aberrant phenotypes
 
 **Statement**: Zero unquarantined isolates display biologically aberrant resistance phenotypes
-contradicting EUCAST expert rules and intrinsic resistance guidelines (cataloged as `TW-09.1` in
-`tripwire-register.md`).
+contradicting the EUCAST intrinsic resistance and unusual phenotype tables (v3.3, Tables 1-8,
+pp. 5-13; cataloged as `TW-09.1` in `tripwire-register.md`).
 **Today**: Rouen 2024 records **0** exceptional phenotypes (0 VRSA, 0 ampicillin-susceptible
 *K. pneumoniae*, 0 colistin-susceptible *P. mirabilis*).
 
@@ -120,5 +120,6 @@ stratum in `manifest.json` as a potential clinical outbreak or testing panel art
   linkage, rolling refractory window, Note Xa reflex denominator). To be formalized in
   `docs/worked-examples/2024-consores-divergence-account.md`.
 - **Microbiologist Consultation for Biological Rules**: Collaboration with hospital medical
-  biologists to expand and fine-tune the catalog of EUCAST expert rules and intrinsic resistance
-  profiles incorporated into `TW-09.1`.
+  biologists to expand and fine-tune the catalog of EUCAST expert rules (defined in EUCAST
+  Intrinsic Resistance and Unusual Phenotypes v3.3, p. 4) and intrinsic resistance profiles
+  incorporated into `TW-09.1`.

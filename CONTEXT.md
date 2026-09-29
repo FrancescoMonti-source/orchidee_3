@@ -97,8 +97,9 @@ industrialises it. No published source states this role yet.
 _Avoid_: data lake, platform
 
 **ONERBA**:
-The observatory whose methodological recommendations define what a duplicate is.
-The origin of the deduplication rule and of the sample-type thesaurus.
+The observatory whose methodological recommendations define what a duplicate
+(ONERBA recommendations, Chapter III, pp. 25-27). The origin of the deduplication
+rule and of the sample-type thesaurus (Chapter II, pp. 21-22, and Annex 4, p. 44).
 
 **EDSH**:
 A hospital's own clinical data warehouse, the source v3 reads from and the

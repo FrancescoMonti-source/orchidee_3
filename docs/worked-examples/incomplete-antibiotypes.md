@@ -109,7 +109,8 @@ not kept, so no kept isolate reports that molecule for that patient.
 | isolates with an orphaned result: more molecules, then oldest | 99 (8 with an R) | 116 (11) | 100 (3) |
 | isolates with an orphaned result: oldest, never replaced | 159 (29) | 187 (27) | 148 (22) |
 
-The SPARES retention rule loses fewer results than ONERBA's "never replaced".
+The SPARES retention rule (p. 11) loses fewer results than ONERBA's "never replaced" (our reading of
+ONERBA pp. 26-27, where a duplicate is counted against the original isolate already included).
 
 ### Same date and hour
 

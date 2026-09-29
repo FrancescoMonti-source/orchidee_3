@@ -166,5 +166,5 @@ opposite directions.
 
 The scripts that produced Results 1 and 2 read
 `outputs/rouen_current/bundle_v3/sir_wide.rds` from the `orchidee` repository
-and implement the ONERBA rule directly, parameterised by panel and window. They
+and implement the ONERBA rule (pp. 26-27) directly, parameterised by panel and window. They
 are not part of any pipeline; they exist to be re-run and disagreed with.
