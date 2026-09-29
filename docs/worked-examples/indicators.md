@@ -8,10 +8,10 @@ Witness for decisions 08.1 through 08.8 in `docs/methods/08-indicateurs.md`.
 
 ## 1. The specimen deduplication hazard: blood cultures (08.1)
 
-Both SPARES and SPF specify resistance indicators for **all diagnostic samples pooled** and separately for **blood cultures** (*hémocultures* / bactériémies).
+Both SPARES (pp. 8, 16) and SPF (p. 4) specify resistance indicators for **all diagnostic samples pooled** and separately for **blood cultures** (*hémocultures* / bactériémies).
 
-SPARES explicitly defines the deduplication scope for specimen-specific analyses:
-> *« pour un même type de prélèvement à visée diagnostique [...] un seul prélèvement (le plus ancien) par type de prélèvement et par patient est conservé »*
+SPARES defines a duplicate within « un même type de prélèvement à visée diagnostique » (p. 10) and explicitly defines the deduplication scope for specimen-specific analyses (SPARES p. 16):
+> analyse des résistances par type de prélèvement : les doublons « prélèvement » sont exclus, un seul prélèvement (le plus ancien) par type de prélèvement et par patient, est conservé
 
 This makes the specimen scope an **input to deduplication**. If an implementation instead runs global deduplication across all sample types first, and then filters the resulting table on `naturepvt == "hemoculture"`, legitimate bacteremias are erased:
 
@@ -37,10 +37,10 @@ A patient admitted to an eligible unit is sampled on day 1 (e.g. urine, superfic
 
 ## 2. Antibiotic group evaluation and testing coverage cascades (08.2, 08.4, 08.7)
 
-SPF specifies indicators aggregated by **antibiotic group** (C3G, Fluoroquinolones, Carbapenems) evaluated using three-valued logic:
+SPF specifies indicators aggregated by **antibiotic group** (C3G, Fluoroquinolones, Carbapenems) evaluated using three-valued logic (SPF pp. 2-3, table and footnote 1):
 - **`R`**: At least one molecule in the group is reported `R`.
 - **`Ø` (Empty set)**: No molecule in the group is documented (all untested or missing).
-- **`S`**: At least one molecule is documented and none is `R` (`SFP` and `ZIT` count as `S`).
+- **`S`**: At least one molecule is documented and none is `R` (`SFP` counts as `S`, SPF p. 2 footnote 1; `ZIT` also counts as `S` by ORCHIDEE's own decision, since SPF does not mention it).
 
 Measured on *E. coli*, 2024, eligible perimeter ($N = 2\,445$ deduplicated isolates):
 
@@ -96,10 +96,10 @@ Treating absent phenotype tests as missing data ($NA$) inflates BLSE rates by a 
 
 ## 4. SARM methicillin rule and laboratory surrogate handling (08.3)
 
-For *S. aureus* methicillin resistance (SARM), SPF Annexe 3 footnote 2 establishes the marker precedence:
-> *« En cas de discordance entre les résultats céfoxitine et oxacilline, le résultat de la céfoxitine est conservé. »*
+For *S. aureus* methicillin resistance (SARM), footnote 2 of the SPF table (SPF p. 3) establishes the marker precedence:
+> En cas de discordance entre les résultats cefoxitine et oxacilline, le résultat de la cefoxitine est conservé.
 
-Under the CA-SFM guidelines, cefoxitine (30 µg disk) is the screening test for methicillin resistance in staphylococci, whose resistant phenotype covers cefoxitine resistance or a *mecA/mecC* gene (2025 edition, p. 72), but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule (Annexe 3 footnote 2, quoted above):
+Under the CA-SFM guidelines, cefoxitine (30 µg disk) is the screening test for methicillin resistance in staphylococci, whose resistant phenotype covers cefoxitine resistance or a *mecA/mecC* gene (2025 edition, p. 72), but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule (SPF p. 3, footnote 2, quoted above):
 1. **Primary marker**: Cefoxitine interpretation if tested.
 2. **Surrogate fallback**: Oxacilline interpretation if cefoxitine is untested.
 3. **Tripwire verification (TW-08.1)**: If an isolate is co-tested for both, cefoxitine takes precedence and any discordance is flagged for clinical review.

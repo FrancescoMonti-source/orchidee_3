@@ -153,7 +153,8 @@ panel; `FOS` is tested only on the last sample.
 | P2 | 2024-09-15 | S | R | S | S | **S** |
 
 - **SPARES panel, annual**: P1's two samples are identical on the panel, so keep
-  the oldest. P2's September tested one more, so keep September. **2 isolates**,
+  the oldest (SPARES p. 11). P2's September tested one more, so keep September
+  (SPARES p. 11). **2 isolates**,
   AMC 50 %, OFX 50 %.
 - **Full panel, annual**: TCC differs S/R on P1, so they are not duplicates.
   **3 isolates**, AMC 66.7 %, OFX 33.3 %.

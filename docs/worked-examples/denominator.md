@@ -15,7 +15,7 @@ which is what v2 publishes. 124 169 movement rows fall in eligible UFs.
 | 2024 denominator | patient-days |
 |---|---|
 | ORCHIDEE, derived from intervals, SPARES perimeter | **355 246** |
-| SAE, as declared to ConsoRes | **589 397** |
+| ConsoRes denominator, presumed SAE-declared days (ConsoRes report p. 15; SPARES p. 13) | **589 397** |
 | ratio | **×1.66** |
 
 The SAE figure exceeds ORCHIDEE's *unfiltered* exposure table (564 968), so it
@@ -108,7 +108,9 @@ Modal admission hour is 08:00 (56 475 rows), modal discharge hour 15:00
 Note the degeneracy that makes the choice safe: if both timestamps were 00:00,
 occupancy hours would equal `(date_out − date_in) × 24`, so hours ÷ 24 would be
 *identically* the midnight-presence count. A date-only site gets exactly the
-number the SPARES definition would have given it — which is why the resolution
+midnight-presence count, which this document treats as the SPARES-comparable
+day count (SPARES p. 13 defines its days only as those declared in the SAE and
+states no counting rule) — which is why the resolution
 must be declared rather than inferred. See decision 04.9.
 
 ## 5. Union against hull

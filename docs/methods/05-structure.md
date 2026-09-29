@@ -70,7 +70,7 @@ file (`ref/rouen/establishment_structure_2025.xlsx`), calendar year 2024.
 | 05.2 | Structure coherence | positive perimeter (03.5) with non-blocking tripwire asserting > 99.9 % resolution | blocking schema check on ingestion | admin: 362/362 (100 %) in structure; lab: 272/278 in structure (6 external UFs, 68 raw rows, 0 in `sir_wide`). A blocking check fails on inert codes |
 | 05.3 | ICU reassignment | defined by national DE table; ORCHIDEE validates compliance | local text-parsing algorithm or subagent guessing | Rouen referential maps 3 USC to Médecine, 1 USC to Chirurgie, 4 réa néonat/péd to Pédiatrie; exactly 0 discrepancies with `reference_code_de.csv` |
 | 05.4 | Structure versioning | annual snapshot per surveillance period (`calendar_year`) | dynamic time-validity intervals `[start_date, end_date[` per event | Rouen structure has 1 155 UFs, all with `Date fin UF = 2099-12-31` (0 mid-year splits). Dynamic intervals make annual deduplication non-transitive |
-| 05.5 | Hierarchy granularity | `UF` (`SEJUF`) is the atomic key of the contract | `(UM, UF)` composite key, or mandatory Service/Pôle | SPARES and ConsoRes only recognize `Code UF`. Forcing `UM` leaks Rouen internal schema into portable contract (ADR 0003) |
+| 05.5 | Hierarchy granularity | `UF` (`SEJUF`) is the atomic key of the contract | `(UM, UF)` composite key, or mandatory Service/Pôle | SPARES's structure file for ConsoRes requires `Code UF`, `Code DE` and `Code TA`, with service and pôle optional and no UM defined (SPARES p. 12, Annexe 6 p. 31). Forcing `UM` leaks Rouen internal schema into portable contract (ADR 0003) |
 
 Unproven: **0 of 5**.
 
@@ -128,7 +128,7 @@ exceed 0.1 %, or if any unit with patient-days cannot be classified.
 ### 05.3 note — specialised intensive care is a nomenclature mapping, not an algorithm
 
 SPARES requires specialised intensive care and continuous monitoring to be
-attributed to medicine, surgery, or paediatrics. This requirement does not
+attributed to medicine, surgery, or paediatrics (SPARES p. 10). This requirement does not
 require ORCHIDEE to parse local French ward labels or run language models.
 
 In the official French `CODE_DE` nomenclature (`reference_code_de.csv`):

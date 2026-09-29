@@ -7,14 +7,19 @@ identically to midnight presence on date-only movements.
 
 ## Why
 
-The third-party platform ConsoRes calculates incidence densities by dividing by
-the whole-establishment administrative declaration (Statistique annuelle des
-établissements de santé, SAE). At Rouen in 2024, the SAE declares 589 397
-patient-days across the entire hospital group without activity filtering.
+The third-party platform ConsoRes prints the patient-days figure it divides
+incidence densities by: 589 397 for Rouen in 2024 (ConsoRes standard report,
+p. 15). SPARES p. 13 says the activity data entered into ConsoRes are the days
+declared in the Statistique annuelle des établissements de santé (SAE),
+collected per functional unit. Which units Rouen submitted is not documented on
+disk. Reading 589 397 as the whole-establishment SAE declaration without
+activity filtering is our inference, made because the figure exceeds even
+ORCHIDEE's unfiltered exposure table (564 968 patient-days). The ConsoRes
+report labels its own perimeter « Sanitaire SPARES » (p. 1).
 
 However, the SPARES method restricts surveillance to complete and weekly
 hospitalisation within designated clinical sectors (excluding ambulatory care,
-sessions, consultations, emergency passages, and home care). ORCHIDEE calculates
+sessions, consultations, emergency passages, and home care; SPARES pp. 9-10). ORCHIDEE calculates
 exposure directly from hospitalisation movement intervals within that defined
 perimeter (355 246 patient-days at Rouen in 2024). Dividing by the unfiltered
 SAE understates all incidence densities in ConsoRes by **40 %** (`Finding 16`).

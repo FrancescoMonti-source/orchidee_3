@@ -38,7 +38,7 @@ that drive BMR and BHRe policy. Céfotaxime moves 8 points and ertapénème
 quadruples.
 
 The SPF requirements make the same point about screening-based indicators in
-their long-term section: *"le nombre de dépistages faits dépend de la situation
+their long-term section (SPF p. 10): *"le nombre de dépistages faits dépend de la situation
 et de la politique de l'hôpital"*.
 
 ## Is it just a filter before deduplication?

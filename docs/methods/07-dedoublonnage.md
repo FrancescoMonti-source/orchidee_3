@@ -118,7 +118,7 @@ Grouping by patient and calendar year collapses one infection, repeated
 infections and a chronic infection into a single isolate. The undercount
 therefore falls on chronic and re-admitted patients, so it varies with case
 mix - which weakens exactly the comparison between establishments that the
-surveillance exists to provide. SPARES states its choice and never argues for
+surveillance exists to provide. SPARES states its choice (SPARES pp. 10, 16) and never argues for
 it. ORCHIDEE follows the choice and records the objection.
 
 ### 07.4 tripwire (TW-07.1)
