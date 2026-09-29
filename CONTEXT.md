@@ -1,26 +1,28 @@
-# ORCHIDEE
+# ORCHIDEE v3 — antimicrobial resistance
 
-Semi-automated surveillance of antimicrobial resistance computed from a
+An independent methodology proposal (v3) for the antimicrobial resistance strand
+of ORCHIDEE: semi-automated surveillance of resistance computed from a
 hospital's own data warehouse, producing aggregated indicators for Santé
-Publique France.
+Publique France. Nobody commissioned v3; its decisions are its author's. This
+glossary is written for the author and the agents.
 
 ## Language
 
 **Site**:
-A hospital that runs ORCHIDEE against its own data. Rouen is the site that
+A hospital that runs v3 against its own data. Rouen is the site that
 builds and first operates the product; it holds no privileged position in the
 model.
 _Avoid_: établissement (when the running hospital is meant), client, partner
 
 **Site handoff**:
-The fixed set of files a site produces to feed ORCHIDEE, in which the site has
-already translated its local codes into ORCHIDEE's vocabulary. The boundary
-between what a hospital owns and what ORCHIDEE owns.
+The fixed set of files a site produces to feed v3, in which the site has
+already translated its local codes into v3's vocabulary. The boundary
+between what a hospital owns and what v3 owns.
 _Avoid_: import, extract, input files
 
 **Site adapter**:
 Site-specific code and reference data that turns one hospital's raw exports
-into a site handoff. Lives outside the ORCHIDEE core, which never reads it.
+into a site handoff. Lives outside the v3 core, which never reads it.
 _Avoid_: connector, ETL
 
 **Indicator table**:
@@ -30,42 +32,51 @@ are consumers of this table and hold no calculation of their own.
 _Avoid_: results, output, report
 
 **Delivery bundle**:
-The versioned, self-contained package produced by ORCHIDEE for transmission to
-national authorities (HDH/SPF), containing unmasked indicator tables, exposure
-denominators, and a signed metadata manifest (`manifest.json`) recording pipeline
-provenance, snapshot hashes, and the post-flight audit ledger.
+The versioned package a site transmits: its indicator tables, unmasked, with the
+exposure denominators and a record of how they were produced. Its contents and
+format are a chapter 09 design, not settled.
 _Avoid_: submission, export zip, payload
-
 
 ### The surveillance landscape
 
-**SPARES**:
-The French national mission for antimicrobial resistance surveillance in health
-establishments. Used alone the word is ambiguous in the source documents, which
-apply it to three different things; prefer the qualified forms below.
+**ORCHIDEE**:
+Organisation d'un Réseau de Centres Hospitaliers Impliqués Dans la surveillance
+Épidémiologique et la réponse aux Émergences: SPF's network of university
+hospitals producing surveillance indicators from their data warehouses,
+organised in thematic working groups. Antimicrobial resistance is one of them;
+this project is an independent proposal for its methodology, not official
+ORCHIDEE work.
+_Avoid_: ORCHIDEE alone for this project (say v3), or v3 for the network
+
+**SPARES** (Surveillance et Prévention de l'Antibiorésistance en Établissements
+de Santé):
+The national mission, run by a consortium of CPias and CRAtb, that surveils
+antibiotic consumption and bacterial resistance in health establishments. It
+has its own method, which among other things defines a perimeter; the source
+documents use the bare word for all three, so use the qualified forms below.
 _Avoid_: using "SPARES" unqualified
 
 **SPARES method**:
 The published protocol SPARES defines — inclusion criteria, deduplication rule,
-denominators, thesauri. A document ORCHIDEE can read and disagree with in the
+denominators, thesauri. A document v3 can read and disagree with in the
 open.
 _Avoid_: the SPARES algorithm, the SPARES rules
 
 **SPARES perimeter**:
 The subset of hospital activity the SPARES method admits: complete and weekly
 hospitalisation across the listed sectors, excluding séances, venues,
-consultations, passages and HAD. One named perimeter among several ORCHIDEE may
+consultations, passages and HAD. One named perimeter among several v3 may
 compute, never the only one.
 _Avoid_: the perimeter, the scope
 
 **ConsoRes**:
 The third-party web platform that today receives hospitals' imports and computes
-the SPARES indicators. Its implementation is not reviewable. It is ORCHIDEE's
+the SPARES indicators. Its implementation is not reviewable. It is v3's
 point of comparison, not its reference.
 _Avoid_: the national tool, the reference implementation, the gold standard
 
 **Divergence account**:
-A one-time retrospective reconciliation monograph comparing ORCHIDEE against
+A one-time retrospective reconciliation monograph comparing v3 against
 ConsoRes on a benchmark surveillance period (Rouen 2024), decomposing the gap
 into an additive waterfall of named methodological decisions to demonstrate
 validity to SPF. A transition proof, not an annual pipeline routine.
@@ -73,33 +84,31 @@ _Avoid_: annual reconciliation, ConsoRes report
 
 
 **SPF** (Santé Publique France):
-The agency that commissioned ORCHIDEE and consumes its indicators, and which
-currently treats ConsoRes output as authoritative.
+The national public-health agency that coordinates ORCHIDEE and consumes the
+surveillance indicators. It commissioned this project up to v2; v3 is a
+methodology proposed to it. It currently uses ConsoRes output as its reference.
 _Avoid_: the agency, the client
 
 **PDS / HDH** (Plateforme des données de santé / Health Data Hub):
-The French national health data platform that acts as the technical receiving and
-processing infrastructure for hospital surveillance delivery bundles on behalf of
-Santé Publique France. It handles ingestion of unmasked indicator tables, national
-aggregation, and downstream statistical disclosure control.
+The French national health data platform, a partner of the ORCHIDEE consortium.
+As the project team understands it, each working group develops and tests its
+pipeline locally and with a few partner sites, then HDH takes it over and
+industrialises it. No published source states this role yet.
 _Avoid_: data lake, platform
-
-
 
 **ONERBA**:
 The observatory whose methodological recommendations define what a duplicate is.
 The origin of the deduplication rule and of the sample-type thesaurus.
 
 **EDSH**:
-A hospital's own clinical data warehouse, the source ORCHIDEE reads from and the
+A hospital's own clinical data warehouse, the source v3 reads from and the
 reason it can see data national surveillance cannot.
 _Avoid_: the warehouse, the datalake
 
 **GLIMS**:
-The Laboratory Information System (LIS / SIL) manufactured by CliniSys/MGI, used
-by the CHU de Rouen bacteriology laboratory. It handles order entry, laboratory
-workbenches, analyzer connections, and medical validation, and is the source of
-the raw `bact22_24` table.
+The laboratory information system (LIS / SIL) of the CHU de Rouen bacteriology
+laboratory, sold by Clinisys (formerly MIPS). The source of Rouen's raw
+bacteriology export. A Rouen fact, not part of the model.
 
 ### Resistance measurement
 
@@ -129,7 +138,7 @@ _Avoid_: same antibiotype, same souche, identical
 Isolates of one patient and species in the window (and in one sample type, for
 an analysis by sample type), every two of which are compatible. It has one
 retained isolate. The sources define compatibility, not the groups: where a
-bridging isolate allows more than one grouping, an ORCHIDEE rule picks one.
+bridging isolate allows more than one grouping, a v3 rule picks one.
 _Avoid_: operational souche, antibiotype group, clone, episode
 
 **Duplicate**:
@@ -178,11 +187,10 @@ _Avoid_: the antibiotic list, the columns
 **Deduplication**:
 Keeping the retained isolate of each duplicate group and discarding the others:
 groups formed within one sample type for an analysis by sample type (discarding
-sample-type duplicates), across sample types for an analysis across sample types
-(discarding duplicates). Always
-relative to a panel and a window; never absolute. Deduplication is strictly
-partitioned by patient, species, and specimen scope: isolates of different
-species never compete, deduplicate, or affect each other.
+sample-type duplicates), across all sample types for the global analysis
+(discarding duplicates). Always within one patient and one species: isolates of
+different species never affect each other. Always relative to a panel and a
+window; never absolute.
 _Avoid_: dédoublonnage (in English text), de-duping, filtering
 
 **Major discrepancy**:
@@ -191,46 +199,42 @@ which makes them not compatible. A S↔SFP difference is minor and does not. A
 blank result is never a difference.
 
 **Diagnostic sample**:
-A sample taken to identify the cause of a suspected infection. Distinguished
-from a screening sample, taken to detect colonisation or carriage, which
-resistance indicators exclude.
+A sample taken to identify the cause of a suspected infection (the sources'
+« prélèvement à visée diagnostique »). The only samples resistance indicators
+include. Each site decides which of its sample types are diagnostic; v3
+does not decide it for them.
 _Avoid_: clinical sample, prélèvement
 
 **Screening sample**:
-A sample taken for infection-control surveillance to detect asymptomatic bacterial
-colonisation or carriage (e.g. rectal or nasal swabs). In French hospitals,
-screening is targeted rather than universal: patients transferred from abroad or
-other ICUs, weekly surveillance in high-risk units (ICU, hematology), and contact
-patients during an outbreak. Resistance indicators strictly exclude screening
-samples.
+A sample taken to detect colonisation or carriage rather than to diagnose an
+infection (the sources' « prélèvement à visée écologique »: recherche de
+colonisation, portage, dépistage). Resistance indicators exclude it.
 _Avoid_: surveillance sample, prélèvement écologique (in English text)
 
 **SFP** (sensible à forte posologie):
-The clinical category between susceptible and resistant, EUCAST's "I". The
-surveillance rules place it on the susceptible side: a S/SFP difference is
-minor, a SFP/R difference is major, and a reported result of SFP counts as S.
+The clinical category between susceptible and resistant. It replaced the former
+intermediate category, which surveillance grouped with resistant, from the 2020
+version of the bacteriology reference; resistance rates before and after the
+change are not comparable. The surveillance rules place it on the susceptible
+side: a S/SFP difference is minor, a SFP/R difference is major, and a reported
+result of SFP counts as S.
 
 **ZIT** (zone d'incertitude technique):
 A CA-SFM measurement caveat meaning the antibiogram could not be read reliably.
 A statement about the test, not about the organism. Neither the SPF requirements
 nor the SPARES methodology mentions it; only the CA-SFM reference and hospital
-exports use it. Treating it as SFP is an ORCHIDEE decision that no external
+exports use it. Treating it as SFP is a v3 decision that no external
 document prescribes.
 _Avoid_: treating ZIT and SFP as the same concept without recording the choice
 
 **Resistance phenotype (BLSE, Carbapenemase)**:
-A binary isolate attribute (`TRUE`/`FALSE`) denoting an enzymatic resistance
-mechanism in Enterobacterales. In clinical microbiology, wild-type susceptible
-isolates do not trigger confirmatory testing and carry no record, which surveillance
-treats as negative per SPARES Note Xa. It is an attribute of the isolate, not an
-antibiotic column in the antibiotype panel.
+An enzymatic resistance mechanism (BLSE, carbapenemase) in Enterobacterales and
+*Pseudomonas*, found by a confirmation test that a sentinel result triggers. The
+sources record it only when found and read no record as absent. That reading
+holds only when the sentinel molecules were tested, and an export shows what was
+reported, not what was tested, so it cannot always tell the two apart. An
+attribute of the isolate, not a molecule of the antibiotype panel.
 _Avoid_: treating phenotypes as molecules during deduplication
-
-**Diagnostic scope**:
-A sample-level contract boolean (`TRUE` for diagnostic specimens, `FALSE` for
-screening or carriage) supplied exclusively by the site adapter according to local
-order codes. Core ORCHIDEE enforces exclusion before deduplication and never
-attempts string heuristics on raw labels.
 
 ### Exposure and perimeter
 
@@ -243,8 +247,8 @@ consumer can name the version it divided by.
 _Avoid_: activity, volume, JH
 
 **Denominator profile**:
-The rule that converts occupied time into exposure. ORCHIDEE's canonical profile
-measures occupancy hours and expresses them in days; `midnight_presence` counts
+The rule that converts occupied time into exposure. v3's canonical profile
+measures occupancy hours and expresses them in days; midnight presence counts
 the calendar boundaries a stay crosses, and is derived from the same intervals
 for comparability with what SPARES publishes. Two figures computed under
 different profiles cannot be added: the sum has no unit.
@@ -252,7 +256,7 @@ _Avoid_: counting method, convention
 
 **Population selection**:
 Every step that decides which isolates are analysed: the perimeter, the
-diagnostic scope, the period. It runs after ingestion and before deduplication,
+diagnostic samples, the period. It runs after ingestion and before deduplication,
 never after it, because deduplication is not monotone — removing an isolate from
 its input can add one to its result. A selection applied afterwards is a
 different operation wearing the same name.
@@ -265,20 +269,20 @@ selections would each be defensible and their ratio would be a rate of nothing.
 _Avoid_: scope, inclusion criteria, filter
 
 **Hospitalisation unit attribution**:
-The derivation of the clinical unit an isolate belongs to, determined by matching
-the sample timestamp to the patient's hospitalisation movement intervals. If no
-movement interval covers the sample time, the isolate receives `SEJUF = NA` and
-is excluded from the eligible perimeter, unless it qualifies under the 24-hour
-pre-admission linkage window (`ADR-0009`). It is never attributed by guessing from
-the ordering laboratory code when intervals contradict it.
-
-**Pre-admission linkage window**:
-A bounded 24-hour look-ahead window linking diagnostic specimens (such as blood
-cultures) collected in the Emergency Department (TA 10) to a subsequent acute
-inpatient stay (TA 03 / TA 20), attributing the specimen to the initial receiving
-inpatient unit (`ADR-0009`). This prevents dropping acute community-onset sepsis
-admissions from the numerator while their inpatient stay days remain in the denominator.
+Deciding which clinical unit an isolate belongs to: the unit whose stay interval
+contains the sample time. A sample outside every stay interval is not
+attributed to a ward; an emergency isolate is the case that matters. It is never
+attributed from the ordering laboratory's unit code when the intervals
+contradict it.
 _Avoid_: unit mapping (when sample attribution is meant), sample location
+
+**Emergency isolate**:
+An isolate from a diagnostic sample drawn in the emergency department, usually
+before any admission, so it cannot have been acquired in a ward. SPARES
+attributes a sample to the unit at the time of sampling and excludes emergency
+activity, so it drops these isolates; v3 keeps them. Whether they are linked to
+the stay that follows or kept as their own stratum is open (chapter 05).
+_Avoid_: pre-admission linkage (names one of the open options)
 
 **Structure snapshot**:
 The annual version of the establishment's structural referential (UFs, TAs,
@@ -288,16 +292,16 @@ _Avoid_: dynamic structure, live hierarchy
 
 **SAE** (Statistique annuelle des établissements de santé):
 The annual administrative declaration that SPARES names as the source of
-hospitalisation days. ORCHIDEE does not use it: at Rouen it is declared without
-an activity filter, so it answers a different question from the one the
-indicator asks. It is retained as a recorded figure in the divergence account,
-not as a reference.
+hospitalisation days. v3 does not use it: the figure comes from the
+hospital administration, cannot be reproduced from the site's own data, and is
+not restricted to the activity SPARES admits. v3 measures exposure from
+the site's stay data instead.
 _Avoid_: official figure, reference denominator
 
 ### How decisions are recorded
 
 **Decision register**:
-The list of every choice ORCHIDEE makes that its source documents do not make
+The list of every choice v3 makes that its source documents do not make
 for it. One line per choice: the question, the answer, the alternative, and the
 witness.
 _Avoid_: methods doc, spec notes
@@ -325,5 +329,6 @@ _Avoid_: TODO, open question
 Automated quality verification applied to the generated indicator table prior to
 delivery or diffusion. Distinguishes fatal invariant violations that halt
 delivery from microbiological or epidemiological tripwires that record warnings.
+A chapter 09 design, not settled.
 _Avoid_: sanity check, output filter
 
