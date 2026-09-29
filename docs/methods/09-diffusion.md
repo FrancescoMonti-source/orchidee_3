@@ -20,13 +20,14 @@ Status: **settled**. Four decisions, two tripwires, zero unproven. Two follow-up
 
 ---
 
-## What SPF and PDS ask
+## What SPF asks
 
-Santé publique France (SPF) and the Plateforme des données de santé (PDS / Health Data Hub)
-require reliable, standardized transmission of AMR indicators across participating healthcare
-establishments. Indicators feed national epidemiological surveillance, international reporting,
-and local infection-prevention steering, while strictly complying with statistical disclosure
-control (SDC) regulations for external diffusion.
+The Santé publique France (SPF) expression of needs asks ORCHIDEE to provide aggregated
+indicators to the agency (SPF p. 1), estimated monthly (SPF p. 5), with the numerator and
+denominator of each (SPF p. 5). It says nothing about the Plateforme des données de santé
+(PDS / Health Data Hub) or about statistical disclosure control (SDC). The split of
+responsibilities below, including the unmasked delivery to PDS, is ORCHIDEE's own design
+(`ADR-0008`), not a requirement quoted from either body.
 
 ---
 

@@ -65,7 +65,7 @@ table, calendar year 2024, SPARES-eligible perimeter
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 04.1 | Source | derived from hospitalisation intervals | the SAE declaration, as specified | SAE/ConsoRes 2024 = **589 397 JH**; perimeter-correct = **355 246**. Ratio **×1.66** |
+| 04.1 | Source | derived from hospitalisation intervals | the SAE declaration, as specified | ConsoRes 2024 prints **589 397 JH** (ConsoRes report p. 15; SPARES p. 13 says ConsoRes takes SAE-declared days); perimeter-correct = **355 246**. Ratio **×1.66** |
 | 04.2 | Exposure measure | occupancy hours, expressed in days | midnight presence | 356 492 against 355 246, **+0.35 %**. TA 04 ×3.705, TA 19 ×55.1, TA 23 ×1.316 |
 | 04.3 | Comparability profile | `midnight_presence` derived in parallel | a single profile | same intervals, no second pipeline; per-sector ratio 0.988 to 1.020 |
 | 04.4 | Aggregation | only within one profile | free aggregation | the units are incommensurable; no number can be produced to defend the alternative |

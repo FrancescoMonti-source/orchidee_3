@@ -23,8 +23,8 @@ Status: **method decisions settled**. Eight decisions, eight witnesses, three tr
 
 ## What SPF asks
 
-SPF requires aggregated indicators with complete auditability of numerators and
-denominators:
+SPF asks to receive, for every aggregated indicator, the numerator and
+denominator used (SPF p. 5):
 
 > nous souhaiterions recevoir, pour tous les indicateurs agrégés demandés, le
 > numérateur et dénominateur utilisés (le nombre de souches avec une résistance, le
