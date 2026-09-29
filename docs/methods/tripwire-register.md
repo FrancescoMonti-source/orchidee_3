@@ -41,7 +41,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 | **TW-04.2** | Timestamp Grain Resolution | Ingestion & pre-flight audit | Movement timestamps (`DATENT`, `DATSORT`) | Blocking refusal | Rouen: 4.11 % `DATENT`, 4.08 % `DATSORT` at 00:00 (clean `datetime`) |
 | **TW-05.1** | Structure Snapshot Referential Coverage | Referential linkage | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
 | **TW-06.1** | Resistance Flags and Antibiotic Test Results | Ingestion & pre-flight audit | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
-| **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` |
+| **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` <!-- citecheck: ok, index row naming the CA-SFM version check; the CA-SFM/SPARES claims are located in the TW-06.2 entry below --> |
 | **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 441 under the 35-column supported panel and 4 441 under the 19-molecule SPARES panel; retained IDs identical |
 | **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 0 co-tested isolates at Rouen; concordance is not assessable; oxacilline fallback: 84 / 1 093 R |
 | **TW-09.1** | EUCAST Exceptional Phenotype Integrity | Diffusion & post-flight audit | Output tables & unquarantined isolates | Non-blocking warning (`manifest.json` flagged for biologist review) | Rouen 2024: 0 exceptional phenotypes (0 VRSA, 0 Amp-S *K. pneumoniae*) |
@@ -165,9 +165,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 - **Identifier**: `TW-06.2`
 - **Pipeline Stage**: Ingestion & standardization (`06-donnees-resistance.md`, Decision 06.6)
 - **Statement**: The antibiogram interpretation referential declared by the site corresponds to
-  CA-SFM/EUCAST $\ge 2020$ on surveillance campaigns from 2024 onward.
-- **Rationale & Risk**: SPARES requires CA-SFM $\ge 2020$ rules, where the intermediate category
-  `I` was redefined as "Susceptible at increased exposure" (SFP). Testing at the row level
+  CA-SFM/EUCAST $\ge 2020$ (SPARES p. 15) on surveillance campaigns from 2024 onward.
+- **Rationale & Risk**: SPARES requires CA-SFM $\ge 2020$ rules (pp. 7 and 15), where the intermediate
+  category `I` was redefined as "Susceptible at increased exposure" (SFP; SPARES p. 22, and CA-SFM 2025
+  p. 40 for the SFP category). Testing at the row level
   against raw laboratory version strings (`CASFM`) is dangerous because LIS dictionary updates
   often lagged behind bench practice (e.g. Rouen 2022 rows carried `CASFM = "2019"` despite clinical
   2020 compliance; row-level drops discarded whole years). The tripwire verifies site metadata
@@ -238,7 +239,8 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 - **Identifier**: `TW-09.1`
 - **Pipeline Stage**: Diffusion & post-flight audit (`09-diffusion.md`, Decision 09.3)
 - **Statement**: Zero unquarantined isolates display biologically aberrant resistance phenotypes
-  contradicting EUCAST expert rules and intrinsic resistance guidelines.
+  contradicting the EUCAST intrinsic resistance and unusual phenotype tables (v3.3, Tables 1-8,
+  pp. 5-13; the tables are a tool to validate species identification and susceptibility results, p. 4).
 - **Rationale & Risk**: Bacterial species have predictable intrinsic resistance mechanisms (e.g. *Klebsiella pneumoniae*
   is naturally ampicillin-resistant; *Proteus mirabilis* is naturally colistin-resistant) and certain acquired
   resistances are exceptionally rare (e.g. vancomycin resistance in *Staphylococcus aureus* [VRSA]). Identifying
@@ -246,7 +248,9 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
   though very rarely it represents a true superbug emergence. In either case, the run must flag the finding
   for medical biologist review rather than silently passing it to national aggregation.
 - **Trigger Condition**:
-  Count of unquarantined isolates matching any EUCAST exceptional/impossible phenotype $> 0$.
+  Count of unquarantined isolates matching any EUCAST unusual phenotype (v3.3, Tables 6-8, pp. 11-13;
+  headed "exceptional" in earlier versions, p. 3) or susceptible to an agent listed as intrinsically resistant
+  (Tables 1-5, pp. 5-10) $> 0$.
 - **Action on Trip**: Non-blocking warning. Records finding in `manifest.json` (`status = "FLAGGED"`),
   detailing isolate identifiers, species, and contradictory antibiotic results for medical validation.
 - **Rouen Baseline Witness**: On Rouen 2024 data, exactly **0** exceptional phenotypes detected across

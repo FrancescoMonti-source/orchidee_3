@@ -103,9 +103,9 @@ offline LLM batch harmonization pipeline.
 | 06.3 | Isolate key | `(PATID, ELTID, souche_id)` | collapse same species within sample | 213 triples split across several `souche_id`, 214 extra isolates, 0.4 % |
 | 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; non-interpretive &rarr; `NA` | retain `I` as distinct 4th value | Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
 | 06.5 | Resistance phenotypes | binary isolate attribute; absent phenotype signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
-| 06.6 | CA-SFM validation | run metadata declaration + ingestion tripwire | per-row rejection on raw `CASFM` | 100 % of Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance; per-row drop discards entire historical years |
+| 06.6 | CA-SFM validation | run metadata declaration + ingestion tripwire | per-row rejection on raw `CASFM` | 100 % of Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance; per-row drop discards entire historical years <!-- citecheck: ok, decision row naming the CA-SFM version check; the CA-SFM/SPARES requirement is located in the TW-06.2 entry of tripwire-register.md --> |
 | 06.7 | Screening contract | sample-level boolean `diagnostic_scope` from site adapter | internal string heuristics (`"recherche"`, `"rectal"`) | `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
-| 06.8 | Bacterial scope | open ingestion &rarr; ONERBA standard mapping &rarr; counted residual | closed hardcoded filter | isolates outside target species logged and surfaced; mapping dictionary maintained via offline LLM batch job |
+| 06.8 | Bacterial scope | open ingestion &rarr; mapping to the target species list (SPARES Annexe 5, pp. 28-30) &rarr; counted residual | closed hardcoded filter | isolates outside target species logged and surfaced; mapping dictionary maintained via offline LLM batch job |
 
 Unproven: **0 of 8**.
 
@@ -139,4 +139,6 @@ None. Section 06 is fully settled.
   the exact volume of excluded screening samples alongside resistance indicators so that
   inter-hospital comparisons remain transparent and auditable.
 - **Taxonomy dictionary maintenance**: Target taxonomy mapping from local laboratory
-  microorganism strings to ONERBA standard codes is scheduled as an offline LLM batch job.
+  microorganism strings to the target species list (SPARES Annexe 5, pp. 28-30) is scheduled as an
+  offline LLM batch job. ONERBA (p. 23) asks for species-level identification following bacterial
+  taxonomy but publishes no code list, so there are no "ONERBA standard codes".

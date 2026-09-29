@@ -99,7 +99,7 @@ Treating absent phenotype tests as missing data ($NA$) inflates BLSE rates by a 
 For *S. aureus* methicillin resistance (SARM), footnote 2 of the SPF table (SPF p. 3) establishes the marker precedence:
 > En cas de discordance entre les résultats cefoxitine et oxacilline, le résultat de la cefoxitine est conservé.
 
-In CA-SFM 2025 (p. 72), methicillin resistance in *S. aureus* is screened with a cefoxitine disc, but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule (SPF p. 3, footnote 2):
+Under the CA-SFM guidelines, cefoxitine (30 µg disk) is the screening test for methicillin resistance in staphylococci, whose resistant phenotype covers cefoxitine resistance or a *mecA/mecC* gene (2025 edition, p. 72), but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule (SPF p. 3, footnote 2, quoted above):
 1. **Primary marker**: Cefoxitine interpretation if tested.
 2. **Surrogate fallback**: Oxacilline interpretation if cefoxitine is untested.
 3. **Tripwire verification (TW-08.1)**: If an isolate is co-tested for both, cefoxitine takes precedence and any discordance is flagged for clinical review.

@@ -58,8 +58,8 @@ résultat"*), and it carries an ordering hazard that v2's own register records:
 If rows are dropped for any other reason before the screening marker propagates
 across the whole sample, a screening sample can re-enter as diagnostic.
 
-**The flag is a proxy for intent, not a property of the sample.** ONERBA defines
-the boundary by purpose - *à visée diagnostique* against *à visée écologique*. A
+**The flag is a proxy for intent, not a property of the sample.** ONERBA (pp. 20-21)
+defines the boundary by purpose - *à visée diagnostique* against *à visée écologique*. A
 rectal swab is nearly always screening; an ECBU can be either. No sample type
 determines the answer on its own, so the classification rests on local codes and
 local practice.

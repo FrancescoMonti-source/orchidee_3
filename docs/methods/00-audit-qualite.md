@@ -167,10 +167,14 @@ The code `TW-05.1` is the corresponding check's identifier in the tripwire regis
 
 ### 5. Intrinsic and Phenotypic Microbiological Plausibility
 
-- **Intrinsic microbiological resistances**: Under EUCAST / CA-SFM guidelines, certain bacterial
-  species possess universal chromosomal resistance mechanisms. An isolate reported as susceptible
-  (`S`) to an intrinsically resistant molecule indicates clerical error or taxonomic misidentification.
-  The pre-flight audit validates incoming isolates against the intrinsic resistance matrix:
+- **Intrinsic microbiological resistances**: Under EUCAST (Intrinsic Resistance and Unusual
+  Phenotypes v3.3, p. 4 and Tables 1-2, pp. 5 and 7) and CA-SFM (2025, pp. 33-35) guidelines, certain
+  bacterial species possess universal chromosomal resistance mechanisms. An isolate reported as
+  susceptible (`S`) to an intrinsically resistant molecule indicates clerical error or taxonomic
+  misidentification. The pre-flight audit validates incoming isolates against the intrinsic resistance
+  matrix (both sources list the four rows below; for *P. aeruginosa*, cefotaxime and
+  trimethoprim-sulfamethoxazole come from CA-SFM p. 35, while EUCAST p. 7 lists ceftriaxone and
+  trimethoprim alone):
   - ***Klebsiella pneumoniae***: intrinsically resistant to **Ampicillin / Amoxicillin**.
   - ***Enterobacter cloacae complex***: intrinsically resistant to **Amoxicillin-clavulanate**.
   - ***Proteus mirabilis***: intrinsically resistant to **Colistin**.

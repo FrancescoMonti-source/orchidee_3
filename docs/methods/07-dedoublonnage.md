@@ -188,7 +188,7 @@ This section used to say that SPF's Annexe 1 replaces the antibiotype rule
 with "the oldest sample per patient", and measured 4 438 against 4 039 isolates
 as the gap between two rules. That was wrong. SPF (pp. 14-15) contains the same
 antibiotype, retention and phenotype rules as SPARES (pp. 10-11), and SPARES
-(p. 16) contains the same scope passage as SPF. Read with ONERBA, the scope
+(p. 16) contains the same scope passage as SPF. Read with ONERBA (2000, pp. 26-27), the scope
 passage applies within compatible isolates (see What SPARES says), so it never
 collapses isolates with a major discrepancy. 4 039 was the number of distinct patients in the slice,
 not the output of a rule. Issue #5 was opened on this premise.
