@@ -196,7 +196,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
   observed in v2 when the CLAVENTIN / AMC remapping moved 51 isolates and the denominators of 20
   antibiotic columns. The tripwire ensures that panel expansions are noticed immediately.
 - **Trigger Condition**:
-  $$\Delta N = |N_{\text{full\_panel}} - N_{\text{spares\_panel}}| > 0$$
+  $$\Delta N = |N_{\text{full\_panel}} - N_{\text{comparison\_panel}}| > 0$$
   evaluated on deduplicated isolates for target species within the surveillance window.
 - **Action on Trip**: Non-blocking warning. Logs the diverging isolate IDs and identifies the
   specific antibiotic molecules responsible for separating the antibiotypes.

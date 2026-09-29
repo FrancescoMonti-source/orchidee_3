@@ -28,7 +28,7 @@ comparison and decision 07.6. Site mappings remain unreviewed. Slice: Rouen,
 - **panel**: removing amoxicilline-acide clavulanique from the comparison panel
   costs 65 isolates and moves ofloxacine up 0.12 pp while cotrimoxazole moves
   down 0.61 pp - two indicators that do not contain it, moving in opposite
-  directions. The full 35-column supported panel and comparison panel retain the
+  directions. The full 35-column supported panel and the comparison panel retain the
   same 4 441 isolate IDs.
 - **conflict rule**: reading `SFP <-> R` as major and `ZIT` as `SFP` keeps
   4 441 isolates; treating `ZIT` as never conflicting keeps 4 431. AMC reads

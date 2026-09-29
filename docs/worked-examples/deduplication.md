@@ -87,7 +87,7 @@ catches it.
 The reverse experiment - adding molecules - has **no effect on this slice at
 all**. Rouen tests 21 distinct antibiotics on *E. coli* and every one already
 reaches an indicator column. Of the 35 supported columns, the only one outside
-the SPARES *E. coli* panel that carries any data here is meropenem: 1468
+the *E. coli* comparison panel that carries any data here is meropenem: 1468
 results, **6 of them R**. It almost never discriminates.
 
 This is worth stating plainly because it contradicts the intuitive fear. **The

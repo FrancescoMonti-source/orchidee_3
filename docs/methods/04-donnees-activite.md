@@ -73,7 +73,7 @@ table, calendar year 2024, SPARES-eligible perimeter
 | 04.4 | Aggregation | only within one profile | free aggregation | the units are incommensurable; no number can be produced to defend the alternative |
 | 04.5 | Overlapping intervals | unioned per patient / stay / unit | convex hull of the episode | 2024 hull 365 887 against union 355 246: **−10 641 (3.0 %)**, 1 953 episodes |
 | 04.6 | Period grain | month, plus an independent annual run | annual only, or annual ÷ 12 | annual dedup keeps 4 441, monthly keeps 4 814 (**+8.40 %**) on *E. coli*/urines/2024, remeasured with phenotype comparison and 07.6 |
-| 04.7 | Perimeter | one object, consumed by numerator and denominator | each stage selects independently | ConsoRes' own failure: SPARES numerator over whole-establishment denominator |
+| 04.7 | Perimeter | one object, consumed by numerator and denominator | each stage selects independently | the ConsoRes report, if its denominator is the whole-establishment SAE (04.1 note): a perimeter-restricted numerator over a wider denominator |
 | 04.8 | Admissions | establishment level only | stratified by sector | not measured. `unproven` |
 | 04.9 | Timestamp resolution | declared by the site, checked against the data | inferred silently | Rouen: **4.11 %** of `DATENT` and 4.08 % of `DATSORT` at exactly 00:00; peaks 08:00 and 15:00 |
 | 04.10 | Plausibility | non-blocking, requires acknowledgement | blocking, or nothing | eligible denominator 327 301 / 347 303 / 355 246 while the raw table moved 1 016 036 → 564 968 |
@@ -97,9 +97,9 @@ The consequence is in the published report:
 | SARM, blood cultures | 0,024 (14/589397) | **0,039** |
 
 Against the perimeter-correct denominator, every incidence density in Rouen's
-ConsoRes report is understated by **40 %**,
-and since consumption divides by the same JH, so is the 526,9 DDJ/1000 JH
-establishment figure. The numerator is not at fault.
+ConsoRes report is understated by **40 %**. If consumption divides by the same
+JH (not shown in the sources), so is the 526,9 DDJ/1000 JH establishment
+figure. We take the numerator as correct.
 
 `589 397` is retained in `docs/evidence/` as a receipt, not as an oracle. When
 ORCHIDEE publishes SARM at 0,27 against ConsoRes' 0,16, the field's first
