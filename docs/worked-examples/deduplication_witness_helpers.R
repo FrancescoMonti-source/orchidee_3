@@ -14,7 +14,9 @@ rows <- as.data.frame(readRDS(file.path(bundle_dir, "sir_wide.rds")))
 meta <- readRDS(file.path(bundle_dir, "sir_wide_meta.rds"))
 all_atb <- intersect(meta$supported_atb_cols, names(rows))
 
-comparison_panel <- c(
+# SPF Expression de besoins, Annexe 3 (p. 20), E. coli column. Annexe 3 lists
+# fosfomycine once; the bundle splits it into trometamol and IV.
+annexe3_ecoli <- c(
   "amoxicilline_ampicilline", "amoxicilline_acide_clavulanique",
   "piperacilline_tazobactam", "mecillinam", "cefotaxime", "ceftriaxone",
   "ceftazidime", "cefepime", "imipeneme", "ertapeneme", "gentamicine",
@@ -22,7 +24,7 @@ comparison_panel <- c(
   "trimethoprime_sulfamethoxazole", "nitrofurantoine",
   "fosfomycine_trometamol", "fosfomycine_iv"
 )
-stopifnot(all(comparison_panel %in% all_atb))
+stopifnot(all(annexe3_ecoli %in% all_atb))
 
 sample_date <- as.Date(rows$DATEPRELEV)
 slice <- !is.na(sample_date) &

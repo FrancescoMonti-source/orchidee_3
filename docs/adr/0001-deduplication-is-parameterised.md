@@ -13,7 +13,7 @@ Only one of the four varies at run time.
 | **Window** | calendar, annual and monthly | **Parameter.** SPF requires monthly (SPF p. 5); comparability requires annual. Both are needed at once. |
 | **Grouping key** | patient (`PATID`) | **Decided**, as SPARES asks. `EVTID` is retained in the data so the stay-level witness stays computable. |
 | **Conflict rule** | `S <-> R` and `SFP <-> R` are major; `S <-> SFP` is minor; `ZIT` is read as `SFP` | **Decided**, following the SPF text. |
-| **Panel** | every antibiotic the site tests | **Decided, with a tripwire** asserting that the 19-molecule comparison panel (an example subset of *E. coli*-related molecules used by the witnesses, called "SPARES panel" in the recorded witness outputs; its provenance is unverified, and the SPARES methodology, pp. 1-31, lists no panel of molecules) would keep the same isolates. |
+| **Panel** | every antibiotic the site tests | **Decided, with a tripwire** asserting that the SPF Annexe 3 list for *E. coli* (SPF p. 20, titled "Méthodologie Spares": 18 molecules, 19 columns here because the bundle splits fosfomycine in two; the SPARES methodology itself, pp. 1-31, lists no panel of molecules) would keep the same isolates. |
 
 ## Why record all four when only one varies
 
@@ -25,10 +25,10 @@ comparison and decision 07.6. Site mappings remain unreviewed. Slice: Rouen,
 - **window**: annual keeps 4 441 isolates, monthly keeps 4 814 (+8.40 %).
   AMC, OFX and SXT move by +0.27 to +0.34 pp; CTX moves by +1.14 pp.
   Incidence density moves by +8.40 %.
-- **panel**: removing amoxicilline-acide clavulanique from the comparison panel
+- **panel**: removing amoxicilline-acide clavulanique from the Annexe 3 list
   costs 65 isolates and moves ofloxacine up 0.12 pp while cotrimoxazole moves
   down 0.61 pp - two indicators that do not contain it, moving in opposite
-  directions. The full 35-column supported panel and the comparison panel retain the
+  directions. The full 35-column supported panel and the Annexe 3 list retain the
   same 4 441 isolate IDs.
 - **conflict rule**: reading `SFP <-> R` as major and `ZIT` as `SFP` keeps
   4 441 isolates; treating `ZIT` as never conflicting keeps 4 431. AMC reads

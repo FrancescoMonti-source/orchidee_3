@@ -65,7 +65,7 @@ removed molecule is not the one being measured.
 
 | Panel | Isolates | OFX %R (R / tested) | SXT %R (R / tested) |
 |---|---:|---:|---:|
-| full comparison panel (19 molecules) | 4 441 | **15.94** (632 / 3 964) | **28.84** (1 272 / 4 411) |
+| Annexe 3 *E. coli* list (19 columns) | 4 441 | **15.94** (632 / 3 964) | **28.84** (1 272 / 4 411) |
 | minus amoxicilline-acide clavulanique | 4 376 | 16.06 (627 / 3 904) | 28.23 (1 227 / 4 347) |
 | minus amoxicilline-ampicilline | 4 429 | 15.99 (632 / 3 953) | 28.87 (1 270 / 4 399) |
 | minus mecillinam | 4 418 | 15.92 (628 / 3 944) | 28.69 (1 259 / 4 388) |
@@ -76,7 +76,7 @@ Dropping AMC from the panel removes **65 isolates** and moves **ofloxacine up
 0.12 pp while cotrimoxazole moves down 0.61 pp**. Neither indicator involves
 amoxicilline-acide clavulanique. AMC discriminated between antibiotypes that
 are otherwise identical, so removing it merges pairs of isolates. The full
-35-column supported panel and the 19-molecule comparison panel retain the same
+35-column supported panel and the 19-column Annexe 3 *E. coli* list (SPF p. 20) retain the same
 4 441 isolate IDs in this slice.
 
 **The two indicators move in opposite directions**, so no aggregate sanity check
@@ -87,7 +87,7 @@ catches it.
 The reverse experiment - adding molecules - has **no effect on this slice at
 all**. Rouen tests 21 distinct antibiotics on *E. coli* and every one already
 reaches an indicator column. Of the 35 supported columns, the only one outside
-the *E. coli* comparison panel that carries any data here is meropenem: 1468
+the *E. coli* Annexe 3 list that carries any data here is meropenem: 1468
 results, **6 of them R**. It almost never discriminates.
 
 This is worth stating plainly because it contradicts the intuitive fear. **The
@@ -106,7 +106,7 @@ and moved the denominators of **20 antibiotic columns**.
 Using the current selected interpretation (`ZIT` read as `SFP`) retains
 4 441 isolates. Treating `ZIT` as never conflicting retains 4 431. On AMC,
 the selected interpretation gives 1 740 / 4 435 = 39.23 %R; the alternative
-gives 1 733 / 4 425 = 39.16 %R. The full-panel and comparison-panel runs agree
+gives 1 733 / 4 425 = 39.16 %R. The full-panel and Annexe 3 runs agree
 for both interpretations.
 
 ## Result 3 - why slicing an annual deduplication window produces retrospective instability
@@ -142,8 +142,8 @@ change by anyone reading the output.
 
 The real-data effects above are small per indicator, which makes the mechanism
 hard to see. Four rows, one species, one sample type, make it visible. `TCC` is
-ticarcilline-acide clavulanique, the CLAVENTIN molecule, outside the SPARES
-panel; `FOS` is tested only on the last sample.
+ticarcilline-acide clavulanique, the CLAVENTIN molecule, outside the Annexe 3
+list; `FOS` is tested only on the last sample.
 
 | Patient | Sample date | AMC | OFX | CTX | TCC | FOS |
 |---------|-------------|-----|-----|-----|-----|-----|
@@ -152,13 +152,13 @@ panel; `FOS` is tested only on the last sample.
 | P2 | 2024-04-02 | S | R | S | S | - |
 | P2 | 2024-09-15 | S | R | S | S | **S** |
 
-- **comparison panel, annual**: P1's two samples are identical on the panel, so keep
+- **Annexe 3 list, annual**: P1's two samples are identical on the panel, so keep
   the oldest (SPARES p. 11). P2's September tested one more, so keep September
   (SPARES p. 11). **2 isolates**,
   AMC 50 %, OFX 50 %.
 - **Full panel, annual**: TCC differs S/R on P1, so they are not duplicates.
   **3 isolates**, AMC 66.7 %, OFX 33.3 %.
-- **comparison panel, monthly**: **4 isolates**, AMC 50 %, OFX 50 %.
+- **Annexe 3 list, monthly**: **4 isolates**, AMC 50 %, OFX 50 %.
 
 Two bolded cells, neither an AMC nor an OFX cell, and both indicators move - in
 opposite directions.

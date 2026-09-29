@@ -90,7 +90,7 @@ All witnesses are measured on real Rouen rows. Method and scripts:
 | 07.1 | Window length | annual **and** monthly | one only | annual keeps 4 441 isolates, monthly 4 814 (+8.40 %); resistance proportions move +0.27 to +1.14 pp and incidence density moves +8.40 % |
 | 07.2 | Window shape | calendar (production); rolling refractory comparison remains an experiment | pure calendar only | the historical 4 718 rolling result is not reproduced; current direct implementations keep 4 729 with phenotypes and 07.6, or 4 727 without phenotypes; exact historical rule is unknown |
 | 07.3 | Grouping key | patient | patient and stay | not measured; `EVTID` is retained so it stays computable. `unproven` |
-| 07.4 | Antibiotype panel | everything the site tests | a fixed comparison panel per species | the 35-column supported panel and 19-molecule comparison panel retain 4 441 isolates each, with identical retained IDs; guarded by a tripwire |
+| 07.4 | Antibiotype panel | everything the site tests | the species\' SPF Annexe 3 list (SPF p. 20) | the 35-column supported panel and 19-column Annexe 3 *E. coli* list retain 4 441 isolates each, with identical retained IDs; guarded by a tripwire |
 | 07.5 | Conflict rule | `SFP <-> R` is major; `ZIT` is read as `SFP` | `ZIT` never conflicts | 4 441 vs 4 431 retained isolates; AMC %R is 39.23 % vs 39.16 % |
 | 07.6 | Comparison when antibiograms are incomplete | compare a new isolate with **every** isolate of a duplicate group | with the retained isolate only (the witness code until now); with the first isolate of the group; merge every chain of compatible isolates | Rouen 2022-2024: same retained isolates as the witness code in every group; comparing with the first isolate merges a major discrepancy in 1, 0 and 1 groups; `docs/worked-examples/incomplete-antibiotypes.md` |
 | 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `souche_id` | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
@@ -123,7 +123,7 @@ it. ORCHIDEE follows the choice and records the objection.
 
 ### 07.4 tripwire (TW-07.1)
 
-**Statement**: the comparison panel and the full supported panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
+**Statement**: the species' Annexe 3 list and the full supported panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
 **Today**: 4 441 under each panel, with identical retained isolate IDs, *E. coli* / urines / 2024. The full panel has 35 supported columns; 21 have results in this slice.
 
 The check fails on the day a site starts testing a molecule that separates two

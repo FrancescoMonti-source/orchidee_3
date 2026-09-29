@@ -42,7 +42,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 | **TW-05.1** | Structure Snapshot Referential Coverage | Referential linkage | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
 | **TW-06.1** | Resistance Flags and Antibiotic Test Results | Ingestion & pre-flight audit | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
 | **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` <!-- citecheck: ok, index row naming the CA-SFM version check; the CA-SFM/SPARES claims are located in the TW-06.2 entry below --> |
-| **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 441 under the 35-column supported panel and 4 441 under the 19-molecule comparison panel; retained IDs identical |
+| **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 441 under the 35-column supported panel and 4 441 under the 19-column Annexe 3 *E. coli* list; retained IDs identical |
 | **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 0 co-tested isolates at Rouen; concordance is not assessable; oxacilline fallback: 84 / 1 093 R |
 | **TW-09.1** | EUCAST Exceptional Phenotype Integrity | Diffusion & post-flight audit | Output tables & unquarantined isolates | Non-blocking warning (`manifest.json` flagged for biologist review) | Rouen 2024: 0 exceptional phenotypes (0 VRSA, 0 Amp-S *K. pneumoniae*) |
 | **TW-09.2** | Temporal Surge Outbreak Detection | Diffusion & post-flight audit | Output indicators ($N_{\text{tested}} \ge 30$) | Non-blocking warning (`manifest.json` flagged for epidemiological review) | Rouen 2022–2024: 0 indicators with $> 3\times$ year-over-year surge |
@@ -189,20 +189,20 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 - **Identifier**: `TW-07.1`
 - **Pipeline Stage**: Deduplication (`07-dedoublonnage.md`, Decision 07.4)
 - **Statement**: Deduplicating on the site's full tested antibiotype panel retains the exact same
-  isolates as deduplicating on the 19-molecule comparison panel (called "SPARES panel" in the recorded witness outputs; its provenance is unverified, and the SPARES methodology, pp. 1-31, recommends no species panel of molecules).
+  isolates as deduplicating on the species\' SPF Annexe 3 list (SPF p. 20, titled "Méthodologie Spares"; the SPARES methodology itself, pp. 1-31, lists no panel of molecules). Witnessed on *E. coli* only; the lists of the other species in Annexe 3 are not yet run.
 - **Rationale & Risk**: Deduplication is sensitive to the antibiotype panel. Testing an additional
   out-of-panel molecule can create a major discrepancy between two isolates that were previously
   identical, splitting an episode into two and increasing the deduplicated numerator. This was
   observed in v2 when the CLAVENTIN / AMC remapping moved 51 isolates and the denominators of 20
   antibiotic columns. The tripwire ensures that panel expansions are noticed immediately.
 - **Trigger Condition**:
-  $$\Delta N = |N_{\text{full\_panel}} - N_{\text{comparison\_panel}}| > 0$$
+  $$\Delta N = |N_{\text{full\_panel}} - N_{\text{annexe3\_list}}| > 0$$
   evaluated on deduplicated isolates for target species within the surveillance window.
 - **Action on Trip**: Non-blocking warning. Logs the diverging isolate IDs and identifies the
   specific antibiotic molecules responsible for separating the antibiotypes.
 - **Rouen Baseline Witness**: On Rouen 2024 data (*E. coli* / urines / 2024 slice), both the full
   site-supported panel (35 columns; 21 have results in this slice) and the
-  19-molecule comparison panel retain exactly **4 441 isolates each**
+  19-column Annexe 3 *E. coli* list retain exactly **4 441 isolates each**
   ($\Delta N = 0$), with identical retained isolate IDs. Meropenem is the only
   out-of-panel molecule carrying data in this slice and creates no isolate splits.
 
