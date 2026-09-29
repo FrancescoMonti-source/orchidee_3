@@ -4,7 +4,7 @@ Witness for decision 03.2, and the general rule it establishes in
 `07-dedoublonnage.md`.
 
 **Slice**: *Escherichia coli*, all sample types, diagnostic scope, sampling year
-2024. Annual window, grouping by patient, SPARES panel, `ZIT` read as `SFP`.
+2024. Annual window, grouping by patient, 19-column Annexe 3 *E. coli* list, `ZIT` read as `SFP`.
 Built from `bundle_v3/sir_wide.rds` joined to
 `bundle_v3/sample_scope_reference.rds`. Reproduction:
 `perimeter_ordering_witness.R`.

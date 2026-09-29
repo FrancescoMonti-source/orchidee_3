@@ -4,7 +4,7 @@ Witness for decision 05.1, and the resolution of the unit-less isolate open ques
 from `03-activites.md`.
 
 **Slice**: *Escherichia coli*, all sample types, diagnostic scope, sampling year
-2024. Annual window, grouping by patient, SPARES panel, `ZIT` read as `SFP`.
+2024. Annual window, grouping by patient, 19-column Annexe 3 *E. coli* list, `ZIT` read as `SFP`.
 Built from `bundle_v3/sir_wide.rds` joined to
 `site_inputs/microbiology_observations.rds` and
 `bundle_v3/sample_scope_reference.rds`. Reproduction:
