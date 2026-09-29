@@ -1,11 +1,14 @@
 # Worked example: how deduplication choices move indicators
 
-Measured on real Rouen rows, not on a constructed fixture.
+Measured on real Rouen rows, not on a constructed fixture. Remeasured
+2026-09-27 with BLSE/carbapenemase comparison and decision 07.6's
+all-members grouping. The source bundle is provisional because its site
+mappings have not been reviewed.
 
 **Slice**: *Escherichia coli*, urines, sampling year 2024, diagnostic scope.
-**4963 isolates before deduplication, 4039 distinct patients.**
-Source: `bundle_v3/sir_wide.rds` from the v2 pipeline, 48595 isolates and 35
-antibiotic columns.
+**4 963 isolates before deduplication, 4 039 distinct patients.**
+Source: `outputs/rouen_stage2_2024/bundle_v3/sir_wide.rds`, built by the v2
+pipeline; 48 595 records and 35 supported antibiotic columns.
 
 Two choices are normally left implicit, and neither can be applied after the
 fact. Both are inputs to deduplication, and deduplication decides which isolates
@@ -37,43 +40,44 @@ sought changes:
 
 | Window Parameter | Deduplicated Isolates | AMC %R ($n / N_{\text{tested}}$) | OFX %R ($n / N_{\text{tested}}$) | CTX %R ($n / N_{\text{tested}}$) | SXT %R ($n / N_{\text{tested}}$) | Slice Incidence Density (/1 000 JH)* |
 |---|---|---|---|---|---|---|
-| **Annual (SPARES)** | **4 438** | 39.23 % (1 739 / 4 433) | 15.93 % (631 / 3 962) | 24.39 % (341 / 1 398) | 28.80 % (1 270 / 4 409) | **12.49 / 1 000 JH** |
-| **Monthly (Pooled)** | **4 813** | 39.56 % (1 901 / 4 805) | 16.23 % (699 / 4 307) | 25.52 % (370 / 1 450) | 29.09 % (1 390 / 4 778) | **13.55 / 1 000 JH** |
-| **Shift ($\Delta$)** | **+375 (+8.45 %)** | **+0.33 pp (+0.84 %)** | **+0.30 pp (+1.88 %)** | **+1.13 pp (+4.63 %)** | **+0.29 pp (+1.01 %)** | **+1.06 / 1 000 JH (+8.45 %)** |
+| **Annual (SPARES)** | **4 441** | 39.23 % (1 740 / 4 435) | 15.94 % (632 / 3 964) | 24.37 % (341 / 1 399) | 28.84 % (1 272 / 4 411) | **12.50 / 1 000 JH** |
+| **Monthly (Pooled)** | **4 814** | 39.58 % (1 902 / 4 806) | 16.23 % (699 / 4 308) | 25.52 % (370 / 1 450) | 29.11 % (1 391 / 4 779) | **13.55 / 1 000 JH** |
+| **Shift ($\Delta$)** | **+373 (+8.40 %)** | **+0.34 pp** | **+0.28 pp** | **+1.14 pp** | **+0.27 pp** | **+1.05 / 1 000 JH (+8.40 %)** |
 
 *\*Incidence density measured over Rouen 2024 eligible inpatient exposure (355 246 JH).*
 
 ### Key methodological takeaways from this comparison:
 
 1. **The denominator disclosure matters**:
-   Notice that cefotaxime (CTX) was tested on only **31.5 % of isolates** (1 398 / 4 438) due to laboratory cascade/reflex testing rules, whereas amoxicillin-clavulanate (AMC) was tested on **99.9 %** (4 433 / 4 438). The slightly larger shift on CTX (+1.13 percentage points vs +0.30 pp) is driven by this selective testing subset. Reporting $n / N_{\text{tested}}$ prevents readers from mistaking cascade-testing artifacts for true microbiological divergence.
+   Cefotaxime (CTX) was tested on **31.5 % of isolates** (1 399 / 4 441), while amoxicillin-clavulanate (AMC) was tested on **99.9 %** (4 435 / 4 441). The CTX proportion moves by +1.14 percentage points, compared with +0.34 pp for AMC. Reporting $n / N_{\text{tested}}$ prevents readers from mistaking cascade-testing artifacts for true microbiological divergence.
 
 2. **Divergence of metric types (Proportions vs. Densities)**:
-   - **Resistance proportions barely shift**: Proportions move by less than **0.33 percentage points** (+0.84 % relative) on the widely tested first-line molecules (AMC, OFX, SXT).
-   - **Isolate counts and incidence densities surge by +8.45 %**: Because incidence density is defined as $\frac{\text{Isolates retained} \times 1\,000}{\text{Exposure (JH)}}$, retaining 375 repeat monthly episodes drives the slice incidence density from **12.49 to 13.55 / 1 000 JH**.
+   - **The widely tested proportions move modestly**: AMC, OFX and SXT shift by +0.27 to +0.34 percentage points; CTX, tested on a selected subset, shifts by +1.14 pp.
+   - **Isolate counts and incidence density move by +8.40 %**: Because incidence density is defined as $\frac{\text{Isolates retained} \times 1\,000}{\text{Exposure (JH)}}$, retaining 373 additional monthly isolates moves the slice incidence density from **12.50 to 13.55 / 1 000 JH**.
 
-3. **The ConsoRes validation trap**:
-   A naive validation process that merely compares published resistance *percentages* against historical ConsoRes outputs would conclude that annual and monthly deduplication are "virtually identical" (discrepancies < 0.5 pp). Yet all incidence densities would be distorted by **+8.45 %**. Surveillance engines must validate both resistance proportions and isolate volume counts simultaneously.
+3. **The percentage-only validation trap**:
+   Comparing only the widely tested proportions could make the annual and monthly results appear similar, but CTX moves by +1.14 pp and all isolate counts and incidence densities change by **+8.40 %**. Surveillance engines must validate both resistance proportions and isolate volume counts.
 
 ## Result 2 - the panel is a real effect, but conditional
 
 Remove **one** antibiotic from the panel and re-run. Nothing else changes. The
 removed molecule is not the one being measured.
 
-| Panel | Isolates | OFX %R | SXT %R |
-|---|---|---|---|
-| full SPARES panel (19 molecules) | 4438 | **15.93** | **28.80** |
-| minus amoxicilline-acide clavulanique | 4372 | 16.05 | 28.20 |
-| minus amoxicilline-ampicilline | 4425 | 15.95 | 28.82 |
-| minus mecillinam | 4415 | 15.91 | 28.66 |
-| minus nitrofurantoine | 4433 | 15.87 | 28.79 |
-| minus fosfomycine IV | 4433 | 15.92 | 28.84 |
+| Panel | Isolates | OFX %R (R / tested) | SXT %R (R / tested) |
+|---|---:|---:|---:|
+| full SPARES panel (19 molecules) | 4 441 | **15.94** (632 / 3 964) | **28.84** (1 272 / 4 411) |
+| minus amoxicilline-acide clavulanique | 4 376 | 16.06 (627 / 3 904) | 28.23 (1 227 / 4 347) |
+| minus amoxicilline-ampicilline | 4 429 | 15.99 (632 / 3 953) | 28.87 (1 270 / 4 399) |
+| minus mecillinam | 4 418 | 15.92 (628 / 3 944) | 28.69 (1 259 / 4 388) |
+| minus nitrofurantoine | 4 436 | 15.89 (629 / 3 959) | 28.82 (1 270 / 4 406) |
+| minus fosfomycine IV | 4 437 | 15.93 (631 / 3 960) | 28.86 (1 272 / 4 407) |
 
-Dropping AMC from the panel removes **66 isolates** and moves **ofloxacine up
-0.12 pp while cotrimoxazole moves down 0.60 pp**. Neither indicator involves
-amoxicilline-acide clavulanique. They move because AMC was discriminating
-between antibiotypes that are otherwise identical, and removing it merges pairs
-of isolates into single ones.
+Dropping AMC from the panel removes **65 isolates** and moves **ofloxacine up
+0.12 pp while cotrimoxazole moves down 0.61 pp**. Neither indicator involves
+amoxicilline-acide clavulanique. AMC discriminated between antibiotypes that
+are otherwise identical, so removing it merges pairs of isolates. The full
+35-column supported panel and the 19-molecule SPARES panel retain the same
+4 441 isolate IDs in this slice.
 
 **The two indicators move in opposite directions**, so no aggregate sanity check
 catches it.
@@ -96,6 +100,14 @@ This is exactly the CLAVENTIN event: see
 `docs/evidence/2026-08-02_amc_remapping_cascade.txt`, where correcting a single
 antibiotic's mapping removed **51 isolates** from the deduplicated global scope
 and moved the denominators of **20 antibiotic columns**.
+
+## Result 2b - conflict interpretation changes the retained set
+
+Using the current selected interpretation (`ZIT` read as `SFP`) retains
+4 441 isolates. Treating `ZIT` as never conflicting retains 4 431. On AMC,
+the selected interpretation gives 1 740 / 4 435 = 39.23 %R; the alternative
+gives 1 733 / 4 425 = 39.16 %R. The full-panel and SPARES-panel runs agree
+for both interpretations.
 
 ## Result 3 - why slicing an annual deduplication window produces retrospective instability
 

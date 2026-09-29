@@ -108,7 +108,7 @@ On Rouen 2024 eligible *S. aureus* ($N = 1\,100$ deduplicated isolates):
 - Cefoxitine was not included in Rouen's routine *S. aureus* panel (all cefoxitine tests at Rouen are deployed on Enterobacterales as an AmpC marker).
 - Oxacilline is Rouen's routine clinical AST marker for *S. aureus*: **1 093 tested** (84 R, 1 009 S), with 7 untested isolates.
 - SARM prevalence under the surrogate fallback rule: **84 / 1 093 tested (7.69 %)**; slice incidence density = **0.236 / 1 000 JH**.
-- Tripwire `TW-08.1` monitors co-tested discordances (trivially 0 here since cefoxitine is absent, but fully active for multi-center sites testing both).
+- Tripwire `TW-08.1` monitors co-tested discordances. Rouen has zero co-tested isolates, so concordance is not assessable here; the tripwire remains useful at sites testing both markers.
 
 ---
 

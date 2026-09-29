@@ -42,8 +42,8 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 | **TW-05.1** | Structure Snapshot Referential Coverage | Referential linkage | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
 | **TW-06.1** | Resistance Flags and Antibiotic Test Results | Ingestion & pre-flight audit | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
 | **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` |
-| **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 438 isolates under full panel vs 4 438 under SPARES panel |
-| **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 91 co-tested isolates: 84 R/R, 7 S/S, exactly 0 discordances |
+| **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 441 under the 35-column supported panel and 4 441 under the 19-molecule SPARES panel; retained IDs identical |
+| **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 0 co-tested isolates at Rouen; concordance is not assessable; oxacilline fallback: 84 / 1 093 R |
 | **TW-09.1** | EUCAST Exceptional Phenotype Integrity | Diffusion & post-flight audit | Output tables & unquarantined isolates | Non-blocking warning (`manifest.json` flagged for biologist review) | Rouen 2024: 0 exceptional phenotypes (0 VRSA, 0 Amp-S *K. pneumoniae*) |
 | **TW-09.2** | Temporal Surge Outbreak Detection | Diffusion & post-flight audit | Output indicators ($N_{\text{tested}} \ge 30$) | Non-blocking warning (`manifest.json` flagged for epidemiological review) | Rouen 2022–2024: 0 indicators with $> 3\times$ year-over-year surge |
 
@@ -200,9 +200,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 - **Action on Trip**: Non-blocking warning. Logs the diverging isolate IDs and identifies the
   specific antibiotic molecules responsible for separating the antibiotypes.
 - **Rouen Baseline Witness**: On Rouen 2024 data (*E. coli* / urines / 2024 slice), both the full
-  site panel (21 molecules) and the SPARES recommended panel retain exactly **4 438 isolates**
-  ($\Delta N = 0$). All tested molecules reaching indicator columns already participate in the
-  panel; meropenem is the only extra molecule and creates zero isolate splits.
+  site-supported panel (35 columns; 21 have results in this slice) and the
+  19-molecule comparison panel retain exactly **4 441 isolates each**
+  ($\Delta N = 0$), with identical retained isolate IDs. Meropenem is the only
+  out-of-panel molecule carrying data in this slice and creates no isolate splits.
 
 ---
 
@@ -225,9 +226,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 - **Action on Trip**: Non-blocking warning. Enforces cefoxitine precedence automatically in the
   group evaluation logic and logs discordant isolates in the audit ledger.
 - **Rouen Baseline Witness**: On Rouen 2024 eligible *S. aureus* ($N = 1\,100$ deduplicated isolates),
-  oxacilline is Rouen's routine clinical marker (1 093 tested: 84 R, 1 009 S, 7 NA; cefoxitine is
-  untested on *S. aureus*). Under the surrogate fallback rule, SARM prevalence is 84 / 1 093 (7.69 %).
-  Discordances on co-tested isolates = **0**.
+  oxacilline is Rouen's routine clinical marker (1 093 tested: 84 R, 1 009 S;
+  7 untested); cefoxitine has no tests on *S. aureus*. Under the surrogate fallback
+  rule, SARM prevalence is 84 / 1 093 (7.69 %). The co-tested denominator is 0,
+  so concordance and discordance are not assessable at this site.
 
 ---
 
