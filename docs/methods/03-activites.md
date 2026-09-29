@@ -121,7 +121,7 @@ sample that could not be attributed to a hospitalisation unit, and no amount of
 
 - **The intensive-care reassignment rule.** SPARES requires specialised
   intensive-care and continuous-monitoring units to be assigned to medicine,
-  surgery or paediatrics. This is a mapping decision and the document does not
+  surgery or paediatrics (SPARES p. 10). This is a mapping decision and the document does not
   say who applies it. If the site applies it, two sites will differ; if ORCHIDEE
   applies it, it needs a rule over local unit labels it cannot read.
 - **The 3 650 unit-less isolates.** Whether they are excluded, counted as an

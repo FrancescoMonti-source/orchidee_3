@@ -4,6 +4,7 @@ This document answers the SPARES methodology section by section, in the same
 order, so the two can be read side by side. Where ORCHIDEE does what SPARES
 does, the section says so and stops. Where it differs, the section states the
 difference, the reason, and the witness that measures it.
+<!-- citecheck: ok, describes how this document is organised; states nothing about the content of SPARES -->
 
 Source: `docs/Methodologie SPARES we need to reproduce and improve upon.pdf`
 and `docs/Expression de besoins SPF.pdf`.
@@ -56,7 +57,7 @@ is still open.
 
 Each section has the same four parts:
 
-1. **What SPARES says** — quoted, not paraphrased, so a reader can check it.
+1. **What SPARES says** — quoted, not paraphrased, so a reader can check it. <!-- citecheck: ok, names the section that quotes SPARES; the quotes carry their own pages -->
 2. **What ORCHIDEE does** — in enough detail to implement without choosing.
 3. **Decisions** — every choice where SPARES was silent, vague, or where ORCHIDEE decided to do things cleanly and differently. Each choice records the question, the chosen answer, the alternative, and its witness:
    - **Witness**: the empirical proof measured from real hospital data showing what difference the choice makes versus the alternative.

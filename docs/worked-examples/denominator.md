@@ -108,7 +108,9 @@ Modal admission hour is 08:00 (56 475 rows), modal discharge hour 15:00
 Note the degeneracy that makes the choice safe: if both timestamps were 00:00,
 occupancy hours would equal `(date_out − date_in) × 24`, so hours ÷ 24 would be
 *identically* the midnight-presence count. A date-only site gets exactly the
-number the SPARES definition would have given it — which is why the resolution
+midnight-presence count, which this document treats as the SPARES-comparable
+day count (SPARES p. 13 defines its days only as those declared in the SAE and
+states no counting rule) — which is why the resolution
 must be declared rather than inferred. See decision 04.9.
 
 ## 5. Union against hull

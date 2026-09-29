@@ -132,8 +132,11 @@ expressed per passage.
 
 When both timestamps are 00:00, occupancy hours equal
 `(date_out − date_in) × 24`, so hours ÷ 24 is *identically* the midnight-presence
-count. A site with date-only movements gets precisely the number the SPARES
-definition would have given it. Nothing breaks.
+count. A site with date-only movements gets precisely the midnight-presence count.
+SPARES defines its hospitalisation days only as those « telles que déclarées
+dans le cadre de la statistique annuelle des établissements de santé (SAE) »
+(SPARES p. 13) and does not state a counting rule, so treating midnight presence as
+the SPARES-comparable count is an assumption of this document. Nothing breaks.
 
 Which is why the resolution must be declared rather than inferred:
 

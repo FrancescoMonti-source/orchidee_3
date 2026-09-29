@@ -13,7 +13,7 @@ Only one of the four varies at run time.
 | **Window** | calendar, annual and monthly | **Parameter.** SPF requires monthly; comparability requires annual. Both are needed at once. |
 | **Grouping key** | patient (`PATID`) | **Decided**, as SPARES asks. `EVTID` is retained in the data so the stay-level witness stays computable. |
 | **Conflict rule** | `S <-> R` and `SFP <-> R` are major; `S <-> SFP` is minor; `ZIT` is read as `SFP` | **Decided**, following the SPF text. |
-| **Panel** | every antibiotic the site tests | **Decided, with a tripwire** asserting that the SPARES panel would keep the same isolates. |
+| **Panel** | every antibiotic the site tests | **Decided, with a tripwire** asserting that the 19-molecule comparison panel (the "SPARES panel" of the witnesses; the SPARES methodology, pp. 1-31, lists no panel of molecules) would keep the same isolates. |
 
 ## Why record all four when only one varies
 
@@ -37,8 +37,7 @@ comparison and decision 07.6. Site mappings remain unreviewed. Slice: Rouen,
   infections and a chronic infection into a single isolate. The undercount
   therefore falls on chronic and re-admitted patients, so it varies with case
   mix - which weakens the comparison between establishments that the
-  surveillance exists to provide. SPARES states its choice and never argues for
-  it.
+  surveillance exists to provide. SPARES states its choice (SPARES pp. 10, 16) and never argues for it.
 
 The historical case is the same mechanism: correcting one antibiotic's mapping
 removed 51 isolates from the deduplicated scope and moved the denominators of 20

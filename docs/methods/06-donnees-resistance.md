@@ -116,9 +116,11 @@ Unproven: **0 of 8**.
 ### 06.5 note: Phenotypes in deduplication
 In v2, BLSE and carbapenemase were treated as pseudo-molecules in the antibiotype vector.
 At Rouen in 2024, treating phenotypes as molecules changed only 10 isolates across all
-Enterobacterales (+4 *E. coli*, +3 *K. pneumoniae*). Adhering to strict SPARES
-specifications (comparing only genuine antibiotic molecules) avoids artificial
-discrepancies driven by delayed confirmatory testing. Phenotype-AST biological plausibility
+Enterobacterales (+4 *E. coli*, +3 *K. pneumoniae*). SPARES compares BLSE and
+carbapenemase in deduplication and reads a blank phenotype cell as absent, unlike
+a blank antibiotic cell, which is missing data (SPARES p. 11). ORCHIDEE therefore
+treats phenotypes as isolate attributes, not as molecules, which avoids
+artificial discrepancies driven by delayed confirmatory testing. Phenotype-AST biological plausibility
 is guarded by [tripwire TW-06.1](tripwire-register.md#tw-06-1), whose full trigger conditions
 and actions are defined in that register entry.
 
