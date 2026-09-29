@@ -18,19 +18,21 @@ Only one of the four varies at run time.
 ## Why record all four when only one varies
 
 Each one silently changes indicators that have no apparent relation to it.
-Measured on Rouen, *E. coli* / urines / 2024, 4963 isolates before
-deduplication:
+Remeasured on 2026-09-27 using the provisional v3 bundle, BLSE/carbapenemase
+comparison and decision 07.6. Site mappings remain unreviewed. Slice: Rouen,
+*E. coli* / urines / 2024, 4 963 isolates before deduplication:
 
-- **window**: annual keeps 4438 isolates, monthly keeps 4813 (+8.4 %). The
-  proportions move by 0.3 pp while every incidence density moves by 8.4 %.
-- **panel**: removing amoxicilline-acide clavulanique from the panel costs 66
-  isolates and moves ofloxacine up 0.12 pp while cotrimoxazole moves down
-  0.60 pp - two indicators that do not contain it, moving in opposite
-  directions.
-- **conflict rule**: reading `SFP <-> R` as major keeps 4438 isolates; reading
-  `ZIT` as never conflicting, which is what v2's `methods.md` decided, keeps
-  4428. On the denominator question alone, amoxicilline-acide clavulanique reads
-  39.88 % or 39.16 %.
+- **window**: annual keeps 4 441 isolates, monthly keeps 4 814 (+8.40 %).
+  AMC, OFX and SXT move by +0.27 to +0.34 pp; CTX moves by +1.14 pp.
+  Incidence density moves by +8.40 %.
+- **panel**: removing amoxicilline-acide clavulanique from the SPARES panel
+  costs 65 isolates and moves ofloxacine up 0.12 pp while cotrimoxazole moves
+  down 0.61 pp - two indicators that do not contain it, moving in opposite
+  directions. The full 35-column supported panel and SPARES panel retain the
+  same 4 441 isolate IDs.
+- **conflict rule**: reading `SFP <-> R` as major and `ZIT` as `SFP` keeps
+  4 441 isolates; treating `ZIT` as never conflicting keeps 4 431. AMC reads
+  39.23 % or 39.16 % under those interpretations, respectively.
 - **grouping key**: patient-and-year collapses one infection, repeated
   infections and a chronic infection into a single isolate. The undercount
   therefore falls on chronic and re-admitted patients, so it varies with case

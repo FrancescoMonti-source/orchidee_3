@@ -139,7 +139,7 @@ and interval-derived exposure (**355 246 JH**). Method and reproduction:
 |---|---|---|---|---|
 | 08.1 | Specimen scope deduplication | Specimen scope is an **input** to deduplication (per SPARES text) | Deduplicate globally, then filter specimen | *E. coli* blood cultures: **267 vs 226 (−41, −15.4 %)**; *S. aureus* blood cultures: **216 vs 139 (−77, −35.6 %)**, SARM bacteremias: **15 vs 10 (−33.3 %)**. `docs/worked-examples/indicators.md` |
 | 08.2 | Group evaluation alphabet | Ternary logic: `R` if any R; `Ø` if no molecule documented; `S` otherwise (`SFP` and `ZIT` count as `S`) | Require all molecules tested, or treat untested as missing | *E. coli* C3G: 218 R, 2221 S, 6 Ø. Universal coverage (99.8 %) despite single molecules tested at only 44.4–56.1 % |
-| 08.3 | SARM methicillin rule | Cefoxitine precedence over oxacilline in case of discordance (SPF Annexe 3 note 2) | Any R = R (naive group logic) | 84 SARM in eligible perimeter; 0 discordances at Rouen in 2024 (84 Fox-R / 1009 Fox-S / 7 NA). Guarded by tripwire |
+| 08.3 | SARM methicillin rule | Cefoxitine precedence over oxacilline in case of discordance (SPF Annexe 3 note 2) | Any R = R (naive group logic) | 84 SARM via oxacilline fallback; 84 OXA-R / 1 009 OXA-S / 7 untested; zero co-tested isolates, so concordance is not assessable. Guarded by tripwire |
 | 08.4 | Resistance proportion denominator | Count of **tested** isolates (`R + S`), strictly excluding the empty set `Ø` | Total isolates of the species (treating Ø as S) | For targeted/reflex antibiotics (e.g. fosfomycine cov 17.6 %): %R is **3.02 %** (13/431) vs diluted **0.53 %** (13/2445) |
 | 08.5 | Phenotype proportion denominator | Total deduplicated isolates of that taxon; absent phenotype = negative (`FALSE`) per SPARES Note Xa | Explicit-test-only denominator | *E. coli* BLSE: **7.61 %** (186 / 2445) under Note Xa vs **83.04 %** (186 / 224) if restricted to explicit test rows |
 | 08.6 | Testing coverage transparency | Materialised on every indicator row (`tested_isolates`, `total_isolates`, `coverage_pct`) | Suppressed or hidden | Ceftriaxone %R is 0.28 % but coverage is only 44.4 %; without coverage, selective cascade reporting creates false clinical confidence |
@@ -168,7 +168,7 @@ Feeding the specimen filter as an input to deduplication is required to prevent 
 ### 08.3 tripwire (TW-08.1) — SARM marker precedence and concordance
 
 **Statement**: Cefoxitine is prioritized as primary marker for *S. aureus* methicillin resistance; oxacilline acts as surrogate fallback when cefoxitine is untested. Co-tested isolates are monitored for discordant clinical interpretations (cataloged as `TW-08.1` in `tripwire-register.md`).
-**Today**: Rouen 2024 exports oxacilline on *S. aureus* (1 093 tested: 84 R, 1 009 S, 7 NA; cefoxitine is not in Rouen's routine *S. aureus* panel). Evaluating SARM via the surrogate fallback yields 84 SARM isolates (7.69 %). Discordances on co-tested isolates = **0**.
+**Today**: Rouen 2024 exports oxacilline on *S. aureus* (1 093 tested: 84 R, 1 009 S; 7 isolates untested). Cefoxitine is not in Rouen's routine *S. aureus* panel: zero isolates are co-tested, so concordance/discordance is **not assessable**. The oxacilline fallback yields 84 SARM isolates (7.69 %).
 
 The tripwire triggers if a site with co-tested isolates records `cefoxitine == "S"` and `oxacilline == "R"` (or vice versa), verifying that cefoxitine precedence is applied and alerting the audit ledger for review.
 

@@ -1,7 +1,9 @@
 # 07 - Deduplication
 
-Status: **under review** (issue #1). Seven decisions, six witnesses, one
-unproven. The witnesses of 07.1-07.5 predate the phenotype comparison; see Open.
+Status: **under review** (issue #1). Seven decisions, six witnesses, two
+unproven. Decisions 07.1, 07.4 and 07.5 have been remeasured with phenotype
+flags and decision 07.6 on the current provisional v3 bundle. Decision 07.2's
+historical rolling-window result is under audit; 07.3 remains unmeasured.
 
 ## What SPARES says
 
@@ -85,32 +87,30 @@ All witnesses are measured on real Rouen rows. Method and scripts:
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 07.1 | Window length | annual **and** monthly | one only | annual keeps 4438 isolates, monthly 4813 (+8.4 %); proportions move 0.3 pp while every incidence density moves 8.4 % |
-| 07.2 | Window shape | calendar (production) with 30-day rolling refractory reference | pure calendar only | 30d rolling refractory keeps 4 718 isolates on E. coli urines (+6.31 % vs annual), eliminating 1.97 % calendar month-end inflation and cross-year resetting; witness in `docs/evidence/dedup_window_30day_refractory_witness.md` |
+| 07.1 | Window length | annual **and** monthly | one only | annual keeps 4 441 isolates, monthly 4 814 (+8.40 %); resistance proportions move +0.27 to +1.14 pp and incidence density moves +8.40 % |
+| 07.2 | Window shape | calendar (production); rolling refractory comparison remains an experiment | pure calendar only | the historical 4 718 rolling result is not reproduced; current direct implementations keep 4 729 with phenotypes and 07.6, or 4 727 without phenotypes; exact historical rule is unknown |
 | 07.3 | Grouping key | patient | patient and stay | not measured; `EVTID` is retained so it stays computable. `unproven` |
-| 07.4 | Antibiotype panel | everything the site tests | the SPARES panel per species | identical at Rouen today (4438 both ways); guarded by a tripwire |
-| 07.5 | Conflict rule | `SFP <-> R` is major, per the SPARES text | `ZIT` never conflicts, as v2 decided | 4438 isolates against 4428 |
+| 07.4 | Antibiotype panel | everything the site tests | the SPARES panel per species | the 35-column supported panel and 19-molecule SPARES panel retain 4 441 isolates each, with identical retained IDs; guarded by a tripwire |
+| 07.5 | Conflict rule | `SFP <-> R` is major; `ZIT` is read as `SFP` | `ZIT` never conflicts | 4 441 vs 4 431 retained isolates; AMC %R is 39.23 % vs 39.16 % |
 | 07.6 | Comparison when antibiograms are incomplete | compare a new isolate with **every** isolate of a duplicate group | with the retained isolate only (the witness code until now); with the first isolate of the group; merge every chain of compatible isolates | Rouen 2022-2024: same retained isolates as the witness code in every group; comparing with the first isolate merges a major discrepancy in 1, 0 and 1 groups; `docs/worked-examples/incomplete-antibiotypes.md` |
 | 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `souche_id` | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
 
-Unproven: **1 of 7**.
+Unproven: **2 of 7**.
 
 ### 07.2 note
 
-A rolling refractory window is measured from the initial episode onset for that
-patient, not from 1 January. It is an ORCHIDEE experiment, not a European
-standard: EARS-Net defines no episode and keeps the first blood or CSF isolate
-per patient and pathogen in the calendar year (ECDC reporting protocol 2025,
-p. 22 and pp. 24-25); WHO GLASS keeps the first isolate per patient, specimen
-type and pathogen in the surveillance period, even if the resistance
-characteristics differ (GLASS manual 2023, section 9.5.1). The nearest published rule is Japan's JANIS,
-which removes repeats within 30 days but keeps an isolate whose resistance
-phenotype changed (Kajihara et al., PLoS ONE 2020;15(6):e0228234).
+The 30-day rolling comparison is an ORCHIDEE experiment. It differs from the
+EARS-Net calendar-year rule for the first blood or CSF isolate per patient and
+pathogen (ECDC reporting protocol 2025, pp. 22 and 24-25).
 
-The 30-day witness (`docs/evidence/dedup_window_30day_refractory_witness.md`)
-compares a new isolate with the retained isolates only, the comparison that 07.6
-replaces, and was measured on the v2 bundle without phenotypes. Its numbers must
-be re-measured under 07.6 and may change.
+The historical 4 718 count is not reproducible from the tracked witness
+scripts. It used a v2 bundle and a comparison rule that decision 07.6
+replaces. On the current provisional v3 bundle, the annual and monthly
+calendar baselines are 4 441 and 4 814. A direct implementation of the
+written rolling-window description yields 4 729 with phenotype flags and
+07.6, or 4 727 without phenotype flags. Neither reproduces 4 718. The
+historical boundary and group-reset rules are not recorded, so the rolling
+comparison remains under audit and does not establish a month-end effect.
 
 ### 07.3 note
 
@@ -123,8 +123,8 @@ it. ORCHIDEE follows the choice and records the objection.
 
 ### 07.4 tripwire (TW-07.1)
 
-**Statement**: the SPARES panel and the full panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
-**Today**: 4438 and 4438, *E. coli* / urines / 2024.
+**Statement**: the SPARES panel and the full supported panel retain the same isolates. (Cataloged as `TW-07.1` in `tripwire-register.md`).
+**Today**: 4 441 under each panel, with identical retained isolate IDs, *E. coli* / urines / 2024. The full panel has 35 supported columns; 21 have results in this slice.
 
 The check fails on the day a site starts testing a molecule that separates two
 antibiotypes which were identical before. That is the CLAVENTIN situation, which
@@ -194,18 +194,21 @@ collapses isolates with a major discrepancy. 4 039 was the number of distinct pa
 not the output of a rule. Issue #5 was opened on this premise.
 `docs/findings.md`, 2026-09-27.
 
-### Witnesses to re-measure
+### Witness status
 
-The witnesses of 07.1-07.5, and of `perimeter-ordering.md`,
-`screening-exclusion.md` and `unit-attribution.md`, were measured on the v2
-bundle, without comparing the BLSE and carbapenemase phenotypes that the source
-includes in deduplication, and with the comparison 07.6 replaces. They must be
-re-measured with the phenotype comparison and 07.6.
+Decisions 07.1, 07.4 and 07.5 were remeasured on 2026-09-27 against
+`outputs/rouen_stage2_2024/bundle_v3`, comparing BLSE and carbapenemase
+flags and using decision 07.6's all-members grouping. The 07.1, 07.4 and
+07.5 counts in this chapter and `docs/worked-examples/deduplication.md`
+reflect that run. The source bundle was built from raw files by the v2
+pipeline; the site mappings remain unreviewed, so these results are
+provisional.
 
-07.6 and 07.7 were measured on a provisional bundle that the v2 pipeline built
-from the raw files (`outputs/rouen_stage2_2024/build_manifest.txt` records the
-commit and the mappings). Which pipeline builds ORCHIDEE's data is not decided,
-and the v2 mappings are not reviewed, so those numbers are provisional too.
+The 07.2 rolling-window witness is under audit: no tracked script or exact
+historical boundary/group-reset rule reproduces its 4 718 count. Decision
+07.3 remains unmeasured. The witnesses in `perimeter-ordering.md`,
+`screening-exclusion.md` and `unit-attribution.md` also remain on the older
+baseline and have not been remeasured with phenotype comparison and 07.6.
 
 ### The source is incomplete
 

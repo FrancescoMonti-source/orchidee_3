@@ -70,7 +70,7 @@ table, calendar year 2024, SPARES-eligible perimeter
 | 04.3 | Comparability profile | `midnight_presence` derived in parallel | a single profile | same intervals, no second pipeline; per-sector ratio 0.988 to 1.020 |
 | 04.4 | Aggregation | only within one profile | free aggregation | the units are incommensurable; no number can be produced to defend the alternative |
 | 04.5 | Overlapping intervals | unioned per patient / stay / unit | convex hull of the episode | 2024 hull 365 887 against union 355 246: **−10 641 (3.0 %)**, 1 953 episodes |
-| 04.6 | Period grain | month, plus an independent annual run | annual only, or annual ÷ 12 | annual dedup keeps 4 438, monthly keeps 4 813 (**+8.4 %**) on *E. coli*/urines/2024 |
+| 04.6 | Period grain | month, plus an independent annual run | annual only, or annual ÷ 12 | annual dedup keeps 4 441, monthly keeps 4 814 (**+8.40 %**) on *E. coli*/urines/2024, remeasured with phenotype comparison and 07.6 |
 | 04.7 | Perimeter | one object, consumed by numerator and denominator | each stage selects independently | ConsoRes' own failure: SPARES numerator over whole-establishment denominator |
 | 04.8 | Admissions | establishment level only | stratified by sector | not measured. `unproven` |
 | 04.9 | Timestamp resolution | declared by the site, checked against the data | inferred silently | Rouen: **4.11 %** of `DATENT` and 4.08 % of `DATSORT` at exactly 00:00; peaks 08:00 and 15:00 |
