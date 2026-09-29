@@ -59,7 +59,7 @@ _Avoid_: using "SPARES" unqualified
 
 **SPARES method**:
 The published protocol SPARES defines — inclusion criteria (pp. 9-10),
-deduplication rule (pp. 10-11), denominators (p. 13), thesauri (pp. 27-29).
+deduplication rule (pp. 10-11), denominators (p. 13), thesauri (pp. 27-30).
 A document v3 can read and disagree with in the open.
 _Avoid_: the SPARES algorithm, the SPARES rules <!-- citecheck: ok, the Avoid line lists discouraged phrases and claims nothing; the definition above carries its pages -->
 
