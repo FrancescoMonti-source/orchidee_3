@@ -38,17 +38,25 @@ USER_AGENT = "citecheck/0.1 (Markdown citation checker; python-urllib)"
 OK_MARK = re.compile(r"<!--\s*citecheck:\s*ok\b")
 
 # C4 vocabulary. A clause makes a claim about a body when it uses one of these
-# words; it is located when it carries one of the LOCATOR forms. A journal
-# reference counts as a locator because C1 checks it.
+# English or French words; it is located when it carries one of the LOCATOR
+# forms. A journal reference counts as a locator because C1 checks it.
 CLAIM = re.compile(
-    r"\b(?:standards?|rules?|defin\w*|requir\w*|recommend\w*|mandat\w*|specif\w*|"
-    r"prescri\w*|stipulat\w*|according to|states?|says|keeps?|counts?|exclud\w*|"
-    r"includ\w*|guidelines?|protocols?|criteri\w*)\b",
+    r"\b(?:standards?|normes?|rules?|r[eè]gles?|defin\w*|d[eé]fin\w*|"
+    r"requir\w*|exig\w*|requi\w*|recommend\w*|recommand\w*|mandat\w*|"
+    r"impos\w*|oblig\w*|specif\w*|sp[eé]cifi\w*|prescri\w*|stipul\w*|"
+    r"according to|selon|d['’]apr[eè]s|conform[eé]ment à|states?|says|"
+    r"affirme\w*|indiqu\w*|pr[eé]cis\w*|pr[eé]voi\w*|pr[eé]vu\w*|d[eé]clar\w*|"
+    r"keeps?|retien\w*|conserv\w*|counts?|compt\w*|exclud\w*|exclu\w*|"
+    r"includ\w*|inclu\w*|guidelines?|protocols?|protocoles?|criteri\w*|"
+    r"crit[eè]res?|recommandations?|directives?|appliqu\w*|compren\w*|"
+    r"conten\w*|contien\w*|comport\w*|d[eé]cr\w*|pr[eé]conis\w*|"
+    r"consid[eè]r\w*|estime\w*|[eé]tabl\w*|vis[eé]\w*)\b",
     re.IGNORECASE,
 )
 LOCATOR = re.compile(
-    r"\bpp?\.\s?\d|§\s?\d|\b(?:[Ss]ection|[Tt]able|[Aa]nnexe?|[Aa]ppendix|[Ff]igure|"
-    r"[Ff]ig\.|[Cc]hapter|[Nn]ote)\s+[A-Z0-9][\w.]*"
+    r"\bpp?\.\s?\d|§\s?\d|\b(?:[Ss]ections?|[Tt]ables?|[Tt]ableaux?|"
+    r"[Cc]hapters?|[Cc]hapitres?|[Aa]nnex(?:e[s]?)?|[Aa]ppendix|[Aa]ppendices?|"
+    r"[Ff]igures?|[Ff]ig\.|[Nn]otes?)\s+[A-Z0-9][\w.]*"
     r"|\d+\s*\(\d+\)\s*:\s*e?\d+|\b10\.\d{4,9}/\S"
 )
 
@@ -168,7 +176,7 @@ def _request(url: str, method: str = "GET") -> urllib.request.Request:
 # -------------------------------------------------------------- markdown ----
 
 @dataclass
-class Unit:
+class MarkdownBlock:
     """A paragraph, list item, table row, heading or block quote."""
 
     kind: str
@@ -199,9 +207,9 @@ FENCE = re.compile(r"^\s*(```|~~~)")
 ITEM = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+")
 
 
-def parse_units(text: str) -> list[Unit]:
-    units: list[Unit] = []
-    current: Unit | None = None
+def parse_markdown_blocks(text: str) -> list[MarkdownBlock]:
+    units: list[MarkdownBlock] = []
+    current: MarkdownBlock | None = None
     heading, in_fence = "", False
 
     def close():
@@ -222,24 +230,24 @@ def parse_units(text: str) -> list[Unit]:
         if stripped.startswith("#"):
             close()
             heading = stripped.lstrip("#").strip()
-            units.append(Unit("heading", heading, [(number, heading)]))
+            units.append(MarkdownBlock("heading", heading, [(number, heading)]))
         elif stripped.startswith(">"):
             if current is None or current.kind != "quote":
                 close()
-                current = Unit("quote", heading)
+                current = MarkdownBlock("quote", heading)
             current.lines.append((number, stripped[1:].strip()))
         elif stripped.startswith("|"):
             close()
             if re.fullmatch(r"[|:\-\s]+", stripped) and units and units[-1].kind == "row":
                 units[-1].kind = "header"
-            units.append(Unit("row", heading, [(number, stripped)]))
+            units.append(MarkdownBlock("row", heading, [(number, stripped)]))
         elif ITEM.match(line):
             close()
-            current = Unit("item", heading, [(number, ITEM.sub("", line, count=1).strip())])
+            current = MarkdownBlock("item", heading, [(number, ITEM.sub("", line, count=1).strip())])
         else:
             if current is None or current.kind == "quote":
                 close()
-                current = Unit("para", heading)
+                current = MarkdownBlock("para", heading)
             current.lines.append((number, stripped))
     close()
     return units
@@ -282,9 +290,16 @@ def clauses(text: str, start: int, end: int):
     yield begin, end
 
 
-def fold(text: str) -> str:
-    """Letters and digits only, casefolded, accents kept: the form quotes are matched in."""
-    return "".join(c for c in unicodedata.normalize("NFKC", text).casefold() if c.isalnum())
+# Curly apostrophes and quotes count as straight ones; list bullets (the PDFs'
+# Symbol-font U+F0B7, or a Markdown "•") count as space.
+TYPOGRAPHIC = str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"',
+                             "": " ", "•": " "})
+
+
+def normalize_quote_text(text: str) -> str:
+    """Case and punctuation kept, whitespace dropped: pdftotext wraps lines and
+    sometimes loses a space between words."""
+    return "".join(unicodedata.normalize("NFKC", text).translate(TYPOGRAPHIC).split())
 
 
 def plain(text: str) -> str:
@@ -299,13 +314,16 @@ def check_document(path: str, text: str, added: set[int] | None, config: Config,
                    net: Net, root: Path) -> list[Finding]:
     """All findings for one Markdown document. `added` is the set of added line
     numbers, or None to check every line."""
-    units = parse_units(text)
+    units = parse_markdown_blocks(text)
     found: list[Finding] = []
     for i, unit in enumerate(units):
-        if OK_MARK.search(unit.text) or not unit.touches(added):
+        if OK_MARK.search(unit.text):
             continue
         if unit.kind == "quote":
-            found += check_quote(path, units, i, config, root)
+            if quote_context_touches(units, i, added):
+                found += check_quote(path, units, i, config, root)
+            continue
+        if not unit.touches(added):
             continue
         if unit.kind == "heading":
             continue
@@ -320,7 +338,7 @@ def check_document(path: str, text: str, added: set[int] | None, config: Config,
 REFERENCE_SECTION = re.compile(r"reference|bibliograph|sources", re.IGNORECASE)
 
 
-def check_attributions(path: str, unit: Unit, added, config: Config) -> list[Finding]:
+def check_attributions(path: str, unit: MarkdownBlock, added, config: Config) -> list[Finding]:
     """C4: a clause naming a watched body and making a claim needs a locator."""
     body = re.compile(r"(?<![\w-])(" + "|".join(map(re.escape, config.bodies)) + r")(?![\w-])")
     text = mask(unit.text, COMMENT, CODE_SPAN, URL.pattern, r"\*")
@@ -342,7 +360,7 @@ def check_attributions(path: str, unit: Unit, added, config: Config) -> list[Fin
     return found
 
 
-def check_references(path: str, unit: Unit, added, net: Net) -> list[Finding]:
+def check_references(path: str, unit: MarkdownBlock, added, net: Net) -> list[Finding]:
     """C1: a reference with a DOI or a volume(issue): page must match Crossref."""
     text = mask(unit.text, COMMENT, CODE_SPAN, QUOTED)
     spans = [(0, len(text))] if unit.kind in ("item", "row") else list(sentences(text))
@@ -429,7 +447,7 @@ def describe(record: dict) -> str:
             f"{record.get('volume', '?')}({record.get('issue', '?')}): {page}, doi:{record.get('DOI')}")
 
 
-def check_links(path: str, unit: Unit, added, net: Net) -> list[Finding]:
+def check_links(path: str, unit: MarkdownBlock, added, net: Net) -> list[Finding]:
     """C2: a link must resolve. Only a vanished page (404, 410) blocks."""
     found = []
     text = mask(unit.text, COMMENT)
@@ -446,16 +464,30 @@ def check_links(path: str, unit: Unit, added, net: Net) -> list[Finding]:
     return found
 
 
-def check_quote(path: str, units: list[Unit], i: int, config: Config, root: Path) -> list[Finding]:
+def quote_context_touches(units: list[MarkdownBlock], i: int, added: set[int] | None) -> bool:
+    """Recheck a quote when it or its attribution context has changed."""
+    if added is None or units[i].touches(added):
+        return True
+    for j in (i - 1, i + 1):
+        if 0 <= j < len(units) and units[j].kind != "heading" and units[j].touches(added):
+            return True
+    heading = next((unit for unit in reversed(units[:i]) if unit.kind == "heading"), None)
+    return heading is not None and heading.touches(added)
+
+
+def check_quote(path: str, units: list[MarkdownBlock], i: int, config: Config, root: Path) -> list[Finding]:
     """C3: a block quote attributed to a registered source must be in its PDF.
 
     The source is an alias followed by a page (`SPARES p. 16`) in the quote or
     the unit just before or after it; failing that, an alias in the heading
-    above, with the page taken from a `(page 16)` inside the quote if there is
-    one. Unattributed quotes are not checked."""
+    above, with the page taken from that heading or a `(page 16)` inside the
+    quote. Unattributed quotes are not checked."""
     quote = units[i]
     source, pages = None, None
     neighbours = [quote] + [units[j] for j in (i + 1, i - 1) if 0 <= j < len(units) and units[j].kind != "heading"]
+    heading = next((unit for unit in reversed(units[:i]) if unit.kind == "heading"), None)
+    if heading:
+        neighbours.append(heading)
     for s in config.sources:
         alias = "|".join(map(re.escape, s.aliases))
         page_ref = re.compile(rf"(?<![\w-])(?:{alias})(?![\w-])[^.\n]{{0,40}}?{PAGE}")
@@ -478,20 +510,21 @@ def check_quote(path: str, units: list[Unit], i: int, config: Config, root: Path
         return [Finding(path, line, "warning", "C3", pdf_pages)]
 
     body = IN_QUOTE_PAGE.sub(" ", " ".join(s for _, s in quote.lines if not re.match(r"^(?:—|--)", s)))
-    parts = [p for p in re.split(r"\[[^\]]*\]|…|\.\.\.", body) if len(fold(p)) >= 12]
-    folded = [fold(p) for p in pdf_pages]
+    parts = [p for p in re.split(r"\[[^\]]*\]|…|\.\.\.", body)
+             if sum(c.isalnum() for c in normalize_quote_text(p)) >= 12]
+    normalized_pages = [normalize_quote_text(page) for page in pdf_pages]
     where = source.name
     if pages:
         where += f" p. {pages[0]}" if pages[0] == pages[1] else f" pp. {pages[0]}-{pages[1]}"
     for part in parts:
-        fragment = fold(part)
+        fragment = normalize_quote_text(part)
         if pages:
-            window = "".join(folded[pages[0] - 1:pages[1]])
+            window = "".join(normalized_pages[pages[0] - 1:pages[1]])
             if fragment in window:
                 continue
-        elif fragment in "".join(folded):
+        elif fragment in "".join(normalized_pages):
             continue
-        elsewhere = [n for n, p in enumerate(folded, 1) if fragment in p]
+        elsewhere = [n for n, page in enumerate(normalized_pages, 1) if fragment in page]
         hint = f"; it is on p. {elsewhere[0]}" if elsewhere else ""
         return [Finding(path, line, "error", "C3",
                         f"quoted text not found in {where}{hint}: \"{_excerpt(part, 70)}\"")]

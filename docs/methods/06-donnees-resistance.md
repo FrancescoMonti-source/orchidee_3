@@ -12,7 +12,7 @@ Status: **settled**. Eight decisions, seven witnesses, one tripwire. Zero unprov
 > de colonisation, portage, dépistage). (p. 15)
 
 > Chaque souche bactérienne d'intérêt est caractérisée par : un patient source [...],
-> une date de prélèvement et un site de prélèvement, un antibiotype, un phénotype de
+> une date de prélèvement et un site de prélèvement [...] un antibiotype, un phénotype de
 > résistance pour les Enterobacterales (BLSE, carbapénémase). (p. 14)
 
 > Pour chaque molécule testée, le résultat S (Sensible), SFP (sensible à forte
