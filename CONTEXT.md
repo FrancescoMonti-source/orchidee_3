@@ -50,20 +50,21 @@ _Avoid_: ORCHIDEE alone for this project (say v3), or v3 for the network
 
 **SPARES** (Surveillance et Prévention de l'Antibiorésistance en Établissements
 de Santé):
-The national mission, run by a consortium of CPias and CRAtb, that surveils
-antibiotic consumption and bacterial resistance in health establishments. It
-has its own method, which among other things defines a perimeter; the source
+The national mission, run by a consortium of CPias and CRAtb (SPARES p. 2), that
+surveils antibiotic consumption and bacterial resistance in health
+establishments (SPARES p. 8). It has its own method, which among other things
+defines a perimeter (SPARES pp. 9-10); the source
 documents use the bare word for all three, so use the qualified forms below.
 _Avoid_: using "SPARES" unqualified
 
 **SPARES method**:
-The published protocol SPARES defines — inclusion criteria, deduplication rule,
-denominators, thesauri. A document v3 can read and disagree with in the
-open.
-_Avoid_: the SPARES algorithm, the SPARES rules
+The published protocol SPARES defines — inclusion criteria (pp. 9-10),
+deduplication rule (pp. 10-11), denominators (p. 13), thesauri (pp. 27-29).
+A document v3 can read and disagree with in the open.
+_Avoid_: the SPARES algorithm, the SPARES rules <!-- citecheck: ok, the Avoid line lists discouraged phrases and claims nothing; the definition above carries its pages -->
 
 **SPARES perimeter**:
-The subset of hospital activity the SPARES method admits: complete and weekly
+The subset of hospital activity the SPARES method admits (SPARES pp. 9-10): complete and weekly
 hospitalisation across the listed sectors, excluding séances, venues,
 consultations, passages and HAD. One named perimeter among several v3 may
 compute, never the only one.
@@ -221,8 +222,8 @@ result of SFP counts as S.
 
 **ZIT** (zone d'incertitude technique):
 A CA-SFM measurement caveat meaning the antibiogram could not be read reliably.
-A statement about the test, not about the organism. Neither the SPF requirements
-nor the SPARES methodology mentions it; only the CA-SFM reference and hospital
+A statement about the test, not about the organism. Neither the SPF requirements (searched in full, pp. 1-21) nor the SPARES
+methodology (searched in full, pp. 1-31) mentions it; only the CA-SFM reference and hospital
 exports use it. Treating it as SFP is a v3 decision that no external
 document prescribes.
 _Avoid_: treating ZIT and SFP as the same concept without recording the choice
@@ -250,7 +251,8 @@ _Avoid_: activity, volume, JH
 The rule that converts occupied time into exposure. v3's canonical profile
 measures occupancy hours and expresses them in days; midnight presence counts
 the calendar boundaries a stay crosses, and is derived from the same intervals
-for comparability with what SPARES publishes. Two figures computed under
+for comparability with the hospitalisation days SPARES divides by, which it takes
+from the SAE (SPARES p. 13). Two figures computed under
 different profiles cannot be added: the sum has no unit.
 _Avoid_: counting method, convention
 
@@ -280,7 +282,7 @@ _Avoid_: unit mapping (when sample attribution is meant), sample location
 An isolate from a diagnostic sample drawn in the emergency department, usually
 before any admission, so it cannot have been acquired in a ward. SPARES
 attributes a sample to the unit at the time of sampling and excludes emergency
-activity, so it drops these isolates; v3 keeps them. Whether they are linked to
+activity (SPARES pp. 10, 15), so on a literal reading it drops these isolates; v3 keeps them. Whether they are linked to
 the stay that follows or kept as their own stratum is open (chapter 05).
 _Avoid_: pre-admission linkage (names one of the open options)
 
@@ -292,7 +294,7 @@ _Avoid_: dynamic structure, live hierarchy
 
 **SAE** (Statistique annuelle des établissements de santé):
 The annual administrative declaration that SPARES names as the source of
-hospitalisation days. v3 does not use it: the figure comes from the
+hospitalisation days (SPARES p. 13). v3 does not use it: the figure comes from the
 hospital administration, cannot be reproduced from the site's own data, and is
 not restricted to the activity SPARES admits. v3 measures exposure from
 the site's stay data instead.

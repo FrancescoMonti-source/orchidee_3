@@ -8,10 +8,10 @@ Witness for decisions 08.1 through 08.8 in `docs/methods/08-indicateurs.md`.
 
 ## 1. The specimen deduplication hazard: blood cultures (08.1)
 
-Both SPARES and SPF specify resistance indicators for **all diagnostic samples pooled** and separately for **blood cultures** (*hémocultures* / bactériémies).
+Both SPARES (pp. 8, 16) and SPF (p. 4) specify resistance indicators for **all diagnostic samples pooled** and separately for **blood cultures** (*hémocultures* / bactériémies).
 
-SPARES explicitly defines the deduplication scope for specimen-specific analyses:
-> *« pour un même type de prélèvement à visée diagnostique [...] un seul prélèvement (le plus ancien) par type de prélèvement et par patient est conservé »*
+SPARES defines a duplicate within « un même type de prélèvement à visée diagnostique » (p. 10) and explicitly defines the deduplication scope for specimen-specific analyses (SPARES p. 16):
+> analyse des résistances par type de prélèvement : les doublons « prélèvement » sont exclus, un seul prélèvement (le plus ancien) par type de prélèvement et par patient, est conservé
 
 This makes the specimen scope an **input to deduplication**. If an implementation instead runs global deduplication across all sample types first, and then filters the resulting table on `naturepvt == "hemoculture"`, legitimate bacteremias are erased:
 

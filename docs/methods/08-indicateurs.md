@@ -92,7 +92,7 @@ dropped silently. It represents the *observed absence of testing*.
 
 ### 3. Specimen Scopes as Inputs to Deduplication
 
-In accordance with SPARES methodology and the general non-monotone rule established in
+SPARES deduplicates within each sample type when the analysis is by sample type (pp. 10 and 16 of the SPARES methodology), in line with the general non-monotone rule established in
 `07-dedoublonnage.md`:
 
 > **Any selection on isolates is an input to deduplication, never a filter on its output.**
@@ -159,9 +159,9 @@ sputum sample on day 1 and develops bacteremia on day 4 will have the day 1 samp
 oldest-sample rule. Post-filtering on blood cultures discards the representative, erasing the
 hospital-acquired bacteremia entirely.
 
-This explains why SPARES explicitly prescribed:
-> *« analyse des résistances par type de prélèvement : les doublons « prélèvement » sont exclus,
-> un seul prélèvement (le plus ancien) par type de prélèvement et par patient, est conservé »*
+This explains why SPARES explicitly prescribed (SPARES p. 16):
+> analyse des résistances par type de prélèvement : les doublons « prélèvement » sont exclus,
+> un seul prélèvement (le plus ancien) par type de prélèvement et par patient, est conservé
 
 Feeding the specimen filter as an input to deduplication is required to prevent preemption.
 

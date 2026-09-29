@@ -14,7 +14,7 @@ patient-days across the entire hospital group without activity filtering.
 
 However, the SPARES method restricts surveillance to complete and weekly
 hospitalisation within designated clinical sectors (excluding ambulatory care,
-sessions, consultations, emergency passages, and home care). ORCHIDEE calculates
+sessions, consultations, emergency passages, and home care; SPARES pp. 9-10). ORCHIDEE calculates
 exposure directly from hospitalisation movement intervals within that defined
 perimeter (355 246 patient-days at Rouen in 2024). Dividing by the unfiltered
 SAE understates all incidence densities in ConsoRes by **40 %** (`Finding 16`).

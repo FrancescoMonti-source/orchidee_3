@@ -2,7 +2,7 @@
 
 Salut,
 
-Pour le calcul des indicateurs de résistance SPARES dans ORCHIDEE, on doit filtrer strictement les prélèvements de **dépistage de portage** pour ne conserver que les prélèvements **diagnostiques** (infections).
+Pour le calcul des indicateurs de résistance SPARES (SPARES p. 15) dans ORCHIDEE, on doit filtrer strictement les prélèvements de **dépistage de portage** pour ne conserver que les prélèvements **diagnostiques** (infections).
 
 En regardant les données brutes GLIMS (`bact22_24`), on a calé une règle de tri automatique. Peux-tu nous valider les 4 points suivants ?
 
@@ -34,7 +34,7 @@ Dans les données, `BGSTA_R` est utilisé dans deux contextes très différents 
 
 ### 3. Le dépistage prénatal du Streptocoque B (`BGSTRB`)
 On a un volume important de `BGSTRB` (écouvillons vaginaux prénataux).
-- En pratique pour la surveillance des infections : considères-tu qu'il s'agit d'un **dépistage de portage asymptomatique** (à exclure de SPARES) ?
+- En pratique pour la surveillance des infections : considères-tu qu'il s'agit d'un **dépistage de portage asymptomatique** (à exclure de SPARES, p. 15) ?
 - Ou doit-on le maintenir comme du **diagnostique** gynécologique ?
 
 ---
