@@ -37,10 +37,10 @@ A patient admitted to an eligible unit is sampled on day 1 (e.g. urine, superfic
 
 ## 2. Antibiotic group evaluation and testing coverage cascades (08.2, 08.4, 08.7)
 
-SPF specifies indicators aggregated by **antibiotic group** (C3G, Fluoroquinolones, Carbapenems) evaluated using three-valued logic:
+SPF specifies indicators aggregated by **antibiotic group** (C3G, Fluoroquinolones, Carbapenems) evaluated using three-valued logic (SPF pp. 2-3, table and footnote 1):
 - **`R`**: At least one molecule in the group is reported `R`.
 - **`Ø` (Empty set)**: No molecule in the group is documented (all untested or missing).
-- **`S`**: At least one molecule is documented and none is `R` (`SFP` and `ZIT` count as `S`).
+- **`S`**: At least one molecule is documented and none is `R` (`SFP` counts as `S`, SPF p. 2 footnote 1; `ZIT` also counts as `S` by ORCHIDEE's own decision, since SPF does not mention it).
 
 Measured on *E. coli*, 2024, eligible perimeter ($N = 2\,445$ deduplicated isolates):
 
@@ -96,10 +96,10 @@ Treating absent phenotype tests as missing data ($NA$) inflates BLSE rates by a 
 
 ## 4. SARM methicillin rule and laboratory surrogate handling (08.3)
 
-For *S. aureus* methicillin resistance (SARM), SPF Annexe 3 footnote 2 establishes the marker precedence:
-> *« En cas de discordance entre les résultats céfoxitine et oxacilline, le résultat de la céfoxitine est conservé. »*
+For *S. aureus* methicillin resistance (SARM), footnote 2 of the SPF table (SPF p. 3) establishes the marker precedence:
+> En cas de discordance entre les résultats cefoxitine et oxacilline, le résultat de la cefoxitine est conservé.
 
-Under EUCAST and French laboratory guidelines, cefoxitine is the preferred phenotypic surrogate for *mecA/mecC* resistance, but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule:
+In CA-SFM 2025 (p. 72), methicillin resistance in *S. aureus* is screened with a cefoxitine disc, but clinical laboratories may export oxacilline depending on local testing panels and LIS configurations. ORCHIDEE enforces the SPF rule (SPF p. 3, footnote 2):
 1. **Primary marker**: Cefoxitine interpretation if tested.
 2. **Surrogate fallback**: Oxacilline interpretation if cefoxitine is untested.
 3. **Tripwire verification (TW-08.1)**: If an isolate is co-tested for both, cefoxitine takes precedence and any discordance is flagged for clinical review.

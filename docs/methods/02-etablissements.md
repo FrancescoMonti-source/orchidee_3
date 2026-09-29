@@ -19,9 +19,12 @@ Status: **settled**. Four decisions, four witnesses, zero unproven. Zero open.
 
 ## What SPF asks
 
-SPF requires indicators at the establishment level, allowing comparison and aggregation
-across health establishments nationally, and raises the perimeter of attached residential
-facilities as an open inquiry.
+SPF asks for resistance indicators stratified by activity sector and by department of the
+establishment (SPF p. 5), and for stratification by establishment among the medium-term
+objectives (SPF p. 7). It asks for consumption indicators by establishment and by
+department (SPF p. 6), and states the aim of comparing indicators within the territory
+(SPF p. 5). It raises whether residential facilities (EHPAD) attached to hospitals are in
+the perimeter as an open question (SPF p. 6).
 
 ---
 

@@ -15,7 +15,7 @@ which is what v2 publishes. 124 169 movement rows fall in eligible UFs.
 | 2024 denominator | patient-days |
 |---|---|
 | ORCHIDEE, derived from intervals, SPARES perimeter | **355 246** |
-| SAE, as declared to ConsoRes | **589 397** |
+| ConsoRes denominator, presumed SAE-declared days (ConsoRes report p. 15; SPARES p. 13) | **589 397** |
 | ratio | **×1.66** |
 
 The SAE figure exceeds ORCHIDEE's *unfiltered* exposure table (564 968), so it
