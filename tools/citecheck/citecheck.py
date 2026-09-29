@@ -20,8 +20,10 @@ from __future__ import annotations
 import argparse
 import difflib
 import fnmatch
+import functools
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -536,12 +538,21 @@ IN_QUOTE_PAGE = re.compile(rf"\([^()]*?{PAGE}[^()]*\)")
 _PDF_CACHE: dict[Path, list[str] | str] = {}
 
 
+@functools.cache
 def pdftotext_path() -> str | None:
-    for candidate in ("pdftotext", "C:/Program Files/Git/mingw64/bin/pdftotext.exe"):
-        found = shutil.which(candidate)
-        if found:
-            return found
-    return None
+    """The first poppler pdftotext on PATH, as CI uses; else any pdftotext.
+
+    Git for Windows ships xpdf's pdftotext, which lays out some text
+    differently (a footnote marker, for one), so a quote can pass locally with
+    xpdf and fail in CI with poppler."""
+    found = [shutil.which("pdftotext", path=d) for d in os.environ.get("PATH", "").split(os.pathsep)]
+    found.append(shutil.which("C:/Program Files/Git/mingw64/bin/pdftotext.exe"))
+    found = list(dict.fromkeys(f for f in found if f))
+    for tool in found:
+        version = subprocess.run([tool, "-v"], capture_output=True, text=True, errors="replace")
+        if "xpdf" not in (version.stdout + version.stderr).lower():
+            return tool
+    return found[0] if found else None
 
 
 def read_pdf(pdf: Path) -> list[str] | str:

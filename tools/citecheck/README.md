@@ -79,5 +79,7 @@ they run offline. After adding a test that needs a new Crossref answer, record
 it with `CITECHECK_RECORD=1` set. Crossref answers are cached in
 `.git/citecheck-cache` so that the hook stays fast.
 
-Requirements: Python 3.11 or newer (standard library only), and `pdftotext`
-(poppler; shipped with Git for Windows) for C3.
+Requirements: Python 3.11 or newer (standard library only), and poppler's
+`pdftotext` for C3, as in CI (`winget install oschwartz10612.Poppler` on
+Windows). Git for Windows ships xpdf's `pdftotext`, which lays out some PDFs
+differently; C3 falls back to it only when poppler is not on PATH.
