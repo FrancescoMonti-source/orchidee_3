@@ -14,10 +14,10 @@ Status: **method decisions settled**. Eight decisions, eight witnesses, three tr
 > des UF utilisée par l'administration, la pharmacie et le laboratoire afin de
 > relier ces informations entre elles lors de l'analyse des résultats. (Page 12)
 
-> a : les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et
-> Pseudomonas doivent être renseignés en cas de positivité et après vérification. Une
-> case vide est considérée comme une absence de phénotype de résistance (et non comme
-> une donnée manquante). (p. 31)
+> les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et Pseudomonas
+> doivent être renseignés en cas de positivité et après vérification. Une case vide est
+> considérée comme une absence de phénotype de résistance (et non comme une donnée
+> manquante). (p. 31)
 
 ---
 

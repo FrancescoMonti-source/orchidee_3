@@ -24,10 +24,10 @@ Status: **settled**. Eight decisions, seven witnesses, one tripwire. Zero unprov
 > bêta-lactamases à spectre étendu (BLSE) et de carbapénèmase sont à renseigner après
 > vérification du phénotype. (p. 15)
 
-> a : les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et
-> Pseudomonas doivent être renseignés en cas de positivité et après vérification. Une
-> case vide est considérée comme une absence de phénotype de résistance (et non comme
-> une donnée manquante). (p. 31)
+> les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et Pseudomonas
+> doivent être renseignés en cas de positivité et après vérification. Une case vide est
+> considérée comme une absence de phénotype de résistance (et non comme une donnée
+> manquante). (p. 31)
 
 The last passage is footnote *a* of the variable dictionary (Annexe 6, p. 31), attached
 to the BLSE and Carbapénémase rows. These docs call it **Note Xa**. The two pages

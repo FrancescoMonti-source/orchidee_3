@@ -15,10 +15,10 @@ Status: **settled**. Eight decisions, eight witnesses, one tripwire. Zero unprov
 > • analyse globale des résistances tous types de prélèvements confondus : seul un
 > prélèvement par patient est conservé, le plus ancien quel que soit le type de prélèvement.
 
-> a : les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et
-> Pseudomonas doivent être renseignés en cas de positivité et après vérification. Une
-> case vide est considérée comme une absence de phénotype de résistance (et non comme
-> une donnée manquante). (p. 31)
+> les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et Pseudomonas
+> doivent être renseignés en cas de positivité et après vérification. Une case vide est
+> considérée comme une absence de phénotype de résistance (et non comme une donnée
+> manquante). (p. 31)
 
 ---
 
