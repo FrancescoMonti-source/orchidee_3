@@ -34,8 +34,12 @@ In French medical biology, `"Recherche de [X]"` is the universal order naming co
 
 ## 2. Phenotype absent-signal validity (SPARES Note Xa)
 
-SPARES specifies that Enterobacterales isolates are characterized by resistance phenotypes (BLSE, carbapenemase), noting (Note Xa):
-> *"En l'absence de mention d'un phénotype de résistance BLSE ou carbapénémase, celui-ci est considéré comme négatif."*
+SPARES characterises each isolate by, among other things, a resistance phenotype "pour les Enterobacterales (BLSE, carbapénémase)" (p. 14), extends the recording of BLSE and carbapenemase results to Pseudomonas (p. 15), and states the absent-signal rule in footnote *a* of its variable dictionary (Annexe 6, p. 31), which these docs call Note Xa:
+
+> les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et Pseudomonas
+> doivent être renseignés en cas de positivité et après vérification. Une case vide est
+> considérée comme une absence de phénotype de résistance (et non comme une donnée
+> manquante). (p. 31)
 
 We tested whether an absent phenotype signal in raw LIS exports reliably indicates a negative phenotype, or whether it reflects missing data.
 

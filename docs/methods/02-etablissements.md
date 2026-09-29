@@ -6,12 +6,14 @@ Status: **settled**. Four decisions, four witnesses, zero unproven. Zero open.
 
 ## What SPARES says
 
-> Sont inclus tous les établissements de santé publics et privés ayant une activité
-> d'hospitalisation complète et/ou d'hospitalisation de semaine, ainsi que les EHPAD
-> disposant d'une pharmacie à usage intérieur (PUI).
->
-> Sont exclus : les structures d'hospitalisation à domicile (HAD), les centres de
-> dialyse ambulatoire, les maisons d'enfants à caractère sanitaire spécialisé (MECSS).
+> Tous les établissements de santé ayant une activité d'hospitalisation complète et/ou
+> d'hospitalisation de semaine ainsi que les EHPAD comportant une pharmacie à usage
+> intérieur (PUI) sont inclus dans la surveillance (voir liste des établissements en
+> annexe 2). (p. 9)
+
+> Les établissements de santé de type maison d'enfant à caractère sanitaire et social
+> (MECSS), les établissements d'hospitalisation à domicile (HAD) et les établissements
+> de dialyse ambulatoire ne sont pas concernés par la surveillance SPARES [...]. (p. 9)
 
 ---
 

@@ -12,14 +12,14 @@ Status: **settled**. Six decisions, four witnesses, two unproven.
 > Réanimation médicale et chirurgicale [...] Pédiatrie [...]
 > Gynécologie/obstétrique [...] Soins de suite et de réadaptation / soins
 > médicaux et de réadaptation (adultes), Soins de longue durée (adultes),
-> Psychiatrie (adultes).
+> Psychiatrie (adultes) [...]
 
 > Les activités exclues de la surveillance sont les activités ne correspondant
 > pas à une hospitalisation complète ou de semaine en établissement de santé :
-> la rétrocession externe, les venues (hospitalisation de jour ou de nuit,
-> anesthésie), les séances (traitements et cures ambulatoires : chimiothérapie,
-> radiothérapie ...), les journées de prise en charge (hospitalisation à
-> domicile…), les consultations, les passages (urgences), les unités de
+> La rétrocession externe, Les venues (hospitalisation de jour ou de nuit,
+> anesthésie), Les séances (traitements et cures ambulatoires : chimiothérapie,
+> radiothérapie ...), Les journées de prise en charge (hospitalisation à
+> domicile…), Les consultations, Les passages (urgences), Les unités de
 > consultations et soins ambulatoires pour les personnes détenues (UCSA).
 
 > La dispensation d'antibiotiques et la réalisation de prélèvements dans les

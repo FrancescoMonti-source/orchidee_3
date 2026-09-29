@@ -1,0 +1,34 @@
+# Configuration for tools/citecheck (see tools/citecheck/README.md).
+# Paths are relative to the repository root. `include` uses fnmatch patterns,
+# where * also matches /.
+
+include = ["docs/*.md", "CONTEXT.md"]
+
+# C4: a clause that names one of these and makes a claim needs a locator.
+bodies = [
+  "EARS-Net", "ECDC", "HAI-Net", "GLASS", "ONERBA", "SPARES", "ConsoRes", "SPF",
+  "CLSI", "EUCAST", "CA-SFM", "NHSN", "JANIS", "ESPAUR",
+]
+
+# C3: block quotes attributed to one of these aliases are searched in the PDF.
+# Page numbers are physical PDF pages.
+
+[[source]]
+name = "SPARES"
+aliases = ["SPARES"]
+pdf = "docs/Methodologie SPARES we need to reproduce and improve upon.pdf"
+
+[[source]]
+name = "SPF"
+aliases = ["SPF", "Santé publique France"]
+pdf = "docs/Expression de besoins SPF.pdf"
+
+[[source]]
+name = "CA-SFM 2025"
+aliases = ["CA-SFM"]
+pdf = "docs/Rouen/CASFM2025_V1.1.pdf"
+
+[[source]]
+name = "GLASS manual 2023"
+aliases = ["GLASS manual", "GLASS"]
+pdf = "docs/GLASS manual for antimicrobial resistance surveillance in common bacteria causing human infection.pdf"

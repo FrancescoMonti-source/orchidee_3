@@ -11,7 +11,7 @@ ORCHIDEE V3 establishes a transparent, national-level antimicrobial resistance (
 
 1. **Vocabulary Discipline**: Consult `CONTEXT.md` before naming concepts. Never use "strain" when an isolate or counted bacterial population is meant.
 2. **Selection Precedes Deduplication**: Any selection on isolates (specimen type, clinical perimeter, diagnostic scope) is an *input* to deduplication, never a post-filter on deduplicated outputs (`ADR-0004`).
-3. **Enzymatic Boundary for Note Xa**: SPARES Note Xa (absent signal = negative, denominator = species total) applies *strictly* to enzymatic reflex phenotypes (BLSE and carbapenemases in Enterobacterales). Antibiogram molecules (e.g. vancomycin in *E. faecium*) divide strictly by tested isolates ($n / N_{\text{tested}}$) (`ADR-0005`).
+3. **Enzymatic Boundary for Note Xa**: SPARES Note Xa (absent signal = negative, hence denominator = species total) applies *strictly* to enzymatic reflex phenotypes: BLSE and carbapenemases in Enterobacterales and Pseudomonas (SPARES p. 15 and Annexe 6 footnote *a*, p. 31; p. 14 names Enterobacterales only). Antibiogram molecules (e.g. vancomycin in *E. faecium*) divide strictly by tested isolates ($n / N_{\text{tested}}$) (`ADR-0005`).
 4. **SARM Precedence**: Cefoxitine is the primary methicillin-resistance marker; oxacilline is the surrogate fallback. Discordances are monitored via `TW-08.1` (`08-indicateurs.md`).
 5. **Emergency Pre-Admission Linkage**: Blood cultures drawn in Emergency (TA 10) link to an acute inpatient stay if admitted within 24 hours, attributed to the initial admitting unit (`ADR-0009`).
 6. **No Database Cell Suppression**: Indicator tables use tall strata carrying full numerator, denominator, and rate; presentation masking is strictly a UI concern (`ADR-0008`).
@@ -24,6 +24,10 @@ ORCHIDEE V3 establishes a transparent, national-level antimicrobial resistance (
 - **Tripwire Register**: [`docs/methods/tripwire-register.md`](docs/methods/tripwire-register.md) (TW-04.1 to TW-08.1)
 - **Findings Log**: [`docs/findings.md`](docs/findings.md) (append-only discovery record)
 - **Worked Examples & Code**: [`docs/worked-examples/`](docs/worked-examples/)
+
+## Citation Check
+
+Every citation in the docs must be checkable. A pre-commit hook (`tools/citecheck/`) blocks added lines where a reference disagrees with Crossref, a block quote is not verbatim in its source PDF, or a claim attributed to a named body (EARS-Net, SPARES, SPF...) has no page or section. Enable it once per clone with `git config core.hooksPath .githooks`. Do not bypass it with `--no-verify`: fix the citation, or, when a sentence only mentions a body, mark the paragraph `<!-- citecheck: ok, <reason> -->`.
 
 ## Agent skills
 

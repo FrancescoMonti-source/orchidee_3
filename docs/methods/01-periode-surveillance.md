@@ -6,18 +6,22 @@ Status: **under review**. Three decisions have current witnesses; Decision 01.3'
 
 ## What SPARES says
 
-> Les données de résistance bactérienne sont recueillies rétrospectivement sur une
-> période annuelle allant du 1er janvier au 31 décembre de l'année considérée.
-> Les données de consommation et d'activité couvrent la même année civile.
+> Cette étude recueille rétrospectivement les données du 1er janvier au 31 décembre
+> 2024. (p. 9)
 
 ---
 
 ## What SPF asks
 
-SPF requires **monthly surveillance indicators** alongside the national annual campaign:
+SPF asks for monthly estimation, and for the numerator and denominator of every
+aggregated indicator (SPF p. 5):
 
-> nous souhaiterions recevoir, pour tous les indicateurs agrégés demandés, les
-> résultats mensuels ainsi que le bilan annuel consolidé.
+> La fréquence d'estimation des indicateurs devra être mensuelle. [...] nous
+> souhaiterions recevoir, pour tous les indicateurs agrégés demandés, le numérateur et
+> dénominateur utilisés (le nombre de souches avec une résistance, le nombre de souches
+> testés, le nombre total de JH). (p. 5)
+
+The annual cadence comes from SPARES, whose campaign covers one calendar year (p. 9).
 
 ---
 
@@ -25,7 +29,7 @@ SPF requires **monthly surveillance indicators** alongside the national annual c
 
 ORCHIDEE disentangles temporal surveillance along three independent axes:
 1. **Cadence (When to report)**: Dual reporting — monthly for operational hospital monitoring, annual for national campaigns.
-2. **Window (Over what timeframe to group duplicates)**: French calendar boundaries (SPARES Annexe 1) are the production rule. A continuous 30-day rolling refractory window remains an experiment under audit (not the EARS-Net rule; see §3).
+2. **Deduplication Window (Over what timeframe to group duplicates)**: French calendar boundaries (SPARES Annexe 1) are the production rule. A continuous 30-day rolling refractory window remains an experiment under audit (not the EARS-Net rule; see §3).
 3. **State Lifecycle (Can past monthly numbers change?)**: Strictly immutable upon month close — no retrospective revision from later cultures.
 
 ### 1. Dual Temporal Cadence
