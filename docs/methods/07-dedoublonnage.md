@@ -15,13 +15,13 @@ historical rolling-window result is under audit; 07.3 remains unmeasured.
 > souches comparées et pour au moins une molécule, une différence majeure
 > (S <-> R ou SFP <-> R) de catégories cliniques. Deux antibiotypes sont
 > considérés comme identiques (doublons), s'il existe uniquement des différences
-> mineures (S <-> SFP).
+> mineures (S <-> SFP) entre les souches comparées.
 
-> En cas de doublon [...] le prélèvement qui sera conservé [...] est : le
-> prélèvement le plus ancien, si l'antibiotype est le même et avec un nombre
-> identique d'antibiotiques testés ; le prélèvement avec le plus de molécules
-> testées, si l'antibiotype est le même mais avec un nombre différent
-> d'antibiotiques testés.
+> En cas de doublon [...] le prélèvement qui sera conservé [...] est :
+> • Le prélèvement le plus ancien, si l'antibiotype est le même et avec un nombre
+> identique d'antibiotiques testés
+> • Le prélèvement avec le plus de molécules testées, si l'antibiotype est le même
+> mais avec un nombre différent d'antibiotiques testés
 
 > Une absence de résultat [case vide] [...] ne fait pas partie des caractères
 > discriminants pour le dédoublonnage.
