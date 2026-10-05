@@ -45,8 +45,9 @@ deduplication, screening not removed): carbapenemase 4 of 85 tested isolates
   never tri-state with missing values in deduplicated tables.
 - The denominator for phenotype proportions is `total_isolates` of that species,
   matching the national SPARES and ONERBA benchmark.
-- Pre-flight audit tripwire `TW-06.1` asserts biological plausibility, ensuring that
-  susceptible isolates never carry positive phenotype flags.
+- The pre-flight audit documents positive phenotype flags alongside antibiotic
+  results; clinical susceptibility alone does not disprove a resistance mechanism.
+  Reported phenotypes are retained (`00-audit-qualite.md`).
 
 ## Known weakness
 

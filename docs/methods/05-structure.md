@@ -51,11 +51,11 @@ CHIRURGIE, DE 235/635/636/638 to PÉDIATRIE) and reserves RÉANIMATION for
 general adult intensive care (DE 104, 105, 141, 735). ORCHIDEE validates the
 site's declared `de_domain_ref` against this national reference.
 
-**Coherence** across administration, pharmacy, and laboratory is verified
-through a non-blocking tripwire. Because the perimeter is defined positively
+**Coherence** across administration, pharmacy, and laboratory is documented
+through the pre-flight audit. Because the perimeter is defined positively
 (decision 03.5), unmapped UFs cannot enter surveillance by omission. Any
 residue of unmapped UFs is counted, published in the divergence account, and
-checked against an established tolerance threshold.
+reported without an audit tolerance threshold.
 
 ## Decisions
 
@@ -67,7 +67,7 @@ file (`ref/rouen/establishment_structure_2025.xlsx`), calendar year 2024.
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
 | 05.1 | Unit-less isolates | strict PMSI interval attribution; `SEJUF = NA` excludes isolate from perimeter | fallback to microbiology ordering UF | keeps **2 445** vs **2 555** (+110, +4.5 %, 93 patients gained); céfotaxime moves **14.80 → 15.82 %R (+1.02 pp)**. `docs/worked-examples/unit-attribution.md` |
-| 05.2 | Structure coherence | positive perimeter (03.5) with non-blocking tripwire asserting > 99.9 % resolution | blocking schema check on ingestion | admin: 362/362 (100 %) in structure; lab: 272/278 in structure (6 external UFs, 68 raw rows, 0 in `sir_wide`). A blocking check fails on inert codes |
+| 05.2 | Structure coherence | Report matched and unmatched unit codes and affected records; population selection belongs to 03.5 | Enforce a minimum coverage percentage in the audit | Admin: 362/362 (100 %) in structure; lab: 272/278 in structure (6 external UFs, 68 raw rows) |
 | 05.3 | ICU reassignment | defined by national DE table; ORCHIDEE validates compliance | local text-parsing algorithm or subagent guessing | Rouen referential maps 3 USC to Médecine, 1 USC to Chirurgie, 4 réa néonat/péd to Pédiatrie; exactly 0 discrepancies with `reference_code_de.csv` |
 | 05.4 | Structure versioning | annual snapshot per surveillance period (`calendar_year`) | dynamic time-validity intervals `[start_date, end_date[` per event | Rouen structure has 1 155 UFs, all with `Date fin UF = 2099-12-31` (0 mid-year splits). Dynamic intervals make annual deduplication non-transitive |
 | 05.5 | Hierarchy granularity | `UF` (`SEJUF`) is the atomic key of the contract | `(UM, UF)` composite key, or mandatory Service/Pôle | SPARES's structure file for ConsoRes requires `Code UF`, `Code DE` and `Code TA`, with service and pôle optional and no UM defined (SPARES p. 12, Annexe 6 p. 31). Forcing `UM` leaks Rouen internal schema into portable contract (ADR 0003) |
@@ -112,18 +112,11 @@ within a bounded 24-hour look-ahead window are linked to the stay and attributed
 initial receiving inpatient UF (`ADR-0009`). True outpatient visits without subsequent
 hospitalisation remain excluded.
 
-### 05.2 tripwire (TW-05.1)
+### 05.2 note — structure coverage
 
-**Statement**: 100 % of administration UFs with hospitalisation activity, and
-\> 99.9 % of microbiology observations, resolve in the establishment structure. (Cataloged as `TW-05.1` in `tripwire-register.md`).
-**Today**: Rouen administration has 362 UFs, 362/362 (100 %) in structure;
-microbiology has 278 UFs, 272 in structure (6 external UFs, 68 raw rows, 0 in
-`sir_wide`).
-
-Non-blocking. If an unseen UF appears in laboratory data, decision 03.5
-excludes it from surveillance by default, avoiding false-alarm pipeline halts
-over external test referrals. The check fails if unmapped laboratory rows
-exceed 0.1 %, or if any unit with patient-days cannot be classified.
+The pre-flight audit reports unit codes matched and unmatched to the annual
+structure and the counts and proportions of affected records (`00-audit-qualite.md`).
+No audit coverage threshold is set. Decision 03.5 owns population selection.
 
 ### 05.3 note — specialised intensive care is a nomenclature mapping, not an algorithm
 
