@@ -1,9 +1,19 @@
 # phenotypes_screening_witness.R
 # Measures the empirical behavior of screening keywords and BLSE/Carba phenotypes on 2024 raw data.
 
-.libPaths("C:/Users/franc/AppData/Local/R/win-library/4.6")
-p <- "C:/Users/franc/Documents/Git/orchidee/data/bact22_24"
-b <- readRDS(p)
+find_repo_root <- function() {
+  env_root <- Sys.getenv("ORCHIDEE_V3_REPO_ROOT", unset = "")
+  if (nzchar(env_root) && dir.exists(env_root)) return(normalizePath(env_root, winslash = "/"))
+  c_args <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+  if (length(c_args) > 0L) {
+    s_dir <- dirname(normalizePath(sub("^--file=", "", c_args[1L]), winslash = "/"))
+    cand <- normalizePath(file.path(s_dir, "..", ".."), winslash = "/", mustWork = FALSE)
+    if (file.exists(file.path(cand, "CONTEXT.md"))) return(cand)
+  }
+  normalizePath(getwd(), winslash = "/")
+}
+repo_root <- find_repo_root()
+b <- readRDS(file.path(repo_root, "data", "bact22_24"))
 
 b24 <- b[format(as.Date(b$DATEPRELEV), "%Y") == "2024", ]
 

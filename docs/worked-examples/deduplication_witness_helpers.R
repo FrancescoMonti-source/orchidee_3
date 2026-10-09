@@ -1,15 +1,24 @@
 # Shared calculation for the deduplication witness scripts.
 # Reads the provisional v3 bundle; the bundle's mappings are not reviewed.
 
-repo_root <- normalizePath(
-  Sys.getenv("ORCHIDEE_V3_REPO_ROOT", unset = getwd()),
-  winslash = "/", mustWork = TRUE
-)
+find_repo_root <- function() {
+  env_root <- Sys.getenv("ORCHIDEE_V3_REPO_ROOT", unset = "")
+  if (nzchar(env_root) && dir.exists(env_root)) return(normalizePath(env_root, winslash = "/"))
+  c_args <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+  if (length(c_args) > 0L) {
+    s_dir <- dirname(normalizePath(sub("^--file=", "", c_args[1L]), winslash = "/"))
+    cand <- normalizePath(file.path(s_dir, "..", ".."), winslash = "/", mustWork = FALSE)
+    if (file.exists(file.path(cand, "CONTEXT.md"))) return(cand)
+  }
+  normalizePath(getwd(), winslash = "/")
+}
+repo_root <- find_repo_root()
 run_dir <- normalizePath(
   Sys.getenv("ORCHIDEE_V3_RUN", unset = file.path(repo_root, "outputs", "rouen_stage2_2024")),
   winslash = "/", mustWork = TRUE
 )
 bundle_dir <- file.path(run_dir, "bundle_v3")
+site_dir <- file.path(run_dir, "site_inputs")
 rows <- as.data.frame(readRDS(file.path(bundle_dir, "sir_wide.rds")))
 meta <- readRDS(file.path(bundle_dir, "sir_wide_meta.rds"))
 all_atb <- intersect(meta$supported_atb_cols, names(rows))
@@ -53,6 +62,86 @@ major_discrepancy <- function(a, b, zit_as_sfp = TRUE) {
   susceptible <- if (zit_as_sfp) c("S", "SFP", "ZIT") else c("S", "SFP")
   any((x %in% susceptible & y == "R") | (x == "R" & y %in% susceptible))
 }
+major <- major_discrepancy
+
+dedup <- function(df, panel_cols = NULL, window = "annual", zit_as_sfp = TRUE) {
+  if (nrow(df) == 0L) {
+    return(df)
+  }
+  if (is.null(panel_cols)) {
+    if (exists("avail_panel", envir = parent.frame(), inherits = TRUE)) {
+      panel_cols <- get("avail_panel", envir = parent.frame())
+    } else if (exists("panel", envir = parent.frame(), inherits = TRUE)) {
+      panel_cols <- get("panel", envir = parent.frame())
+    } else if (exists("PANEL", envir = parent.frame(), inherits = TRUE)) {
+      panel_cols <- get("PANEL", envir = parent.frame())
+    } else if (exists("all_atb", envir = parent.frame(), inherits = TRUE)) {
+      panel_cols <- get("all_atb", envir = parent.frame())
+    } else if (exists("all_atb")) {
+      panel_cols <- all_atb
+    } else {
+      panel_cols <- colnames(df)
+    }
+  }
+  panel_cols <- intersect(panel_cols, colnames(df))
+  M <- as.matrix(df[, panel_cols, drop = FALSE])
+  nt <- rowSums(!is.na(M))
+
+  sample_dates <- if ("DATEPRELEV" %in% names(df)) as.Date(df$DATEPRELEV) else NULL
+  year_val <- if ("year" %in% names(df) && !all(is.na(df$year))) {
+    df$year
+  } else if (!is.null(sample_dates)) {
+    format(sample_dates, "%Y")
+  } else {
+    rep("all", nrow(df))
+  }
+
+  if (window == "annual") {
+    grp <- paste(df$PATID, year_val, sep = "|")
+  } else if (window == "monthly") {
+    month_val <- if (!is.null(sample_dates)) format(sample_dates, "%Y-%m") else year_val
+    grp <- paste(df$PATID, month_val, sep = "|")
+  } else {
+    grp <- paste(df$PATID, window, sep = "|")
+  }
+
+  keep <- rep(FALSE, nrow(df))
+  for (g in unique(grp)) {
+    idx <- which(grp == g)
+    if (!is.null(sample_dates)) {
+      idx <- idx[order(sample_dates[idx])]
+    }
+    ret <- integer(0)
+    for (i in idx) {
+      hit <- NA_integer_
+      for (j in ret) {
+        if (!major_discrepancy(M[i, ], M[j, ], zit_as_sfp = zit_as_sfp)) {
+          hit <- j
+          break
+        }
+      }
+      if (is.na(hit)) {
+        ret <- c(ret, i)
+      } else if (nt[i] > nt[hit]) {
+        ret[ret == hit] <- i
+      }
+    }
+    keep[ret] <- TRUE
+  }
+  df[keep, , drop = FALSE]
+}
+
+pr <- function(df, ab) {
+  v <- df[[ab]]
+  v <- v[!is.na(v) & v %in% c("S", "R", "SFP", "ZIT")]
+  n <- sum(v %in% c("S", "R"))
+  if (n == 0L) {
+    return(c(percent = NA_real_, count = 0L))
+  }
+  c(percent = round(100 * sum(v == "R") / n, 2), count = n)
+}
+pR <- pr
+
 
 deduplicate_witness <- function(data, panel, grain = c("annual", "monthly"), zit_as_sfp = TRUE) {
   grain <- match.arg(grain)

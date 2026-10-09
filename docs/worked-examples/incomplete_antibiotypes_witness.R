@@ -6,36 +6,29 @@
 # build_manifest.txt: commit and mappings); its counts are provisional.
 # Run from the repository root.
 
-suppressMessages(library(dplyr))
+args <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+script_dir <- if (length(args) > 0L) dirname(normalizePath(sub("^--file=", "", args[1L]), winslash = "/")) else getwd()
+helpers_file <- file.path(script_dir, "deduplication_witness_helpers.R")
+if (!file.exists(helpers_file)) {
+  repo_root <- Sys.getenv("ORCHIDEE_V3_REPO_ROOT", unset = getwd())
+  helpers_file <- file.path(repo_root, "docs", "worked-examples", "deduplication_witness_helpers.R")
+}
+source(helpers_file)
 
-p_run <- Sys.getenv("ORCHIDEE_V3_RUN", unset = file.path("outputs", "rouen_stage2_2024"))
-p_bundle <- file.path(p_run, "bundle_v3")
-manifest <- readLines(file.path(p_run, "build_manifest.txt"), warn = FALSE)
+manifest <- readLines(file.path(run_dir, "build_manifest.txt"), warn = FALSE)
 stopifnot(
   "source_contract: v3" %in% manifest,
-  any(grepl(paste0("md5=", unname(tools::md5sum("data/bact22_24"))), manifest, fixed = TRUE)),
-  any(grepl(paste0("md5=", unname(tools::md5sum("data/pmsi"))), manifest, fixed = TRUE))
+  any(grepl(paste0("md5=", unname(tools::md5sum(file.path(repo_root, "data/bact22_24")))), manifest, fixed = TRUE)),
+  any(grepl(paste0("md5=", unname(tools::md5sum(file.path(repo_root, "data/pmsi")))), manifest, fixed = TRUE))
 )
 
-s <- as.data.frame(readRDS(file.path(p_bundle, "sir_wide.rds")))
-r <- as.data.frame(readRDS(file.path(p_bundle, "sample_scope_reference.rds")))
-meta <- readRDS(file.path(p_bundle, "sir_wide_meta.rds"))
+s <- rows
+r <- as.data.frame(readRDS(file.path(bundle_dir, "sample_scope_reference.rds")))
 s <- merge(s, r[, c("SEJUF", "sample_uf_is_eligible_by_ta_de")], by = "SEJUF", all.x = TRUE)
 s$elig <- !is.na(s$sample_uf_is_eligible_by_ta_de) & s$sample_uf_is_eligible_by_ta_de
 s$year <- as.integer(format(as.Date(s$DATEPRELEV), "%Y"))
 panel <- intersect(meta$supported_atb_cols, names(s))
 c3g <- intersect(c("cefotaxime", "ceftriaxone", "ceftazidime", "cefepime"), panel)
-
-# Source rule (SPARES pp. 10-11, SPF pp. 14-15): a major discrepancy is S<->R or
-# SFP<->R; ZIT is read as SFP; a blank antibiotic result never discriminates; a
-# blank phenotype cell means the phenotype is absent.
-major <- function(a, b) {
-  both <- !is.na(a) & !is.na(b)
-  if (!any(both)) return(FALSE)
-  x <- a[both]; y <- b[both]
-  susc <- c("S", "SFP", "ZIT")
-  any((x %in% susc & y == "R") | (x == "R" & y %in% susc))
-}
 
 # Five ways to decide which isolates of one comparison group are kept. `idx` is in
 # chronological order; `compatible(i, j)` is TRUE when i and j are compatible; `nt`
