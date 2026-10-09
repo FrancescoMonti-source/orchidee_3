@@ -2,18 +2,18 @@
 # Reproduction script for Section 08 (Indicator construction) witnesses.
 # Computes empirical witnesses on Rouen 2024 bacteriology data.
 
-.libPaths("C:/Users/franc/AppData/Local/R/win-library/4.6")
-suppressMessages(library(dplyr))
+args <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+script_dir <- if (length(args) > 0L) dirname(normalizePath(sub("^--file=", "", args[1L]), winslash = "/")) else getwd()
+helpers_file <- file.path(script_dir, "deduplication_witness_helpers.R")
+if (!file.exists(helpers_file)) {
+  repo_root <- Sys.getenv("ORCHIDEE_V3_REPO_ROOT", unset = getwd())
+  helpers_file <- file.path(repo_root, "docs", "worked-examples", "deduplication_witness_helpers.R")
+}
+source(helpers_file)
 
-p_bundle <- "C:/Users/franc/Documents/Git/orchidee/outputs/rouen_current/bundle_v3/"
-p_site <- "C:/Users/franc/Documents/Git/orchidee/outputs/rouen_current/site_inputs/"
-
-s <- as.data.frame(readRDS(paste0(p_bundle, "sir_wide.rds")))
-r <- as.data.frame(readRDS(paste0(p_bundle, "sample_scope_reference.rds")))
-den <- readRDS(paste0(
-  p_bundle,
-  "denominator_bundle.rds"
-))$incidence_exposure_by_year_um_uf_ta_de_profile
+s <- rows
+r <- as.data.frame(readRDS(file.path(bundle_dir, "sample_scope_reference.rds")))
+den <- readRDS(file.path(bundle_dir, "denominator_bundle.rds"))$incidence_exposure_by_year_um_uf_ta_de_profile
 
 # Merge scope eligibility
 s <- merge(
@@ -92,58 +92,6 @@ PANEL <- c(
   "acide_fusidique"
 )
 avail_panel <- intersect(PANEL, colnames(s))
-
-major <- function(a, b) {
-  both <- !is.na(a) & !is.na(b)
-  if (!any(both)) {
-    return(FALSE)
-  }
-  x <- a[both]
-  y <- b[both]
-  any(
-    (x == "S" & y == "R") |
-      (x == "R" & y == "S") |
-      (x == "ZIT" & y == "R") |
-      (x == "R" & y == "ZIT")
-  )
-}
-
-dedup <- function(df, panel_cols = avail_panel, window = "annual") {
-  if (nrow(df) == 0) {
-    return(df)
-  }
-  M <- as.matrix(df[, panel_cols, drop = FALSE])
-  nt <- rowSums(!is.na(M))
-  if (window == "annual") {
-    grp <- paste(df$PATID, df$year, sep = "|")
-  } else if (window == "monthly") {
-    grp <- paste(df$PATID, format(as.Date(df$DATEPRELEV), "%Y-%m"), sep = "|")
-  } else {
-    grp <- paste(df$PATID, window, sep = "|")
-  }
-  keep <- rep(FALSE, nrow(df))
-  for (g in unique(grp)) {
-    idx <- which(grp == g)
-    idx <- idx[order(df$DATEPRELEV[idx])]
-    ret <- integer(0)
-    for (i in idx) {
-      hit <- NA_integer_
-      for (j in ret) {
-        if (!major(M[i, ], M[j, ])) {
-          hit <- j
-          break
-        }
-      }
-      if (is.na(hit)) {
-        ret <- c(ret, i)
-      } else if (nt[i] > nt[hit]) {
-        ret[ret == hit] <- i
-      }
-    }
-    keep[ret] <- TRUE
-  }
-  df[keep, , drop = FALSE]
-}
 
 eval_group <- function(df, cols) {
   M <- as.matrix(df[, intersect(cols, colnames(df)), drop = FALSE])
@@ -337,10 +285,14 @@ cat(
   "--- 08.8: Small Numbers Distribution in Monthly Sector Stratifications ---\n"
 )
 ec_monthly <- dedup(ec_elig, window = "monthly")
-sec_m_counts <- ec_monthly %>%
-  mutate(month = format(as.Date(DATEPRELEV), "%Y-%m")) %>%
-  group_by(sample_de_domain_ref, month) %>%
-  summarise(n = n(), .groups = "drop")
+sec_m_counts <- aggregate(
+  list(n = rep(1L, nrow(ec_monthly))),
+  by = list(
+    sample_de_domain_ref = ec_monthly$sample_de_domain_ref,
+    month = format(as.Date(ec_monthly$DATEPRELEV), "%Y-%m")
+  ),
+  FUN = length
+)
 
 cat("Monthly-sector cell size distribution:\n")
 print(summary(sec_m_counts$n))
