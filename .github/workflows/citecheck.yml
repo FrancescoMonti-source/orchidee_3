@@ -6,10 +6,12 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   citecheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +26,10 @@ jobs:
       - name: Unit tests
         run: python -m unittest discover tools/citecheck/tests
       - name: Check citations added by this change
+        if: github.event_name != 'workflow_dispatch'
         env:
           BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
         run: python tools/citecheck/citecheck.py --base "$BASE"
+      - name: Audit all citations
+        if: github.event_name == 'workflow_dispatch'
+        run: python -u tools/citecheck/citecheck.py --all
