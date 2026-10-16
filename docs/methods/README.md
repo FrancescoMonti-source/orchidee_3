@@ -24,7 +24,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
 | Données d'activité | [04](04-donnees-activite.md) | **settled** |
 | Structure de l'établissement | [05](05-structure.md) | **settled** |
-| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **settled** |
+| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **reviewed audit reporting retained; input boundary clarified; mapping details open** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |
 | Construction des indicateurs | [08](08-indicateurs.md) | **settled** |
 | Analyse et diffusion | [09](09-diffusion.md) | **settled** |
@@ -35,6 +35,12 @@ questions. `partial` means some decisions are settled and the section names what
 is still open.
 
 ## Cross-cutting catalogs
+
+Chapter 00 specifies a report-only audit of the prepared diagnostic antibiogram
+handoff, after local preparation and before shared hospital perimeter selection
+and deduplication. Hospitalisation activity keeps its own population. Suites 1–5
+use the earlier reviewed definitions; Suite 6 awaits a separate review. No
+executable common audit is implemented or remeasured by this recovery.
 
 - [tripwire-register.md](tripwire-register.md) - The unified catalog of the 5
   dynamic pipeline tripwires (TW-04.1 through TW-09.2), their mathematical trigger

@@ -3,6 +3,12 @@
 Witness for the decision *"only diagnostic samples enter the resistance
 indicators"*.
 
+**Historical witness:** the figures below have not been remeasured for issue
+#22. The retained-screening input describes the older witness, not the current
+common site handoff. Diagnostic selection now occurs locally before that
+handoff and its common audit; the historical comparison does not require the
+shared pipeline to receive records removed upstream.
+
 **Slice**: *Escherichia coli*, all sample types (global scope), sampling year
 2024. Annual window, grouping by patient, 19-column Annexe 3 *E. coli* list. Built from
 `site_inputs/microbiology_observations.rds`, which retains screening rows that
@@ -66,14 +72,15 @@ local practice.
 
 ## The portability consequence
 
-The site handoff carries `ratb_diagnostic_scope` as a boolean, so each site
-classifies its own samples. That is correct - only the site can read its own
-analysis codes - but it means **the highest-impact decision in the resistance
-pipeline is delegated to the site, and nothing in the contract makes two sites
-agree.**
+The site adapter interprets its own codes, applies diagnostic scope and retains
+isolates with an antibiogram before supplying the standardized site handoff
+(ADR-0003; issue #22). The common audit accepts correct local preparation and
+diagnostic selection as input assumptions. It does not revalidate that
+classification or calculate screening exclusions from rows it does not receive.
+The old `ratb_diagnostic_scope` flag in this witness does not impose an
+unselected-screening handoff on sites.
 
-Two hospitals with identical epidemiology and different screening-coding
-practice will publish céfotaxime resistance rates that differ by several points.
-The site contract must therefore state the boundary in clinical terms, and the
-site's classification must be published as an auditable count, not accepted
-silently.
+Shared hospital perimeter selection remains downstream of the common audit,
+and analysis-specific specimen selection still precedes deduplication. This
+historical witness motivates the ordering rule; it does not establish new
+measurements or a common raw-data testing interface.

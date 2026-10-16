@@ -18,3 +18,24 @@ references.
 - Anything the core needs must be expressible in the handoff. If a Rouen
   reference turns out to be necessary to the core, that is a defect in the
   contract, not a reason to read the file.
+- The site adapter owns cleaning, antibiotic and bacterial mappings,
+  diagnostic classification and selection, and retention of isolates with an
+  antibiogram. Chapter 00 audits this prepared site handoff, accepting correct
+  local preparation and diagnostic selection as input assumptions (issue #22).
+  The common audit does not revalidate local decisions, read raw comments or
+  recover records removed upstream, including screening records.
+- The previous ORCHIDEE antibiotic and bacterial mappings are the foundation
+  for improvement, not a declaration that every existing entry is correct.
+  The common audit consumes prepared identities rather than interpreting
+  local labels; unresolved equivalences, species/complex groupings and target
+  lists remain mapping decisions. No dictionary changes are implemented here.
+- Hospital perimeter selection remains shared and follows the common audit.
+  Local diagnostic and antibiogram selection does not authorise additional
+  local perimeter exclusions. Analysis-specific specimen selection precedes
+  deduplication; Emergency linkage decisions remain unchanged.
+- Hospitalisation activity retains its own population, including relevant
+  activity from patients without cultures or antibiograms.
+- Native raw-data auditing remains local; sites do not converge on Rouen's
+  raw schema. The common audit uses the supplied fields and available provenance.
+  Missing inputs are reported as not assessable. Findings activate no automatic
+  blocking, correction, quarantine or exclusion; no acceptance thresholds are set.
