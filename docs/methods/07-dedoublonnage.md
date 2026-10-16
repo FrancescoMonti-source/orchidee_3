@@ -84,6 +84,74 @@ Measured on the perimeter: filtering then deduplicating keeps 2 445 *E. coli*
 isolates, deduplicating then filtering keeps 2 350, and 79 patients vanish
 entirely. `docs/worked-examples/perimeter-ordering.md`.
 
+### Deduplication audit output
+
+Each analysis saves a **deduplication mapping** alongside its retained isolates
+in the local run outputs. The mapping preserves the groups formed by decision
+07.6 so that their membership remains available for explaining exclusions,
+examining lost antibiotic results, and comparing retention choices.
+
+The mapping has one row per input isolate after population selection, including
+isolates in single-member groups. It records these fields:
+
+| Field | Meaning |
+|---|---|
+| `analysis_id` | Reference to the exact analysis context described below. |
+| `PATID`, `ELTID`, `isolate_id` | The original input isolate key. |
+| `retained_PATID`, `retained_ELTID`, `retained_isolate_id` | The original key of the retained isolate in the same duplicate group. |
+
+For example, with A, B and C standing for full isolate keys:
+
+| Analysis | Input isolate key | Retained isolate key |
+|---|---|---|
+| X | A | A |
+| X | B | A |
+| X | C | C |
+
+This records groups {A, B} and {C}, retaining A and C. A retained isolate maps
+to itself. A separate `duplicate_group_id` is unnecessary: within an analysis,
+the retained isolate key identifies the group.
+
+The audit of the actual effect of deduplication belongs here, after population
+selection. For one declared analysis, report $N_{\text{input}}$ input isolates,
+$N_{\text{retained}}$ retained isolates and their difference as the removed
+count. The fraction removed is
+$(N_{\text{input}}-N_{\text{retained}})/N_{\text{input}}$ when the input is nonempty.
+The common-input inventory in chapter 00 is not automatically this denominator:
+population selection and the declared analysis scope determine the input
+isolate set for deduplication.
+
+Each `analysis_id` resolves to metadata recording the version or hashes of the
+input data and site mappings, the supplied diagnostic antibiogram population,
+hospital perimeter version, surveillance period, analysis-specific specimen
+scope, grouping key, window, antibiotype panel, phenotype and antibiotic
+comparison rules, grouping rule, retention rule, tie-break, and pipeline
+version. The supplied population records completed local diagnostic and
+antibiogram selection. Changing any of this context requires computing a
+mapping for that context. Saved membership can be reused only with the same
+input and rules.
+
+The mapping must satisfy these invariants:
+
+- Every input isolate appears exactly once per analysis.
+- Every retained key refers to an input isolate in the same analysis and
+  patient/species/window/specimen partition.
+- Every retained isolate maps to itself, and every target of a mapping row is
+  one of those self-mapped isolates.
+- The self-mapped isolates are exactly the retained isolate table, and members
+  sharing a retained key satisfy decision 07.6's pairwise compatibility rule.
+- All original isolate keys remain unchanged.
+
+Isolates excluded by shared population selection remain in its exclusion audit;
+they do not acquire membership in a deduplication group for that analysis.
+This concerns the supplied population only: no common exclusion audit recovers
+screening records or other records removed by local preparation before the
+site handoff.
+
+This is an agreed audit-output requirement for implementation. The current
+witness functions return retained isolates without saving this mapping; their
+historical counts have not been remeasured by adding this specification.
+
 ## Decisions
 
 All witnesses are measured on real Rouen rows. Method and scripts:

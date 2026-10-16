@@ -71,3 +71,9 @@ register, and the code that produced them is set aside.
   isolates that would need its own sweep rule.
 - Sample dates are never discarded, so the window decision destroys no
   information and stays reversible.
+- Each analysis saves its deduplication mapping alongside the retained isolates:
+  one row per input isolate linking its original key to its group's retained
+  isolate key. Retained isolates map to themselves. The analysis reference
+  records the exact input version, population selection and deduplication rules;
+  membership is reusable only in that same context. The full output contract is
+  in `docs/methods/07-dedoublonnage.md`, Deduplication audit output.

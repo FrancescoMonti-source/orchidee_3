@@ -151,6 +151,7 @@ bacteriology export. A Rouen fact, not part of the model.
 | Antibiotic-result record | Ligne de résultat de sensibilité à un antibiotique | One recorded result for one antibiotic attached to an isolate. |
 | Compatible isolates | Isolats compatibles pour le dédoublonnage | Two isolates that satisfy the operational comparison rule. |
 | Retained isolate | Isolat conservé après dédoublonnage | The isolate selected from a duplicate group to contribute its results to an analysis. |
+| Deduplication mapping | Table de correspondance du dédoublonnage | For each analysis, a link from every input isolate to the retained isolate of its duplicate group. |
 
 The French word *souche* needs context. In its biological sense it refers to a
 lineage. The SPARES method also calls individual recoveries *souches*, defines
@@ -301,6 +302,14 @@ _Avoid_: dédoublonnage (in English text), de-duping, filtering
 A difference of S↔R or SFP↔R on at least one molecule tested in both isolates,
 which makes them not compatible. A S↔SFP difference is minor and does not. A
 blank result is never a difference.
+
+**Deduplication mapping**:
+A local audit table saved alongside the retained isolates for an analysis. Each
+input isolate appears once and points to the original key of its group's
+retained isolate; retained isolates point to themselves. The analysis reference
+identifies the exact input version, population selection and deduplication
+rules. This preserves group membership without requiring a separate group
+identifier. See `docs/methods/07-dedoublonnage.md`, Deduplication audit output.
 
 **Diagnostic sample**:
 A sample taken to identify the cause of a suspected infection (the sources'
