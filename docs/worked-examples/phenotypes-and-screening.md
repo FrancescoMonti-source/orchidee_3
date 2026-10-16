@@ -28,7 +28,13 @@ Similarly, filtering on sample nature containing `"rectal"` catches invasive sur
 ### Conclusion for 06.7
 In French medical biology, `"Recherche de [X]"` is the universal order naming convention for both carriage screening and targeted infectious diagnostics.
 
-**Core ORCHIDEE must never attempt keyword guessing on analysis or sample descriptions.** Screening identification is strictly a site adapter responsibility, outputting the sample-level boolean `diagnostic_scope = TRUE / FALSE` (ADR 0003).
+**Core ORCHIDEE must never attempt keyword guessing on analysis or sample descriptions.**
+The site adapter classifies samples and applies diagnostic scope before
+supplying the handoff (ADR-0003; issue #22). It supplies diagnostic isolates
+with an antibiogram; the common audit accepts correct local preparation and
+does not require screening rows or counts of records removed upstream.
+The keyword figures above remain historical observations, not a remeasurement
+of the revised common-input population.
 
 ---
 

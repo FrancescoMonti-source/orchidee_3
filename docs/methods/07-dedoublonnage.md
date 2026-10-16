@@ -65,8 +65,10 @@ The window is expressed as a predicate over a pair of isolates,
 refractory window cheap to add later.
 
 Deduplication runs **after** population selection and **before** indicator
-computation. It never runs before the screening exclusion; see
-`06-donnees-resistance.md` for why the order is part of the rule.
+computation. Diagnostic selection and retention of isolates with an antibiogram
+are completed locally before the site handoff and common audit. Shared hospital
+perimeter selection follows that audit; analysis-specific specimen selection
+also precedes deduplication. See `06-donnees-resistance.md` and ADR-0003.
 
 That ordering is not a precaution specific to screening. Deduplication is **not
 monotone**: removing a row from its input can add a row to its result, because
@@ -136,8 +138,11 @@ The mapping must satisfy these invariants:
   sharing a retained key satisfy decision 07.6's pairwise compatibility rule.
 - All original isolate keys remain unchanged.
 
-Isolates excluded by population selection remain in its exclusion audit; they
-do not acquire membership in a deduplication group for that analysis.
+Isolates excluded by shared population selection remain in its exclusion audit;
+they do not acquire membership in a deduplication group for that analysis.
+This concerns the supplied population only: no common exclusion audit recovers
+screening records or other records removed by local preparation before the
+site handoff.
 
 This is an agreed audit-output requirement for implementation. The current
 witness functions return retained isolates without saving this mapping; their

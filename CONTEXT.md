@@ -34,20 +34,28 @@ input audit and does not require sites to reproduce Rouen's source format.
 
 **Common input audit** (*audit des données standardisées en entrée*):
 Examination of the site handoff at the point where sites converge on a shared
-representation, after the mappings needed to produce it and before population
-selection and deduplication. It assesses the supplied data's structure and
-coherence; it does not by itself establish that local source mappings are
-correct.
+representation, after local cleaning, mappings, diagnostic selection and
+retention of isolates with an antibiogram, and before shared hospital perimeter
+selection and deduplication. It assesses the prepared data's structure and
+coherence, accepting correct local preparation as an input assumption. It does
+not revalidate diagnostic classification or recover records removed upstream.
+Hospitalisation activity keeps its own population, including relevant activity
+from patients without a culture or antibiogram.
 
 **Site handoff**:
 The fixed set of files a site produces to feed v3, in which the site has
-already translated its local codes into v3's vocabulary. The boundary
-between what a hospital owns and what v3 owns.
+already translated its local codes into v3's vocabulary. Its microbiology data
+contain diagnostic isolates with an antibiogram, selected by the site adapter.
+The shared hospital perimeter is applied later. The boundary between what a
+hospital owns and what v3 owns.
 _Avoid_: import, extract, input files
 
 **Site adapter**:
 Site-specific code and reference data that turns one hospital's raw exports
-into a site handoff. Lives outside the v3 core, which never reads it.
+into a site handoff. It owns cleaning, antibiotic and bacterial mappings,
+diagnostic classification and selection, and retention of isolates with an
+antibiogram. Lives outside the v3 core, which never reads it. Local preparation
+does not authorise additional local hospital perimeter exclusions.
 _Avoid_: connector, ETL
 
 **Indicator table**:
@@ -276,6 +284,11 @@ The antibiotic susceptibility examination and, by extension, its results or
 report. The antibiotype is the susceptibility pattern read from those results
 on a declared panel.
 
+An individual antibiotic `NA` means not tested unless other source information
+explicitly establishes otherwise. Source-comment interpretation belongs to the
+site adapter. An individual `NA` does not remove an isolate already supplied
+with an antibiogram; it is distinct from an absent enzymatic phenotype signal.
+
 **Antibiotic-result record**:
 One record carrying a susceptibility result for one antibiotic attached to an
 isolate. Several such records describe one isolate's antibiogram. Repeated
@@ -313,14 +326,16 @@ identifier. See `docs/methods/07-dedoublonnage.md`, Deduplication audit output.
 **Diagnostic sample**:
 A sample taken to identify the cause of a suspected infection (the sources'
 « prélèvement à visée diagnostique »). The only samples resistance indicators
-include. Each site decides which of its sample types are diagnostic; v3
-does not decide it for them.
+include. Each site classifies its samples and applies diagnostic selection
+before the site handoff; the common audit accepts that local decision.
 _Avoid_: clinical sample, prélèvement
 
 **Screening sample**:
 A sample taken to detect colonisation or carriage rather than to diagnose an
 infection (the sources' « prélèvement à visée écologique »: recherche de
-colonisation, portage, dépistage). Resistance indicators exclude it.
+colonisation, portage, dépistage). The site adapter excludes it before supplying
+the microbiology handoff. The common audit does not receive screening rows to
+reclassify them or calculate their excluded count.
 _Avoid_: surveillance sample, prélèvement écologique (in English text)
 
 **SFP** (sensible à forte posologie):
@@ -368,9 +383,11 @@ different profiles cannot be added: the sum has no unit.
 _Avoid_: counting method, convention
 
 **Population selection**:
-Every step that decides which isolates are analysed: the perimeter, the
-diagnostic samples, the period. It runs after ingestion and before deduplication,
-never after it, because deduplication is not monotone — removing an isolate from
+Every step that decides which isolates are analysed. Diagnostic selection and
+retention of isolates with an antibiogram occur locally before the common input
+audit. The shared pipeline subsequently applies the hospital perimeter, period
+and analysis-specific specimen restrictions before deduplication. Selection
+never follows deduplication, because it is not monotone — removing an isolate from
 its input can add one to its result. A selection applied afterwards is a
 different operation wearing the same name.
 _Avoid_: filtering, subsetting, scoping

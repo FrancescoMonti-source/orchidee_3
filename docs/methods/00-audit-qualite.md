@@ -27,17 +27,20 @@ denominator used (SPF p. 5):
 > numérateur et dénominateur utilisés (le nombre de souches avec une résistance, le
 > nombre de souches testés, le nombre total de JH).
 
-ORCHIDEE documents the data supplied at its common entry point before
-population selection and deduplication. The statements above motivate explicit
-quality information; the audit boundary below is an ORCHIDEE design decision.
+ORCHIDEE documents the prepared data supplied at its common entry point before
+shared hospital perimeter selection and deduplication. The statements above
+motivate explicit quality information; the audit boundary below is an ORCHIDEE
+design decision.
 
 ## What ORCHIDEE does
 
 ### Input and pipeline position
 
-**Agreed scope (2026-10-16):** chapter 00 examines the **standardized site
-handoff after the mappings needed to produce it, before population selection
-and deduplication**. This supersedes the former raw-only scope.
+**Agreed scope (2026-10-16; issue #22):** chapter 00 examines the **standardized
+site handoff after local preparation, diagnostic selection and retention of
+isolates with an antibiogram, before shared hospital perimeter selection and
+deduplication**. This supersedes the former raw-only scope and clarifies which
+selection has already occurred.
 
 The sites converge on a shared ORCHIDEE representation, as specified by
 [ADR-0003](../adr/0003-portable-contract-is-the-product.md). Rouen's native
@@ -46,10 +49,12 @@ reproduce. The common core reads only the site handoff.
 
 ```
 Local sources
-    -> site-specific preparation and mappings
+    -> local cleaning and antibiotic/bacterial mappings
+    -> local diagnostic selection and retention of isolates with an antibiogram
     -> standardized site handoff
     -> chapter 00: common input audit
-    -> population selection
+    -> shared hospital perimeter selection
+    -> analysis-specific specimen selection
     -> deduplication
     -> indicator construction
 ```
@@ -59,17 +64,37 @@ data. Their fields, row meanings and available values are defined by the
 shared input model. Audit rules must use that model rather than Rouen's
 native columns or intermediate witness bundles.
 
+The microbiology population supplied by the site is accepted as correctly
+prepared, diagnostic and already restricted to isolates with an antibiogram.
+The common audit does not reassess those local decisions or recover records
+removed upstream. Local diagnostic and antibiogram restrictions do not
+authorise additional local hospital perimeter exclusions. The shared pipeline
+applies that perimeter after the audit; analysis-specific specimen selection
+also precedes deduplication. Existing Emergency linkage decisions are unchanged.
+
+Hospitalisation activity has its own population. It includes relevant activity
+from patients without a culture or antibiogram; the microbiology restriction
+does not select patients or stays for exposure denominators.
+
+The previous ORCHIDEE antibiotic and bacterial mappings are the agreed starting
+point for improvement. The common audit consumes their prepared identities,
+without reinterpreting local labels. This revision changes no dictionaries and
+does not validate all existing entries. Unsettled antibiotic equivalences,
+species/complex groupings and target lists remain mapping decisions.
+
 ### Local raw-data checks
 
 Each site determines how to examine its own raw sources. Those activities
 remain outside the shared audit. This chapter does not prescribe a portable
 raw auditor, a Rouen-shaped raw dataset or a mandatory raw-audit report.
 
-Local source checks and validation of the site's mappings remain distinct
-from the common input audit. A coherent standardized dataset does not by
-itself establish that the adapter has translated the original records
-correctly. Native typos, source-code reuse, conflicting source histories or
-discarded result rows may no longer be observable in the handoff.
+Correct local preparation and diagnostic selection are accepted input
+assumptions, not outstanding common-audit findings or requests for local
+certification. The audit neither inspects raw comments nor requires counts of
+screening records or other records removed upstream. Native typos, source-code
+reuse, conflicting source histories or discarded result rows may no longer be
+observable in the handoff. The existing provenance qualifications in Suites
+1–5 remain intact.
 
 The [review archive](audit-checkpoints-deferred.md) preserves the former
 raw-only specification and Rouen source observations. They are historical
@@ -330,9 +355,12 @@ rule is distinct from surveillance isolate deduplication in chapter 07.
 
 ### Suite 6 — Descriptive profiles of the input data
 
-These profiles describe the standardized input before surveillance population
-selection and deduplication. They do not count infection episodes, identify
-biological strains or measure the number of isolates removed by deduplication.
+The inventory in 6.1 describes each supplied dataset's own population.
+The microbiology profiles in 6.2–6.4 describe the supplied diagnostic
+antibiogram population before shared hospital perimeter selection,
+analysis-specific specimen selection and deduplication. They do not count
+infection episodes, identify biological strains or measure the number of
+isolates removed by deduplication.
 The [English–French glossary](../../CONTEXT.md#englishfrench-terminology)
 defines species, specimen, isolate and antibiotic-result record.
 
@@ -344,9 +372,12 @@ containing an isolate's entire antibiogram have different counting units.
 Their row totals cannot be read as numbers of the same entity.
 
 Report distinct patients and full-key counts of stays, samples and isolates
-represented in each dataset, using the keys in Suite 1. Account separately
-for missing or incomplete keys. Distinct values of `EVTID`, `ELTID` or the
-local `isolate_id` alone do not count those entities.
+represented in each dataset, using the keys in Suite 1. For each entity key,
+report the number of rows with a missing or incomplete key, with **rows** as
+the counting unit; these are not a count of distinct unidentified entities.
+The treatment of these rows in affected calculations remains open below.
+Distinct values of `EVTID`, `ELTID` or the local `isolate_id` alone do not count
+those entities.
 
 Use the explicit term **antibiotic-result records**, replacing the ambiguous
 "handoff observations" label. Keep the earlier decision to omit the PMSI
@@ -359,18 +390,12 @@ the historical diagnostic bundle remain examples in the
 **Question:** within a stated sampling period and specimen scope, how many
 isolates of a given bacterial species are recorded for each patient?
 
-**Population:** retain the reviewed antibiogram-isolate subset of the common
-input. It contains identifiable isolates with traceable antibiotic
-susceptibility results, before surveillance selection and deduplication.
-Phenotype attributes are not antibiotic-result records. A result token such
-as `S` or `R` alone does not identify an antibiotic test.
-
-The exact presence rule for a linked antibiogram remains the earlier narrow
-open point: the record must document a result, not merely an untested
-placeholder. The handling of a documented test whose result maps to missing
-must be stated. Do not substitute the historical witness's restricted drug
-panel for that definition. This does not reopen the choice of an
-antibiogram-isolate main population or the calculations below.
+**Population:** the supplied microbiology isolates are already diagnostic
+isolates with an antibiogram. Their eligibility is an accepted local
+preparation assumption, not a presence rule for the common audit to define.
+Use complete isolate keys to count each isolate once, regardless of the number
+of antibiotic-result rows. Phenotype attributes are not antibiotic-result
+records; a result token alone does not identify a mapped antibiotic.
 
 **Periods and specimen scope:** produce the profile separately by sampling
 calendar year and calendar year-month, overall and by mapped specimen type.
@@ -388,16 +413,25 @@ remain in the input inventory; the representation of that unassigned remainder
 is part of the narrow taxonomic follow-up. The distribution and its `N` below
 concern isolates with assignable patient and taxon keys in the stated context.
 
+**Reporting context:** one sampling calendar year or year-month, either all
+specimen types together or one mapped specimen type. Within that context,
+the pair profile uses complete isolate keys with an assignable patient and
+mapped taxon. State this population alongside its totals and account for
+unavailable keys, dates, specimen types and taxa in the inventory. Do not
+silently choose among conflicting supplied values; the remaining decisions
+are listed under Open.
+
 **Totals:** within that pair-profile context, report:
 
 - `N`: included isolates;
 - `U`: distinct patients;
 - `P`: observed patient–species pairs.
 
-One patient with three E. coli isolates and one K. pneumoniae isolate
-contributes two pairs: patient–E. coli with three isolates and
+One patient with three E. coli isolates and one K. pneumoniae isolate, all in
+the same reporting context, contributes **four isolates, one patient and two
+patient–species pairs**: patient–E. coli with three isolates and
 patient–K. pneumoniae with one. Neither pair establishes an episode or a
-duplicate group.
+duplicate group. This is a constructed example, not a new Rouen measurement.
 
 **Exact distribution:** retain each observed integer value `k = 1, 2, 3, …`.
 For each `k`, report the number of pairs with exactly `k` isolates and the
@@ -417,10 +451,16 @@ for each measure:
 The third numerator includes all isolates in those pairs, not only those
 beyond the first. Thus a percentage of patient–species pairs is not a
 percentage of isolates. None of these measures is the actual deduplication
-removal fraction.
+removal fraction. In the constructed example, the three percentages are
+respectively **1/2 = 50%, 1/2 = 50% and 3/4 = 75%**. Its exact distribution
+contains one pair with `k = 1` (one isolate) and one pair with `k = 3` (three
+isolates).
 
-Recompute totals and pairs within each period and specimen context. Annual
-pair counts and distributions are not sums of their monthly counterparts.
+Recompute totals, distinct patients and pairs within each period and specimen
+context. Annual patient and pair counts and distributions are not sums of
+their monthly counterparts: a patient present in several months counts once
+in the year. Specimen-specific pairs are also formed independently; they
+cannot be inferred from the overall pair grouping.
 Use declared mapped taxon identities; the equivalence of a species label and
 a species-complex label must not be guessed.
 
@@ -449,10 +489,17 @@ results rather than an indicator panel that omits other recorded antibiotics.
 Tests not exported cannot be inferred. A distribution peak alone does not
 identify an instrument or protocol.
 
-Both laboratory-practice outputs use the same documented-result presence
-rule discussed above. The pending treatment of a documented test mapped to
-missing also applies to panel counts and coverage; an untested placeholder
-must not be counted as a recorded test.
+For an individual antibiotic, `NA` means **not tested unless other source
+information explicitly establishes otherwise** (chapter 06). Interpretation
+of such source information, including comments, belongs to local preparation;
+the common audit reads the prepared result and any supplied distinction.
+An untested `NA` placeholder is not a recorded result. If local preparation
+establishes a test but supplies no interpretable result, keep that distinction
+visible; its treatment in these result counts remains to be confirmed rather
+than silently equating it with either an untested or a recorded result.
+An individual `NA` does not discard an isolate from the supplied antibiogram
+population or from the included-isolate denominator. Recorded `S`, `SFP` and
+`R` results use the existing `I` and `ZIT` mappings without changing them.
 
 Raw tested-pair totals, their per-patient/per-stay means and the removed
 `(isolates - pairs) / isolates` ratio are not added. Literal raw-label
@@ -463,9 +510,17 @@ they are not substituted for the patient–species profile above.
 
 Retain the species-specific view as a concrete part of Suite 6 to finish
 reviewing. Within the same population, period and specimen context as 6.2,
-report for each declared species or target taxon: isolates, distinct patients,
-mean isolates per patient and patients with at least two isolates of that
-taxon, with the patient denominator explicit.
+report for each declared species or target taxon: isolates `N_s`, distinct
+patients `U_s`, mean isolates per patient `N_s / U_s`, and patients with at
+least two isolates of that taxon `R_s`, with their denominator `U_s` (and
+`R_s / U_s` if expressed as a percentage). `U_s` counts patients with that
+species in that context, not all patients in the supplied data.
+
+This species detail reconciles with 6.2: species isolate counts sum to `N`,
+and species patient counts sum to `P`, since each counts one patient–species
+pair. Their sum is not the overall distinct-patient count `U` when a patient
+has several species. Apply the same unresolved-information qualifications
+as in 6.2; unassigned taxa remain in the inventory.
 
 This is the species detail of the preceding descriptive calculation. Remove
 the historical "redundancy ratio" column and the ranking by that ratio.
@@ -476,17 +531,27 @@ ward-specific sampling practices.
 
 #### 6.4 Specimens with at least two target species
 
-Keep the original question available for review on mapped data: how many
-specimens have at least two distinct target taxa recorded? Use the complete
-sample key `(PATID, ELTID)`. Two isolates of the same species still contribute
-one species; E. coli and K. pneumoniae in the same specimen contribute two.
+**Population:** samples represented by the supplied diagnostic antibiogram
+isolates, before shared hospital perimeter selection and deduplication. This
+restriction to samples with an antibiogram is settled. The profile cannot
+describe samples absent from the handoff.
 
-**Definition to confirm:** for a target-restricted view, report the number
-of specimens containing at least two distinct mapped target taxa, the number
-containing at least one such taxon in the same descriptive input subset,
-and their percentage. The target list, antibiogram subset, period/specimen
-detail and this denominator must be confirmed before this profile is marked
-settled. Several literal identification labels are not distinct taxa.
+Count complete sample keys `(PATID, ELTID)` and distinct mapped target species
+represented by their supplied isolates. Two isolates of the same species in
+one sample still contribute one species; E. coli and K. pneumoniae in the same
+sample contribute two. Report rows with incomplete sample keys separately,
+as rows, rather than inventing sample identities.
+
+**Recommendation awaiting confirmation:** for a target-restricted view, report
+the number of specimens containing at least two distinct mapped target taxa,
+the number containing at least one such taxon in the same descriptive input subset,
+and their percentage. This proposed fraction is **samples with at least two
+target species / samples with at least one target species**, within the same
+declared period and specimen context. The exact target list, target-specimen
+denominator and reporting detail still require confirmation; the supplied
+antibiogram population does not. Several literal identification labels are
+not distinct taxa. Missing or conflicting sample, date, specimen or taxon
+information must be visible, with the affected counting choices left open.
 
 Species co-detection does not establish polymicrobial infection. The old
 36.86% and 13.53% figures describe different historical populations and have
@@ -502,7 +567,7 @@ removed.
 
 | Decision | Retained requirement or focused follow-up |
 |---|---|
-| 00.1 | Audit the common site handoff after the necessary mappings, before population selection and deduplication. Raw audits remain local. |
+| 00.1 | Audit the prepared diagnostic antibiogram site handoff after local cleaning, mappings and diagnostic selection, before shared hospital perimeter selection and deduplication. Trust local preparation; raw audits remain local. |
 | 00.2 | Use complete patient–stay, sample and isolate identities; retain the reviewed identifier-reuse and reference checks. |
 | 00.3 | Record inverted movement intervals and missing discharge dates. No quarantine is activated. |
 | 00.4 | Retain the reviewed midnight-share checks and declared temporal resolution. No blocking is activated. |
@@ -586,14 +651,35 @@ resistance example reports one outpatient K. pneumoniae susceptible to
 ampicillin, and no such discrepancy among the 604 eligible inpatient
 observations. None of these historical findings activates quarantine here.
 
+Correct local preparation, diagnostic selection and the supplied antibiogram
+population are settled assumptions, not open findings. They introduce no
+common raw-comment reader, local diagnostic certification or accounting for
+upstream exclusions. The agreed annual/monthly reporting, exact distributions
+and explicit denominators remain specified above.
+
 ## Open
 
-- **Remaining Suite 6 definitions.** Complete the linked-antibiogram presence
-  rule, missing versus unclassifiable specimen display, antibiotic-equivalence
-  key, species/complex groupings and unassigned-taxon accounting, and the
-  target-specimen denominator in 6.4.
-  Preserve the approved annual/monthly reporting, exact isolate-count
-  distribution and explicit denominators while resolving those points.
+- **Mapping and display.** Improve the previous antibiotic and bacterial
+  mappings without declaring their entries validated. Exact antibiotic
+  equivalences, species/complex groupings and target lists remain open where
+  not already settled. Confirm separate or combined display of missing and
+  unclassifiable specimen types and presentation of unassigned taxa.
+- **Missing or conflicting prepared information.** Treatment of conflicting
+  dates, specimen types or taxa, and incomplete identifiers in affected
+  calculations, remains open. The suggested approach is to retain available
+  data, use a year or month only where unambiguous, and report calculations
+  that cannot be evaluated. This is a recommendation, not an approved conflict
+  resolution rule. Row counts for incomplete keys are specified in 6.1;
+  they do not resolve those calculation choices. Also confirm how explicitly
+  documented tests with no interpretable result enter antibiotic-result
+  counts and coverage; default untested `NA` values do not count as results.
+- **Empty denominators.** Retaining the counts and displaying “percentage not
+  calculable” is proposed, not approved. Do not silently report zero or a
+  passed calculation when the denominator is empty.
+- **Suite 6.4 fraction and reporting detail.** The at-least-two / at-least-one
+  target-species fraction remains a recommendation. Confirm its exact target
+  list, target-specimen denominator and reporting detail. Samples with an
+  antibiogram are the settled supplied population.
 - **Input field binding and preparation provenance.** Consolidate the portable
   fields and available history needed to execute the retained methods. A
   missing input is reported as not evaluable; it does not erase the check.
