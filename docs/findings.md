@@ -393,3 +393,40 @@ The citation check flagged claims about named bodies that had no page. Giving th
 3. **Locators that pass the check and are wrong, not yet fixed.** `01-periode-surveillance.md` and `docs/worked-examples/deduplication.md` cite « SPARES Annexe 1 » for the deduplication rule; it is on SPARES pp. 10-11.
 
 → `docs/methods/04-donnees-activite.md`, `05-structure.md`, `06-donnees-resistance.md`, `09-diffusion.md`, `docs/worked-examples/indicators.md`
+
+
+### 2026-10-16 — Recover reviewed audit rules and deduplication traceability
+
+Suites 1–5 are recovered from the reviewed checkpoint
+[`d7a31fd`](https://github.com/FrancescoMonti-source/orchidee_3/commit/d7a31fd1e5d6b81cccffd64497336d80a9f5e180).
+This restores separate missing-value counts, whole-stay timing with unavailable
+final discharge handled explicitly, species-specific phenotype audit panels and
+their two denominators. The audit documents findings without acceptance
+thresholds, correction, exclusion, quarantine or blocking. Supporting activity,
+structure and phenotype documents use those reporting rules.
+
+The shared boundary accepts completed local cleaning, mappings, diagnostic
+selection and retention of isolates with an antibiogram. The common audit
+examines the prepared handoff before shared hospital perimeter selection and
+deduplication; native-source inspection stays local. Hospitalisation exposure
+retains its own population. Terminology and complete isolate keys are clarified.
+
+Each selected analysis must save the input-to-retained isolate mapping with its
+exact data and rule versions. This output requirement is specified in chapter 07
+and ADR-0001; the witness functions have not been changed to implement it.
+
+The Suite 6 body, decision 00.8 and related note retain their text from `main`
+and await separate review. Repository-local skill copies and their discovery
+helper are excluded. Source data, mappings and executable analysis code are
+unchanged; no historical measurements are rerun. The longer review history
+remains on the preserved
+[`d6941c4` checkpoint](https://github.com/FrancescoMonti-source/orchidee_3/tree/d6941c46445091bd75308ee3c91cdff1a529b824).
+
+→ `docs/methods/00-audit-qualite.md`;
+`docs/methods/03-activites.md`;
+`docs/methods/06-donnees-resistance.md`;
+`docs/methods/07-dedoublonnage.md`;
+`docs/methods/tripwire-register.md`;
+`CONTEXT.md`; `docs/adr/0001-deduplication-is-parameterised.md`;
+`docs/adr/0003-portable-contract-is-the-product.md`;
+`docs/adr/0007-relational-keys-are-composite-against-recycling.md`
