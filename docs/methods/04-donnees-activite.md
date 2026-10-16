@@ -153,10 +153,10 @@ Which is why the resolution must be declared rather than inferred:
 - **`00:00` is ambiguous by construction** — unknown time, or a real midnight
   admission. No row distinguishes them, so detection is distributional.
 
-A site declares `datetime` or `date`. ORCHIDEE compares the declaration against
-the observed share at 00:00 and refuses a site that is neither — Rouen at 4.11 %
-is a clean `datetime`; a site at 97 % is a clean `date`; a site at 40 % is
-refused rather than averaged. Guarded by tripwire `TW-04.2` (see `tripwire-register.md`).
+A site declares `datetime` or `date`. The pre-flight audit documents that
+declaration alongside observed midnight shares by unit and period. These
+distributions do not establish timestamp accuracy, and no acceptance threshold
+or audit refusal is applied (`00-audit-qualite.md`).
 
 ### 04.10 tripwire (TW-04.1)
 

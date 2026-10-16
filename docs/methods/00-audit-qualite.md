@@ -1,6 +1,9 @@
 # 00 - Pre-flight data quality and coherence audit
 
-Status: **method decisions settled**. Eight decisions, eight witnesses, three tripwires, zero unproven. One follow-up is listed under Open.
+Status: **Suites 1–5 recovered from the reviewed checkpoint; Suite 6 pending**.
+The audit documents and flags findings without automatic action or acceptance
+thresholds. This is a method specification; its executable common audit has not
+been implemented or remeasured by this recovery.
 
 ---
 
@@ -32,7 +35,7 @@ denominator used (SPF p. 5):
 
 Data quality and plausibility cannot remain an unrecorded manual step or an informal
 exchange between the national mission and an establishment. In ORCHIDEE, data
-quality must be proven automatically and transparently before any population selection,
+quality findings must be documented automatically and transparently before any population selection,
 exposure calculation, or deduplication takes place.
 
 ---
@@ -40,40 +43,46 @@ exposure calculation, or deduplication takes place.
 ## What ORCHIDEE does
 
 ORCHIDEE operationalizes SPARES Page 16 §1 by introducing an **upfront, automated
-pre-flight data quality and coherence audit**. This audit runs as an automated gate
+pre-flight data quality and coherence audit**. This audit runs as an automated assessment
 immediately upon ingestion of the **site handoff**, before any data reaches population
 selection, exposure calculation, or deduplication.
+
+The audit documents and flags findings. It does not exclude records, alter reported
+results, or block processing. Population selection, exposure calculation and unit
+attribution remain governed by their respective chapters; an audit flag is not an
+eligibility decision.
 
 The pre-flight audit inspects six core domains:
 
 ```
-Section 00 Pre-Flight Audit Gate
-├── Suite 1: Relational Integrity & Composite Key Enclosure
-│   ├── Test 1.1: Check for stay IDs used by multiple patients (PATID + EVTID)
-│   ├── Test 1.2: Check for sample IDs used by multiple patients (PATID + ELTID + souche_id)
-│   └── Test 1.3: PMSI Referential Coverage (flags orphaned laboratory stays missing from PMSI)
+Section 00 Pre-Flight Audit
+├── Suite 1: Stay and Sample Identifiers
+│   ├── Test 1.1: Count distinct EVTID values associated with more than one PATID; report patients and records affected
+│   ├── Test 1.2: Count distinct ELTID values associated with more than one PATID; report patients and records affected
+│   └── Test 1.3: Count missing PATID, EVTID and ELTID values separately in each applicable input table
 │
-├── Suite 2: Demographic Invariant Plausibility
-│   ├── Test 2.1: Intra-patient Sex Stability (expects 100 % stability; flags clerical toggles)
-│   ├── Test 2.2: Cross-system Sex Concordance (PMSI vs Laboratory; expects >= 99.9 %)
-│   ├── Test 2.3: Birth Date Mutation Audit (flags default dates e.g. 01/01 vs 31/12)
-│   └── Test 2.4: Age Range Bounding (0 <= PATAGE <= 120; flags dummy test records)
+├── Suite 2: Recorded Demographic Values
+│   ├── Test 2.1: Count patients with more than one recorded PATSEX value, separately in bacteriology and PMSI
+│   ├── Test 2.2: Compare recorded PATSEX values between bacteriology and PMSI for matching patients; report agreement and disagreement
+│   ├── Test 2.3: Count patients with more than one recorded birth date (PATBD)
+│   ├── Test 2.4: Report the age distribution, minimum, maximum and count of negative ages
+│   └── Test 2.5: Count missing PATSEX, PATBD and PATAGE values separately in each applicable input table
 │
-├── Suite 3: Temporal Containment & Chronology
-│   ├── Test 3.1: Physical Interval Validity (DATENT <= DATSORT; quarantines negative durations)
-│   ├── Test 3.2: Sampling Stay Containment (expects >= 98 % within [DATENT, DATSORT])
-│   ├── Test 3.3: Report sample lags outside stays; ≥48 h pre-admission is suspicious, >30 d is report-only
-│   └── Test 3.4: Count admission/discharge times at 00:00:00 and with a non-midnight time (TW-04.2)
+├── Suite 3: Movement Chronology and Sample Timing
+│   ├── Test 3.1: Count movements with end before start or missing start/end times; report distinct stays affected
+│   ├── Test 3.2: Count samples collected before, within or after their whole linked stay; report comparisons not assessable separately
+│   ├── Test 3.3: Describe time differences before admission or after discharge, without timing thresholds
+│   └── Test 3.4: Report declared timestamp format and midnight/non-midnight admission and discharge counts
 │
-├── Suite 4: Hospital Unit Structure Checks
-│   ├── Test 4.1: Check that hospital units in the data appear in the annual structure (TW-05.1)
-│   └── Test 4.2: Record unit codes missing from the structure and exclude their records from surveillance
+├── Suite 4: Recorded Unit Codes and Structure Matches
+│   ├── Test 4.1: Count distinct UF codes appearing in bacteriology and PMSI that are found or not found in the structure file, separately for each source
+│   ├── Test 4.2: List UF codes not found in the structure file and count affected records
+│   └── Test 4.3: Count records with missing UF values separately for each source
 │
-├── Suite 5: Intrinsic & Phenotypic Microbiological Plausibility
-│   ├── Test 5.1: Intrinsic Microbiological Resistances (flags impossible susceptible phenotypes)
-│   ├── Test 5.2: Check BLSE and carbapenemase flags against antibiotic test results (TW-06.1)
-│   ├── Test 5.3: CA-SFM Standard Version Referential (TW-06.2; asserts CASFM >= 2020)
-│   └── Test 5.4: Check which result is kept when the same isolate has repeat tests for one antibiotic
+├── Suite 5: Reported Microbiology and Interpretation Standards
+│   ├── Test 5.1: Count recorded S results against uppercase R rules in CA-SFM 2025 V1.1 (pp. 33-39)
+│   ├── Test 5.2: Summarise positive BLSE/carbapenemase flags with no recorded S/SFP/R marker result or with all recorded marker results S
+│   └── Test 5.3: Document the declared interpretation standard and raw CASFM version tags
 │
 └── Suite 6: Descriptive Profiling & Redundancy Statistics
     ├── Test 6.1: Global Entity Volumes (counts of distinct PATID, EVTID, ELTID, isolates)
@@ -84,113 +93,239 @@ Section 00 Pre-Flight Audit Gate
 
 ---
 
-### 1. Relational Integrity and Composite Key Enclosure
+All numerical examples and witnesses below come from Rouen data covering
+**2022–2024**. Unless a narrower period is explicitly stated (for example, 2024
+alone), each figure refers to that full three-year period.
 
-In raw hospital databases, identifiers that appear unique within an application are frequently
-recycled over time:
+### 1. Stay and Sample Identifiers
 
-- **Stay identifier (`EVTID`) recycling**: In administrative PMSI movements, 169 out of
-  194 566 distinct `EVTID`s (0.087 %) are associated with multiple `PATID`s across calendar years.
-  Crucially, 35 multi-patient `EVTID`s occur within the exact same administrative source file
-  (`SRC == "C"`), demonstrating that hospital information systems recycle stay numbers.
-  **Rule**: Stays are strictly composite-keyed as `(PATID, EVTID)`.
-- **Sample accession (`ELTID`) recycling**: In routine laboratory data (`bact22_24`), 135
-  `ELTID`s occur across multiple patients. Empirical analysis reveals that 94.8 % of these
-  collisions occur $> 30$ days apart (median: 319 days, maximum: 2.8 years). `ELTID` is a cyclical
-  accession counter in the laboratory system (GLIMS), not an immutable UUID.
-  **Rule**: The primary isolate key is strictly composite: `(PATID, ELTID, souche_id)`
-  (Decision 06.3), ensuring 100 % global uniqueness (48 595 / 48 595 in `sir_wide.rds`).
+Stay and sample identifiers are intended to be unique, but the Rouen examples show
+that the same identifier can occur under different patients. The audit documents
+these observations without inferring their cause.
 
----
+- **Stay identifiers associated with multiple patients (Test 1.1)**: Count distinct
+  `EVTID` values associated with more than one non-missing `PATID`. Report the number
+  of patients and input records affected, with a detail table listing each affected
+  `EVTID`, its associated patients and their record counts.
+- **Sample identifiers associated with multiple patients (Test 1.2)**: Count distinct
+  `ELTID` values associated with more than one non-missing `PATID`. Report the number
+  of patients and input records affected, with a detail table listing each affected
+  `ELTID`, its associated patients and their record counts.
+- **Missing identifiers (Test 1.3)**: Report simple missing-value counts for `PATID`,
+  `EVTID` and `ELTID` separately in each input table that carries the field. Missing
+  identifiers are reported separately from identifiers associated with multiple
+  patients; they are not treated as an additional patient or identifier.
 
-### 2. Demographic Invariant Plausibility
+The audit does not construct, repair or deduplicate isolates. Multiple antibiotic-result
+rows belonging to one isolate are expected and are not counted as duplicate isolates.
+The composite keys remain the identification rule defined in ADR-0007: `(PATID, EVTID)`
+for stays and `(PATID, ELTID, souche_id)` for isolates (Decision 06.3).
 
-Patient demographic fields must be stable across surveillance encounters:
+**Rouen examples:**
 
-- **Sex stability (`PATSEX`)**: Evaluated for every `PATID`. In raw bacteriology, exactly 0 patients
-  change sex (100 % stable across 107 049 patients). In PMSI movements, only 13 out of 106 491
-  patients (0.012 %) have multiple recorded sexes: 7 undetermined toggles (`F / I`), and 6 clerical
-  corrections (`F / M`). Across both databases, concordance is 99.97 % (106 278 / 106 311 patients).
-- **Date of birth stability (`PATBD`)**: In PMSI movements, 38 patients (0.036 %) have multiple birth
-  dates, primarily caused by default calendar assignments (e.g. `1991-01-01` vs `1991-12-31` when
-  birth year is known but day/month is unrecorded).
-- **Age range plausibility (`PATAGE`)**: Ages must satisfy $0 \le \text{age} \le 120$. In Rouen
-  PMSI movements, ages span 0.0 to 106.0 years with 0 outliers. In raw bacteriology, exactly 4 rows
-  carried `PATAGE == 136` (dummy test records or anonymization artifacts), which are flagged and
-  quarantined by the audit.
+- In administrative PMSI movements, 169 out of 194 566 distinct `EVTID`s (0.087 %)
+  are associated with multiple `PATID`s, including 35 within the same administrative
+  source file (`SRC == "C"`).
+- In routine laboratory data (`bact22_24`), 135 `ELTID`s occur under multiple
+  patients. Of these observed cross-patient occurrences, 94.8 % are more than 30 days
+  apart (median: 319 days, maximum: 2.8 years).
 
----
-
-### 3. Temporal Containment and Chronology
-
-- **Chronological interval validity**: Movement records must satisfy `DATENT <= DATSORT`.
-  Negative stay durations (`DATSORT < DATENT`) are quarantined from exposure calculations
-  (Decision 00.3).
-- **Sample timing relative to linked stays**: Report how far sample collection falls before admission
-  or after discharge. On Rouen surveillance data (`sir_wide.rds` linked to PMSI):
-  - **45 927 isolates (98.56 %)** are strictly contained within the stay (`DATENT <= DATEPRELEV <= DATSORT`).
-  - **185 isolates (0.40 %)** were sampled *before* admission (`DATEPRELEV < DATENT`), with a median
-    lag of 4 days (pre-admission emergency department testing or pre-operative outpatient consultations).
-  - **485 isolates (1.04 %)** were sampled *after* discharge (`DATEPRELEV > DATSORT`), with a median
-    lag of 14 days (post-discharge surgical wound follow-up).
-  - Lags of more than 30 days before admission or after discharge are reported only; they do not
-    by themselves change isolate eligibility.
-  - Pre-admission lags of 48 hours or more are reported as suspicious. Their relationship to the
-    Emergency linkage decision is tracked under Open in `05-structure.md`.
-- **Admission and discharge time detail (`TW-04.2`)**: Count `DATENT` and `DATSORT` values at
-  exactly `00:00:00` and values with a non-midnight time. Compare the midnight share with the site's
-  declared format (`date` or `datetime`).
-  The mathematical definition of occupancy hours and its algebraic reduction to midnight presence
-  on date-only data belongs strictly to `04-donnees-activite.md` (Decisions 04.2 and 04.9).
-  When the site declares `datetime`, a high midnight share may indicate times replaced by the
-  `00:00:00` default. The check counts those values and flags the overall pattern; the timestamp alone
-  cannot distinguish a real midnight from a default. The operational verification check is:
-  - Declared `datetime`: expects $p_{00} \le 10\,\%$ (Rouen: 4.11 % of `DATENT`, 4.08 % of `DATSORT`).
-  - Declared `date`: expects $p_{00} \ge 95\,\%$.
-  - Intermediate ($10\,\% < p_{00} < 95\,\%$): **blocking refusal** to prevent intra-hospital exposure bias.
+These findings establish that `EVTID` and `ELTID` cannot safely be treated as globally
+unique on their own. Their temporal separation does not establish the cause of reuse.
 
 ---
 
-### 4. Hospital Unit Structure Checks
+### 2. Recorded Demographic Values
 
-The establishment structure is ingested as a frozen annual snapshot `unit_mapping` (Decision 05.4).
-The code `TW-05.1` is the corresponding check's identifier in the tripwire register.
+The audit documents recorded demographic values and their differences. It sets no
+agreement threshold and does not correct values, exclude records or require an action
+following a finding. Differences alone do not establish their cause.
 
-- **Check that hospital units in the data appear in the annual structure (`TW-05.1`)**:
-  Check that every administrative unit contributing hospitalisation days, and at least 99.9 % of
-  microbiology observations, link to a unit in `unit_mapping`.
-- **Record units missing from the structure and exclude their records from surveillance**: Under
-  Decision 03.5, only units present in the structure are included in the surveillance perimeter.
-  Record unmatched unit codes and their affected observations in the quality ledger.
+- **Multiple recorded sex values (Test 2.1)**: Count patients with more than one
+  distinct non-missing `PATSEX` value, separately in bacteriology and PMSI. Report
+  the patient counts and a detail table of their recorded values and record counts.
+- **Sex values across systems (Test 2.2)**: Compare patients with a non-missing
+  `PATID` present in both bacteriology and PMSI. Among patients with exactly one
+  distinct non-missing `PATSEX` value in each system, report agreement and
+  disagreement counts; any agreement proportion uses only these comparable patients
+  as its denominator. Separately report patients with multiple recorded values in
+  either system and patients with no recorded value in either or both systems.
+  Include the differing values in the detail table without choosing or replacing a
+  patient's recorded value.
+- **Multiple recorded birth dates (Test 2.3)**: Count patients with more than one
+  distinct non-missing `PATBD` value, separately in each input table carrying the
+  field. Report the patient counts and a detail table of their recorded dates and
+  record counts. Do not infer that a date was a default or a correction.
+- **Recorded ages (Test 2.4)**: Report the distribution, minimum and maximum of
+  non-missing `PATAGE` values and the number of records with a negative age,
+  separately in each input table carrying the field. No upper-age cutoff is set.
+  Unusual recorded ages do not establish that a record is a test or anonymisation
+  artifact.
+- **Missing demographic values (Test 2.5)**: Report simple missing-value counts for
+  `PATSEX`, `PATBD` and `PATAGE` separately in each input table carrying the field.
+  Missing values do not count as an additional sex value or birth date. Patient-level
+  checks use non-missing `PATID`; missing patient identifiers are counted in Suite 1.
+
+**Rouen examples:**
+
+- In raw bacteriology, 0 of 107 049 patients have multiple recorded sex values.
+  In PMSI movements, 13 of 106 491 patients (0.012 %) have multiple recorded values:
+  7 have `F / I` and 6 have `F / M`.
+- The historical cross-system comparison reported agreement for 106 278 of 106 311
+  patients (99.97 %). Its denominator construction is not documented here; this is
+  a historical example, not an acceptance threshold or a specification of Test 2.2.
+- In PMSI movements, 38 patients (0.036 %) have multiple recorded birth dates,
+  including `1991-01-01` and `1991-12-31` for the same patient.
+- Recorded ages in PMSI movements span 0.0 to 106.0 years. In raw bacteriology,
+  4 rows carry `PATAGE == 136`. These examples do not establish the origin of those
+  values.
 
 ---
 
-### 5. Intrinsic and Phenotypic Microbiological Plausibility
+### 3. Movement Chronology and Sample Timing
 
-- **Intrinsic microbiological resistances**: Under EUCAST (Intrinsic Resistance and Unusual
-  Phenotypes v3.3, p. 4 and Tables 1-2, pp. 5 and 7) and CA-SFM (2025, pp. 33-35) guidelines, certain
-  bacterial species possess universal chromosomal resistance mechanisms. An isolate reported as
-  susceptible (`S`) to an intrinsically resistant molecule indicates clerical error or taxonomic
-  misidentification. The pre-flight audit validates incoming isolates against the intrinsic resistance
-  matrix (both sources list the four rows below; for *P. aeruginosa*, cefotaxime and
-  trimethoprim-sulfamethoxazole come from CA-SFM p. 35, while EUCAST p. 7 lists ceftriaxone and
-  trimethoprim alone):
-  - ***Klebsiella pneumoniae***: intrinsically resistant to **Ampicillin / Amoxicillin**.
-  - ***Enterobacter cloacae complex***: intrinsically resistant to **Amoxicillin-clavulanate**.
-  - ***Proteus mirabilis***: intrinsically resistant to **Colistin**.
-  - ***Pseudomonas aeruginosa***: intrinsically resistant to **Ampicillin, Amox-clav, Cefotaxime, Ceftriaxone, Ertapenem, Trimethoprim-sulfamethoxazole**.
-- **Resistance flags and antibiotic test results (`TW-06.1`)**: Compare positive BLSE and
-  carbapenemase flags with the relevant antimicrobial susceptibility testing (AST) results. If a
-  positive flag has no corresponding antibiotic test result, record a non-blocking finding and
-  continue processing; retain the reported phenotype under Decision 06.5. The
-  [full TW-06.1 specification](tripwire-register.md#tw-06-1) defines the exact checks and what
-  happens to discordant results.
-- **Repeated antibiotic test results**: An isolate can have more than one result for the same
-  antibiotic. Before analysis, the handoff reduces these to one result for that isolate and
-  antibiotic. This check verifies the documented rule: keep the last result in the source file's row
-  order.
+The audit documents movement chronology and sample timing. It does not correct
+intervals, fill missing timestamps, exclude records or set timing thresholds.
+
+- **Movement chronology and missing timestamps (Test 3.1)**: Count movement rows
+  with `DATSORT < DATENT`, missing `DATENT`, and missing `DATSORT` separately.
+  For each finding, report the movement-row count and distinct `(PATID, EVTID)`
+  stay count. Also count records with a missing sample collection time.
+- **Sample timing relative to the whole linked stay (Test 3.2)**: Group movements
+  by `(PATID, EVTID)`. The whole-stay boundaries are `min(DATENT)` and
+  `max(DATSORT)` when admission and final discharge can be established from the
+  recorded movements. Compare the sample collection time with those boundaries,
+  rather than with an individual unit movement. Report samples before admission,
+  within the stay (including its recorded boundaries), and after discharge.
+  Report the counts and proportions among assessable comparisons, with their
+  denominator, and a detail table of samples outside the stay.
+
+  If the final movement has no `DATSORT`, the whole-stay discharge is unavailable:
+  do not substitute an earlier movement's exit using `max(DATSORT, na.rm = TRUE)`.
+  Report the affected stays separately. Comparisons with a missing sample time,
+  unavailable whole-stay boundary, or a whole-stay end before its start are
+  reported as not assessable. Missing movement start times may prevent identifying
+  the first or final movement; do not infer the missing timestamps. These reporting
+  categories do not change record eligibility. Unit attribution remains governed
+  by `05-structure.md`.
+- **Time differences outside the stay (Test 3.3)**: For assessable comparisons,
+  describe the distribution of time from sampling to admission for samples collected
+  before the stay, and from discharge to sampling for samples collected after it.
+  State the time unit. No 48-hour or 30-day threshold is set, and timing alone does
+  not establish the clinical reason for sampling.
+- **Timestamp format and midnight values (Test 3.4)**: Report the site's declared
+  format (`date` or `datetime`). Count `DATENT` and `DATSORT` values at exactly
+  `00:00:00`, non-midnight values and missing values separately. Report midnight
+  shares among non-missing values for each field, by unit and period and for the
+  whole site. A midnight timestamp alone cannot distinguish a real midnight from
+  a default. No acceptance threshold is set. Exposure calculation belongs to
+  `04-donnees-activite.md` (Decisions 04.2 and 04.9).
+
+**Rouen examples:**
+
+- Among surveillance isolates linked to PMSI, the historical comparison reported
+  45 927 isolates within the stay (98.56 %), 185 before admission (0.40 %, median
+  time difference: 4 days), and 485 after discharge (1.04 %, median time difference:
+  14 days). These are descriptive examples; they do not establish why samples
+  were taken or demonstrate the whole-stay calculation specified above.
+- The historical timestamp profile reported 4.11 % of `DATENT` and 4.08 % of
+  `DATSORT` at midnight. These figures are examples, not acceptance thresholds.
 
 ---
+
+### 4. Recorded Unit Codes and Structure Matches
+
+The site supplies the annual structure file `unit_mapping` (Decision 05.4).
+The comparison runs from UF codes appearing in bacteriology and PMSI to this
+file. UFs appearing only in the structure file are outside this check.
+
+- **UF codes found or not found in the structure file (Test 4.1)**: For each period,
+  compare distinct non-missing UF codes appearing in the supplied records with the
+  corresponding annual structure. Report matched and unmatched distinct-code
+  counts and the record counts affected, separately for PMSI movement UFs and
+  laboratory ordering UFs. Any matched-code proportion uses the distinct
+  non-missing codes appearing in that source and period as its denominator.
+- **Detail of unmatched UF codes (Test 4.2)**: List each recorded UF code not found
+  in the structure file, its source and period, and its affected record count.
+- **Missing UF values (Test 4.3)**: Count records with a missing UF value,
+  separately for each source and period. Report these separately from populated
+  codes not found in the structure file.
+
+The laboratory ordering UF is distinct from the hospitalisation unit attributed
+at sampling time in `05-structure.md`. The audit documents structure matches;
+no coverage threshold, correction or exclusion follows from this check.
+Population selection remains governed by Decision 03.5.
+
+**Rouen example:** Of the distinct codes appearing in the records, 362 of 362
+administrative UFs and 272 of 278 laboratory ordering UFs appear in the structure
+file. The six unmatched laboratory UFs affect 68 raw records. UFs appearing only
+in the structure file are not included in these denominators.
+
+---
+
+### 5. Reported Microbiology and Interpretation Standards
+
+- **Susceptible results against the natural resistance reference (Test 5.1)**:
+  Count recorded `S` results for organism-antibiotic combinations designated
+  uppercase `R` in CA-SFM 2025 V1.1, Section 2, pp. 33-39, respecting the
+  group-level rules, species-specific rules and footnote exceptions. Report counts
+  by organism and antibiotic. Lowercase `r` denotes low-level natural resistance
+  that does not automatically require an `R` interpretation; do not include it
+  in this comparison as though it were uppercase `R` (CA-SFM 2025 V1.1, p. 33).
+  Retain recorded results without correction or exclusion. A finding does not
+  establish a clerical error or taxonomic misidentification. For the 2022-2024
+  examples, this is a comparison against the 2025 reference, not a claim that
+  the laboratory breached the interpretation rules applicable at the time.
+  The following examples illustrate the rule rather than define its full scope
+  (CA-SFM 2025 V1.1, pp. 33-35):
+  - ***Klebsiella pneumoniae***: **Ampicillin / Amoxicillin**.
+  - ***Enterobacter cloacae complex***: **Amoxicillin-clavulanate**.
+  - ***Proteus mirabilis***: **Colistin**.
+  - ***Pseudomonas aeruginosa***: **Ampicillin, Amox-clav, Cefotaxime, Ceftriaxone, Ertapenem, Trimethoprim-sulfamethoxazole**.
+- **Positive phenotype flags and recorded marker results (Test 5.2)**: For each
+  species, phenotype and year, report two summary counts and percentages:
+  1. Positive BLSE or carbapenemase flags with no recorded `S`, `SFP` or `R` result
+     for any antibiotic in the applicable audit panel. The denominator is all
+     isolates with that positive flag.
+  2. Positive flags with at least one recorded `S`, `SFP` or `R` marker result,
+     and all such recorded results equal to `S`. The denominator is positive-flag
+     isolates with at least one recorded `S`, `SFP` or `R` marker result.
+
+  These are separate descriptive findings. Missing or unrecognised results do not
+  count as `S`. A recorded `SFP` is interpretable but does not satisfy the literal
+  all-`S` condition. The audit uses recorded categories without recategorising them.
+  The second summary concerns all recorded marker results, not a claim that the
+  complete panel was tested. No panel-completeness breakdown or routine isolate-level
+  detail table is required.
+
+  | Organism group | Positive flag | Antibiotics in the audit panel |
+  |---|---|---|
+  | Enterobacterales | BLSE | Cefotaxime, ceftriaxone, ceftazidime, cefepime |
+  | Enterobacterales | Carbapenemase | Ertapenem, imipenem, meropenem |
+  | *P. aeruginosa* | Carbapenemase | Imipenem, meropenem |
+  | *A. baumannii* | Carbapenemase | Imipenem, meropenem |
+
+  These panels are descriptive audit choices informed by the screening and
+  confirmation agents discussed in EUCAST's detection guidance (2017, Sections
+  2.4, 3.4 and 6), not a diagnostic algorithm:
+  [EUCAST detection of resistance mechanisms](https://www.eucast.org/fileadmin/eucast/pdf/eucast_guidelines/EUCAST_detection_of_resistance_mechanisms_170711.pdf).
+  BLSE in Pseudomonas is deferred because an audit panel has not been defined;
+  retain its reported flags and do not apply the Enterobacterales panel to it.
+  For any species/phenotype combination without a defined panel, these two
+  comparisons are not assessed rather than counted as missing marker results.
+
+  Neither finding establishes that a mechanism flag is wrong. Retain reported
+  phenotypes and antibiotic results. No exclusion, correction or trigger threshold
+  follows from these summaries.
+- **Interpretation standard versions (Test 5.3)**: Record the site's declared interpretation
+  standard and the distribution of raw `CASFM` version tags, when available, by year.
+  Document differences without imposing a trigger threshold or excluding records.
+
+---
+
+Suite 6, decision 00.8 and its related note retain the text from `main` for a
+separate review. Their definitions, figures and interpretations are not approved
+by this recovery.
 
 ### 6. Descriptive Profiling and Deduplication Redundancy Statistics
 
@@ -264,78 +399,41 @@ episodes with fewer repeat samples.
 
 ## Decisions
 
-All witnesses measured on Rouen 2022–2024 raw data (`data/pmsi`, `data/bact22_24`, `bundle_v3/sir_wide.rds`).
-
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 00.1 | Pre-flight isolation gate | Automated, upfront pre-flight audit executed at ingestion before population selection | Informal, manual, or post-hoc sanity checks | 100 % of checks automated and logged; prevents silent data corruption before deduplication |
-| 00.2 | Relational composite key enclosure | Composite keys `(PATID, EVTID)` and `(PATID, ELTID, souche_id)` | Single-column keys `EVTID` or `ELTID` | In PMSI, 169 `EVTID`s span multiple patients (35 within same source file); in lab, 135 `ELTID`s recycled across patients (up to 2.8 years apart) |
-| 00.3 | Movement interval physical integrity | Assert `DATENT <= DATSORT`; negative stay durations quarantined from exposure | Silently accept negative stays or compute erroneous negative days | Rouen 2022–2024: 80 of 442 183 raw movement rows (0.018 %) have `DATENT > DATSORT` (down to -27 days) and are quarantined; 24 437 unclosed stays (`DATSORT == NA`) |
-| 00.4 | Denominator grain verification | Operational threshold check on `00:00:00` timestamps; rejects intermediate distributions (TW-04.2) | Silently accept mixed temporal resolutions | Rouen has **4.11 %** `DATENT` and **4.08 %** `DATSORT` at 00:00 (clean `datetime`); method defined in `04-donnees-activite.md` (Decision 04.9) |
-| 00.5 | Structure referential link check | Positive perimeter with non-blocking tripwire asserting $\ge 99.9\,\%$ microbiology resolution (TW-05.1) | Blocking pipeline failure on any unmapped code | Admin 362/362 (100 %); lab 272/278 UFs in structure (6 external referral UFs, 68 raw rows, 0 in `sir_wide.rds`) |
-| 00.6 | Intrinsic resistance violations | Quarantined and logged in audit ledger; excluded from indicator numerator | Silently admitted or unverified | In 2024 raw extract, 1 *K. pneumoniae* reported S to ampicillin (outpatient ELTID 376198529, quarantined); 0 violations in eligible hospitalisation perimeter (604/604 R) |
-| 00.7 | Phenotype-AST plausibility | An absent phenotype signal is `FALSE` under Note Xa; a positive flag without matching antibiotic results is logged and processing continues ([TW-06.1](tripwire-register.md#tw-06-1)) | Restrict denominator to explicit test rows | Under Note Xa, *E. coli* BLSE is **7.61 %** (186/2 445); restricting to explicit tests yields distorted **83.04 %** (186/224) |
+| 00.1 | Pre-flight documentation | Specify an upfront audit of supplied data before shared population selection | Informal, undocumented checks | Method requirement; executable common audit not implemented or remeasured here |
+| 00.2 | Stay and sample identifier documentation | Report identifiers associated with multiple patients, affected patients and records, detail tables and separate missing-value counts; identification follows ADR-0007 | Assume single-column identifiers are globally unique or leave missing identifiers undocumented | In PMSI, 169 `EVTID`s span multiple patients (35 within the same source file); in lab, 135 `ELTID`s occur under multiple patients (up to 2.8 years apart) |
+| 00.3 | Movement chronology documentation | Report inverted intervals, missing start/end times and affected stays; no correction or audit exclusion | Leave chronology and missing timestamps undocumented | 80 of 442 183 raw movement rows (0.018 %) have `DATENT > DATSORT` (down to -27 days) and are flagged; 24 437 movements without an end time (`DATSORT == NA`) |
+| 00.4 | Timestamp profile | Report declared resolution and midnight shares by unit and period; no acceptance threshold | Infer timestamp quality from a fixed percentage | Rouen has **4.11 %** `DATENT` and **4.08 %** `DATSORT` at midnight; exposure method defined in `04-donnees-activite.md` (Decision 04.9) |
+| 00.5 | Recorded UF structure matches | Compare recorded PMSI and laboratory ordering UFs to the structure file; report matched/unmatched codes, affected records and missing UF counts; no audit exclusion or coverage threshold | Check all structure UFs against the data or enforce a minimum match percentage | Admin 362/362 (100 %); lab 272/278 recorded UFs found in structure (6 unmatched UFs, 68 raw records) |
+| 00.6 | Susceptible results against natural resistance reference | Count and document S results against uppercase R rules in CA-SFM 2025 V1.1, Section 2, pp. 33-39, respecting exceptions; retain reported results | Infer an error or alter results from the reference comparison alone | In 2024 raw extract, 1 *K. pneumoniae* reported S to ampicillin (outpatient ELTID 376198529); 604/604 results R in the eligible hospitalisation perimeter |
+| 00.7 | Positive phenotype marker summaries | By species, phenotype and year, report positive flags without recorded S/SFP/R marker results and those with all recorded marker results S, using explicit audit panels and denominators; retain values | Infer mechanism validity from susceptibility categories or routinely list every positive isolate | Definitions specified in Test 5.2; measured counts for these two summaries are not documented here |
 | 00.8 | Pre-flight descriptive profiling | Export comprehensive descriptive profile and divergence ledger (`audit_qualite.rds`) | Omit ingestion profiling | Quantifies true within-species redundancy (32.1 % 3-year ratio; 24.9 % repeat episodes; 26.5 % in 2024) and polymicrobial rates (13.5 % target samples) |
 
-Unproven: **0 of 8**.
+The historical examples illustrate the available observations; they do not establish implementation or validation of every check defined here.
 
 ---
 
-## Notes & Tripwires
+## Notes
 
-### 00.2 note — stay and accession number recycling in hospital IT systems
+### 00.2 note — identifiers associated with multiple patients
 
-In French hospital IT infrastructure, stay numbers (`EVTID` / NDA) and laboratory sample numbers
-(`ELTID` / numéro d'échantillon) are generated by independent software systems (CPAGE / Crossway for
-PMSI movements, GLIMS for microbiology):
-- `EVTID` recycling: 169 stays in Rouen's PMSI history belong to $>1$ patient. 35 occur within the
-  same extract source (`SRC == "C"`), showing that hospital registration software recycles numbers
-  over multi-year periods.
-- `ELTID` recycling: 135 `ELTID`s in `bact22_24` belong to $>1$ patient. Temporal analysis proves
-  these are not data collisions: 94.8 % occurred $> 30$ days apart (median 319 days, max 1 038 days),
-  demonstrating that GLIMS uses a cyclical accession counter.
+The Rouen counts above document shared identifiers, not a confirmed explanation
+of how they arose. A time gap between occurrences does not distinguish identifier
+recycling from other source-data issues. No such explanation is required to report
+the finding or to use the composite keys defined in ADR-0007.
 
-Treating `EVTID` or `ELTID` as globally unique identifiers would cross-contaminate patient records.
-ORCHIDEE strictly enforces composite keys:
-$$\text{Stay Key} = (\text{PATID}, \text{EVTID})$$
-$$\text{Isolate Key} = (\text{PATID}, \text{ELTID}, \text{souche\_id})$$
+### 00.3 note — chronological interval findings in PMSI data
 
-### 00.3 note — chronological interval anomalies and quarantine in PMSI data
-
-In raw hospital administrative data, movements with inverted dates (`DATSORT < DATENT`) arise from
-clerical data entry mistakes, emergency ward transfer back-dating, or system synchronization lag.
-
-On Rouen 2022–2024 raw PMSI movements (442 183 rows), the audit identified:
+Among raw PMSI movements (442 183 rows), the historical audit identified:
 - **80 rows** with `DATSORT < DATENT` (negative durations ranging from -0.03 days to -27.0 days).
   All 80 belong to source `SRC == "C"`.
-- **24 437 rows** with `DATSORT == NA` representing unclosed stays (`PMSISTATUT == "E"`, ongoing stays).
+- **24 437 rows** with `DATSORT == NA`, recorded with `PMSISTATUT == "E"`.
 
-Allowing negative durations into exposure calculations would subtract patient-days from unit
-denominators, corrupting incidence densities. The pre-flight audit isolates inverted movements
-into a quarantine ledger, allowing clean closed intervals (417 666 valid movements) to enter
-the geometric interval union (Decision 04.5).
-
-### 00.4 tripwire (TW-04.2) — operational timestamp grain verification
-
-The operational verification check for `TW-04.2` inspects the empirical share of timestamps
-sitting at `00:00:00`:
-- **Statement**: Observed timestamp distribution matches the site's declared resolution.
-- **Rule**: $p_{00} \le 10\,\%$ for `datetime`, $p_{00} \ge 95\,\%$ for `date`. Intermediate
-  proportions trigger a blocking refusal.
-- **Methodology Reference**: The mathematical equivalence of hours and midnights on date-only
-  data is specified in `04-donnees-activite.md` (Decision 04.9).
-
-### 00.5 tripwire (TW-05.1) — structural referential coverage
-
-Asserts that $\ge 99.9\,\%$ of active administrative UFs and microbiology orders resolve in the
-frozen structure snapshot `unit_mapping` (Decision 05.2).
-
-### 00.7 tripwire (TW-06.1) — resistance flags and antibiotic test results
-
-Compares positive BLSE and carbapenemase flags with the relevant antibiotic test results. A positive
-flag without any corresponding results is recorded as a non-blocking finding, and processing
-continues. See the [full TW-06.1 specification](tripwire-register.md#tw-06-1) for exact trigger
-conditions and actions, including when discordant isolates are quarantined.
+The audit reports movement-row counts and distinct stays affected without
+inferring why dates are inverted or end times are missing. The 24 437 rows are
+not necessarily 24 437 distinct stays. Missing final movement end times must
+remain visible when documenting whole-stay boundaries.
 
 ### 00.8 note — clinical significance of deduplication redundancy profiling
 

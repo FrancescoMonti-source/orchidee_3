@@ -1,6 +1,6 @@
 # Dynamic Pipeline Tripwire Register
 
-Status: **settled**. Nine active tripwires, zero unproven, verified against Rouen 2024 baseline data.
+Status: **settled**. Five active tripwires, zero unproven, verified against Rouen 2024 baseline data.
 
 ---
 
@@ -33,15 +33,15 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ---
 
+Pre-flight measurements are documented in `00-audit-qualite.md`. They have no
+tripwire thresholds or enforcement actions; population selection and calculation
+rules remain owned by their method chapters.
+
 ## 2. Master Catalog of Dynamic Tripwires
 
 | Tripwire ID | Name | Pipeline Stage | Target Scope | Action Policy | Rouen 2024 Witness |
 |---|---|---|---|---|---|
 | **TW-04.1** | Unit Denominator Annual Stability | Exposure derivation | PMSI movement exposure | Non-blocking (acknowledgement) | Denominators: 327 301 / 347 303 / 355 246 JH (2022–2024) |
-| **TW-04.2** | Timestamp Grain Resolution | Ingestion & pre-flight audit | Movement timestamps (`DATENT`, `DATSORT`) | Blocking refusal | Rouen: 4.11 % `DATENT`, 4.08 % `DATSORT` at 00:00 (clean `datetime`) |
-| **TW-05.1** | Structure Snapshot Referential Coverage | Referential linkage | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
-| **TW-06.1** | Resistance Flags and Antibiotic Test Results | Ingestion & pre-flight audit | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
-| **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` <!-- citecheck: ok, index row naming the CA-SFM version check; the CA-SFM/SPARES claims are located in the TW-06.2 entry below --> |
 | **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 441 under the 35-column supported panel and 4 441 under the 19-column Annexe 3 *E. coli* list; retained IDs identical |
 | **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 0 co-tested isolates at Rouen; concordance is not assessable; oxacilline fallback: 84 / 1 093 R |
 | **TW-09.1** | EUCAST Exceptional Phenotype Integrity | Diffusion & post-flight audit | Output tables & unquarantined isolates | Non-blocking warning (`manifest.json` flagged for biologist review) | Rouen 2024: 0 exceptional phenotypes (0 VRSA, 0 Amp-S *K. pneumoniae*) |
@@ -71,116 +71,6 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
   327 301 (2022) to 347 303 (2023) and 355 246 (2024), while unfiltered raw days contracted
   sharply (1 016 036 to 564 968) due to ambulatory data warehouse realignment. Zero eligible
   wards breached $\pm 30\,\%$ without recorded structural reorganization.
-
----
-
-### TW-04.2 — Timestamp Grain Resolution
-
-- **Identifier**: `TW-04.2`
-- **Pipeline Stage**: Ingestion & pre-flight audit (`00-audit-qualite.md`, Decision 00.4;
-  `04-donnees-activite.md`, Decision 04.9)
-- **Statement**: The observed distribution of timestamps falling at exactly `00:00:00` matches
-  the site's declared resolution (`datetime` or `date`).
-- **Rationale & Risk**: On pure date-only movements, occupancy hours divided by 24 simplifies
-  identically to midnight presence ($\frac{\text{hours}}{24} \equiv \text{days}$). However, if
-  a hospital delivers mixed-resolution data (e.g. intensive care with real hours and general
-  wards defaulted to `00:00:00`), calculating occupancy hours introduces systematic intra-hospital
-  exposure bias. Intermediate distributions (~40 % at midnight) represent corrupted or
-  partially defaulted extracts and must not be silently accepted.
-- **Trigger Condition**:
-  - If declared `datetime`: Proportion of `DATENT` or `DATSORT` at `00:00:00` $> 10\,\%$.
-  - If declared `date`: Proportion of `DATENT` or `DATSORT` at `00:00:00` $< 95\,\%$.
-  - Any site falling in the intermediate range ($10\,\% < p < 95\,\%$) triggers a failure.
-- **Action on Trip**: Blocking refusal on ingestion. The site adapter must either provide clean
-  timestamps or declare a uniform date-only grain.
-- **Rouen Baseline Witness**: Rouen 2024 movements show 4.11 % of `DATENT` and 4.08 % of `DATSORT`
-  at `00:00:00`, with distinct admission peaks at 08:00 and discharge peaks at 15:00. This
-  confirms a clean `datetime` profile.
-
----
-
-### TW-05.1 — Structure Snapshot Referential Coverage
-
-- **Identifier**: `TW-05.1`
-- **Pipeline Stage**: Referential linkage (`05-structure.md`, Decision 05.2; `00-audit-qualite.md`,
-  Decision 00.5)
-- **Statement**: 100 % of administration UFs with hospitalisation activity, and $\ge 99.9\,\%$
-  of microbiology observations, resolve in the annual establishment structure snapshot.
-- **Rationale & Risk**: In accordance with Decision 03.5, the perimeter is defined positively:
-  unmapped UFs are excluded from surveillance. A tripwire ensures that unmapped codes do not
-  hide newly opened wards or significant clinical activity. A blocking check is refused because
-  microbiology files frequently include inert external reference codes (e.g. referral samples
-  sent from external clinics) that carry no hospitalisation activity.
-- **Trigger Condition**:
-  - Any administrative UF with $> 0$ hospitalisation days missing from `unit_mapping`.
-  - Unmapped microbiology observation UFs $> 0.1\,\%$ of total laboratory observations.
-- **Action on Trip**: Non-blocking warning. Unmapped UFs are logged in the divergence account
-  with isolate and day counts.
-- **Rouen Baseline Witness**: Rouen administration has 362 UFs, 362/362 (100 %) resolved in
-  structure. Microbiology has 278 ordering UFs: 272 resolved in structure; 6 external UFs
-  represent 68 raw laboratory rows and 0 diagnostic isolates in `sir_wide.rds` (100 % resolution
-  for eligible diagnostic isolates).
-
----
-
-<a id="tw-06-1"></a>
-### TW-06.1 — Resistance Flags and Antibiotic Test Results
-
-- **Identifier**: `TW-06.1`
-- **Pipeline Stage**: Ingestion & pre-flight audit (`00-audit-qualite.md`, Decision 00.7;
-  `06-donnees-resistance.md`, Decision 06.5)
-- **Statement**: Positive BLSE and carbapenemase flags are checked against results for the
-  corresponding antibiotics. Wild-type susceptible Enterobacterales have 0 unexplained positive
-  phenotype flags.
-- **Rationale & Risk**: Under SPARES Note Xa, an absent **phenotype signal** is treated as
-  negative (`FALSE`); this is distinct from a positive phenotype with no corresponding antibiotic
-  test result. If a site adapter inverts boolean flags or misinterprets LIS expert comments, a
-  susceptible isolate could be falsely marked as carrying a resistance mechanism, distorting
-  national indicators.
-- **Trigger Condition**:
-  - Any Enterobacterales isolate marked `blse = TRUE` with no interpretable result (`S`, `SFP`, or
-    `R`) for any corresponding 3rd/4th generation cephalosporin (cefotaxime, ceftriaxone,
-    ceftazidime, cefepime).
-  - Any Enterobacterales isolate marked `blse = TRUE` with at least one corresponding result, where
-    all interpretable results are susceptible (`S`). An `R` or `SFP` result supports the flag.
-  - Any isolate marked `carbapenemase = TRUE` with no interpretable result (`S`, `SFP`, or `R`) for
-    any corresponding carbapenem (meropenem, imipenem, ertapenem).
-  - Any isolate marked `carbapenemase = TRUE` with at least one corresponding result, where all
-    interpretable results are susceptible (`S`). An `R` or `SFP` result supports the flag.
-  - Total discordant phenotype-AST isolates $> 0.5\,\%$ of phenotype-positive isolates. Missing-result
-    findings are reported separately and are not included in this proportion.
-- **Action on Trip**: Non-blocking warning; processing continues.
-  - If a positive phenotype has no corresponding antibiotic test result, log that finding in the
-    quality audit ledger and retain the reported phenotype under Decision 06.5.
-  - If corresponding results are present but all are susceptible (`S`), quarantine the discordant
-    isolate from indicator numerators and export it to the quality audit ledger.
-- **Rouen Baseline Witness**: Rouen 2024 has 9 586 *E. coli* isolates: 99.55 % of C3G-susceptible
-  isolates (8 636 / 8 675) carry no BLSE record, and 99.1 % of positive BLSE records coincide with
-  C3G resistance. Exactly 0 wild-type pan-susceptible isolates are flagged BLSE-positive.
-
----
-
-### TW-06.2 — CA-SFM Interpretation Version Referential
-
-- **Identifier**: `TW-06.2`
-- **Pipeline Stage**: Ingestion & standardization (`06-donnees-resistance.md`, Decision 06.6)
-- **Statement**: The antibiogram interpretation referential declared by the site corresponds to
-  CA-SFM/EUCAST $\ge 2020$ (SPARES p. 15) on surveillance campaigns from 2024 onward.
-- **Rationale & Risk**: SPARES requires CA-SFM $\ge 2020$ rules (pp. 7 and 15), where the intermediate
-  category `I` was redefined as "Susceptible at increased exposure" (SFP; SPARES p. 22, and CA-SFM 2025
-  p. 40 for the SFP category). Testing at the row level
-  against raw laboratory version strings (`CASFM`) is dangerous because LIS dictionary updates
-  often lagged behind bench practice (e.g. Rouen 2022 rows carried `CASFM = "2019"` despite clinical
-  2020 compliance; row-level drops discarded whole years). The tripwire verifies site metadata
-  declaration while inspecting raw tags.
-- **Trigger Condition**:
-  - Surveillance campaign $\ge 2024$ with site declared referential $< 2020$.
-  - In raw laboratory data from 2024 onward, $> 5\,\%$ of rows carry explicit `CASFM < 2020`.
-- **Action on Trip**: Warning for historical campaigns ($\le 2023$); blocking refusal on
-  metadata declaration for campaigns $\ge 2024$.
-- **Rouen Baseline Witness**: 100 % of Rouen 2024 raw laboratory rows carry `CASFM == "2022"`.
-  Historical 2022 data with `CASFM = "2019"` dictionary tags are documented and validated via
-  expert review.
 
 ---
 
@@ -279,11 +169,11 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ## 4. Tripwire Governance and Audit Integration
 
-All 9 dynamic tripwires are evaluated automatically during pipeline execution:
-1. **Execution**: Tripwires TW-04.2, TW-05.1, TW-06.1, and TW-06.2 execute during the pre-flight
-   audit (`00-audit-qualite.md`). TW-04.1 executes during exposure calculation. TW-07.1 executes
-   during deduplication. TW-08.1 executes during indicator construction. TW-09.1 and TW-09.2 execute
-   during post-flight quality audit (`09-diffusion.md`) prior to delivery bundle packaging.
+All 5 dynamic tripwires are evaluated automatically during pipeline execution:
+1. **Execution**: TW-04.1 executes during exposure calculation. TW-07.1 executes
+   during deduplication. TW-08.1 executes during indicator construction. TW-09.1 and
+   TW-09.2 execute during post-flight quality audit (`09-diffusion.md`) prior to
+   delivery bundle packaging. Pre-flight measurements have no tripwire triggers.
 2. **Ledger Recording**: The status of all tripwires (PASS / TRIP / ACKNOWLEDGED), their numerical
    readings, and baseline comparisons are recorded in the run metadata (`manifest.json`) and published alongside
    the **indicator table**.

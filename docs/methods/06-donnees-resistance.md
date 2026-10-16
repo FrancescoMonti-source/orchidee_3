@@ -1,6 +1,6 @@
 # 06 - Bacterial resistance data
 
-Status: **settled**. Eight decisions, seven witnesses, one tripwire. Zero unproven.
+Status: **settled**. Eight decisions, seven witnesses, zero tripwires. Zero unproven.
 
 ## What SPARES says
 
@@ -73,18 +73,17 @@ disk synergy rows) into `blse` and `carbapenemase`. In accordance with clinical
 laboratory practice and SPARES Note Xa, an **absent phenotype signal is interpreted as
 negative (`FALSE`)**. Wild-type susceptible strains do not trigger confirmatory testing
 in routine practice. A positive phenotype with no corresponding antibiotic test result
-is recorded as a non-blocking finding and processing continues; see the
-[TW-06.1 specification](tripwire-register.md#tw-06-1).
+is documented in the pre-flight audit (`00-audit-qualite.md`); the reported
+phenotype is retained.
 
 During deduplication, comparison operates on the antibiotic panel. Within a deduplicated
 patient-sample cluster, positive phenotype status is propagated (`any(positive) -> TRUE`).
 
-### 5. CA-SFM referential validation
-Compliance with CA-SFM &ge; 2020 is established via **site run metadata declaration**
-supported by an **ingestion tripwire** on the raw `CASFM` column (when present,
-&ge; 2020 expected for surveillance data from 2024 onward). ORCHIDEE never executes
-row-level drops on historical data where laboratory dictionary tags lagged behind clinical
-reporting.
+### 5. Interpretation standard documentation
+The pre-flight audit records the site's declared interpretation standard and the
+raw `CASFM` version distribution, when available, by year. Differences are
+reported without a trigger threshold. Raw dictionary tags may lag behind clinical
+practice; the audit does not drop records on that basis.
 
 ### 6. Bacterial taxonomy
 Ingestion accepts open raw organism descriptions. A standardized dictionary maps raw
@@ -103,7 +102,7 @@ offline LLM batch harmonization pipeline.
 | 06.3 | Isolate key | `(PATID, ELTID, souche_id)` | collapse same species within sample | 213 triples split across several `souche_id`, 214 extra isolates, 0.4 % |
 | 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; non-interpretive &rarr; `NA` | retain `I` as distinct 4th value | Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
 | 06.5 | Resistance phenotypes | binary isolate attribute; absent phenotype signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
-| 06.6 | CA-SFM validation | run metadata declaration + ingestion tripwire | per-row rejection on raw `CASFM` | 100 % of Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance; per-row drop discards entire historical years <!-- citecheck: ok, decision row naming the CA-SFM version check; the CA-SFM/SPARES requirement is located in the TW-06.2 entry of tripwire-register.md --> |
+| 06.6 | Interpretation standard documentation | Record site declaration and raw version tags by year; no tripwire threshold | Per-row rejection on raw version tags | Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance |
 | 06.7 | Screening contract | sample-level boolean `diagnostic_scope` from site adapter | internal string heuristics (`"recherche"`, `"rectal"`) | `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
 | 06.8 | Bacterial scope | open ingestion &rarr; mapping to the target species list (SPARES Annexe 5, pp. 28-30) &rarr; counted residual | closed hardcoded filter | isolates outside target species logged and surfaced; mapping dictionary maintained via offline LLM batch job |
 
@@ -111,7 +110,7 @@ Unproven: **0 of 8**.
 
 ---
 
-## Notes & Tripwires
+## Notes
 
 ### 06.5 note: Phenotypes in deduplication
 In v2, BLSE and carbapenemase were treated as pseudo-molecules in the antibiotype vector.
@@ -120,13 +119,12 @@ Enterobacterales (+4 *E. coli*, +3 *K. pneumoniae*). SPARES compares BLSE and
 carbapenemase in deduplication and reads a blank phenotype cell as absent, unlike
 a blank antibiotic cell, which is missing data (SPARES p. 11). ORCHIDEE therefore
 treats phenotypes as isolate attributes, not as molecules, which avoids
-artificial discrepancies driven by delayed confirmatory testing. Phenotype-AST biological plausibility
-is guarded by [tripwire TW-06.1](tripwire-register.md#tw-06-1), whose full trigger conditions
-and actions are defined in that register entry.
+artificial discrepancies driven by delayed confirmatory testing. The pre-flight audit documents positive phenotype flags alongside corresponding
+antibiotic results without changing the reported phenotype (`00-audit-qualite.md`).
 
-### 06.6 tripwire (TW-06.2)
-**Statement**: Ingestion checks that raw `CASFM` &ge; 2020 on surveillance data from 2024 onward. (Cataloged as `TW-06.2` in `tripwire-register.md`).
-**Today**: 100 % of Rouen 2024 rows carry `CASFM == "2022"`.
+### 06.6 note — interpretation standard versions
+Rouen 2024 rows carry `CASFM == "2022"`. Version tags and site declarations are
+reported descriptively; no pre-flight tripwire threshold is set.
 
 ---
 

@@ -37,4 +37,5 @@ midnight presence on pure date-only movement extracts (`Finding 8`).
 - The unit of exposure is always traceable to specific patient movement intervals.
 - The numerator (deduplicated isolates) and denominator (exposure hours/days) are
   bound to the exact same positive clinical perimeter.
-- Tripwire `TW-04.2` protects against mixed-grain timestamp contamination.
+- The pre-flight audit documents declared timestamp resolution and midnight
+  shares by unit and period, without an acceptance threshold (`00-audit-qualite.md`).
