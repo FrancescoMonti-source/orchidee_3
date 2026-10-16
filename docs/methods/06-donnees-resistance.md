@@ -1,6 +1,8 @@
 # 06 - Bacterial resistance data
 
-Status: **settled**. Eight decisions, seven witnesses, zero tripwires. Zero unproven.
+Status: **reviewed audit reporting retained; shared input boundary clarified**.
+Mapping details remain open. This recovery implements no executable audit or
+automatic response and remeasures no historical witnesses.
 
 ## What SPARES says
 
@@ -37,31 +39,67 @@ Enterobacterales and Pseudomonas.
 ## What ORCHIDEE does
 
 ### 1. Isolate identity
-An **isolate** is identified by `(PATID, ELTID, souche_id)`. `souche_id` (or `DLVL` in
-raw GLIMS exports) distinguishes separate strains recovered from the same sample.
+An **isolate** is identified by `(PATID, ELTID, isolate_id)`. `isolate_id` is the
+local isolate identifier: it distinguishes separately recorded isolates recovered
+from the same sample, including multiple isolates of the same species. Its value
+can recur in other samples, so the full composite key is required.
+
+Historical witness files call this field `souche_id`; Rouen's raw GLIMS exports
+call it `DLVL`. Preparing v3 data maps those source names to `isolate_id`. Witness
+scripts reading historical bundles continue to use their actual column names.
+
+The isolate exists before deciding whether it duplicates another recovery.
+Deduplication preserves the original key of the retained isolate; it does not
+rename the column or issue a new identity after grouping. The key identifies an
+individual recovery, while a duplicate group belongs to a particular analysis.
+See the [English–French glossary](../../CONTEXT.md#englishfrench-terminology).
 `EVTID` is retained for stay attribution and grouping witnesses.
 
 ### 2. Screening exclusion and site boundary
-**Screening is excluded** at population selection: after ingestion and before
-deduplication. Screening rows are ingested and marked via the boolean contract key
-`diagnostic_scope`, never dropped during extraction, allowing ORCHIDEE to publish
-exact excluded counts.
+The **site adapter** cleans and maps local data, classifies samples as diagnostic
+or screening, applies diagnostic selection, and retains isolates with an
+antibiogram **before supplying the standardized site handoff** (ADR-0003).
+The common microbiology audit starts from that prepared diagnostic antibiogram
+population and accepts correct local preparation and selection as assumptions.
+`diagnostic_scope` describes the site's diagnostic classification; it is not a
+requirement to supply screening rows for the common core to exclude later.
 
-Screening vs diagnostic classification is strictly a **site adapter responsibility**
-(ADR 0003). In French hospital bacteriology, `"Recherche de [X]"` is the standard
-prefix for both screening orders and targeted infectious diagnostics. Core ORCHIDEE
-never executes blanket text searches (e.g. `grepl("recherche")`), which corrupt
-diagnostic data.
+The shared audit does not revalidate local classification, recognise antibiogram
+eligibility again, inspect raw labels or comments, or recover upstream exclusions.
+No shared count of excluded screening records is required from unavailable rows.
+The historical keyword witness explains why interpretation belongs locally;
+the common core does not reinterpret local analysis codes.
+
+Shared hospital perimeter selection follows the audit. Analysis-specific
+specimen selection also precedes deduplication. Local diagnostic and antibiogram
+selection does not authorise additional local perimeter exclusions. Emergency
+linkage remains governed by chapter 05 and ADR-0009. Hospitalisation activity
+retains its own population, including relevant activity from patients without a
+culture or antibiogram.
 
 ### 3. Result alphabet
 For every tested molecule, clinical categories are mapped to a strict ternary alphabet:
 - **`S`** (sensible à posologie standard)
 - **`SFP`** (sensible à forte posologie / intermédiaire)
 - **`R`** (résistant)
-- **`NA`** (untested, missing, or uninterpretable tokens such as `NC` / `Non côté`)
+- **`NA`** (not tested by default, unless other source information explicitly establishes otherwise)
+
+An individual antibiotic `NA` does not remove an isolate whose antibiogram is
+already in the supplied population. If source information establishes a test
+with a missing or uninterpretable result (for example `NC` / `Non côté`), local
+preparation keeps that distinction explicit instead of treating every `NA` as
+equivalent evidence. Any source-comment interpretation belongs to that local
+preparation, not a common raw-comment reader or a new antibiogram eligibility
+check. Result-profile counting remains part of the separate Suite 6 review.
 
 Historical results with `I` (CA-SFM &le; 2022) are read as `SFP`. Measurement caveat
 `ZIT` (zone d'incertitude technique) is read as `SFP`.
+
+At indicator construction, `SFP` belongs to the `S` side; see chapter 08,
+decision 08.2. Thus the current methods give both source `I` and source `ZIT`
+the path `SFP` then `S` for that classification. They are recognised values
+with established rules, not unknown strings or missing results. The `ZIT`
+mapping is an ORCHIDEE choice, recorded in decisions 06.2 and 07.5.
 
 ### 4. Resistance phenotypes (BLSE, Carbapenemase)
 For Enterobacterales (and carbapenemase in *P. aeruginosa* and *A. baumannii*),
@@ -71,7 +109,7 @@ not as antibiotic rows.
 The site adapter maps local laboratory signals (confirmatory tests, expert comments,
 disk synergy rows) into `blse` and `carbapenemase`. In accordance with clinical
 laboratory practice and SPARES Note Xa, an **absent phenotype signal is interpreted as
-negative (`FALSE`)**. Wild-type susceptible strains do not trigger confirmatory testing
+negative (`FALSE`)**. Wild-type susceptible isolates do not trigger confirmatory testing
 in routine practice. A positive phenotype with no corresponding antibiotic test result
 is documented in the pre-flight audit (`00-audit-qualite.md`); the reported
 phenotype is retained.
@@ -80,16 +118,25 @@ During deduplication, comparison operates on the antibiotic panel. Within a dedu
 patient-sample cluster, positive phenotype status is propagated (`any(positive) -> TRUE`).
 
 ### 5. Interpretation standard documentation
-The pre-flight audit records the site's declared interpretation standard and the
-raw `CASFM` version distribution, when available, by year. Differences are
-reported without a trigger threshold. Raw dictionary tags may lag behind clinical
-practice; the audit does not drop records on that basis.
+The common audit records the site's declared interpretation standard and any
+version metadata supplied through the handoff, by year. Differences are reported
+without a trigger threshold. Inspection of native tags such as `CASFM` remains
+local; the core does not read raw laboratory exports. Raw dictionary tags may
+lag behind clinical practice and do not justify audit exclusions.
 
 ### 6. Bacterial taxonomy
-Ingestion accepts open raw organism descriptions. A standardized dictionary maps raw
-taxa to the target ONERBA/SPARES species list. Unmapped isolates are logged and counted.
-Taxonomic mapping expansion is decoupled from pipeline execution and delegated to an
-offline LLM batch harmonization pipeline.
+Local preparation starts from the **previous ORCHIDEE bacterial and antibiotic
+mappings and improves them**. This is the user's agreed foundation, not a
+declaration that all existing entries are correct. No dictionary changes are
+implemented by this revision.
+
+Local organism descriptions are translated on the site side; the common audit
+consumes prepared identities rather than interpreting those descriptions.
+Isolates without an assignable mapped taxon remain visible in the inventory.
+Exact antibiotic equivalences, species/complex groupings and target lists remain
+mapping decisions where not already settled. A source species list (SPARES
+Annexe 5, pp. 28–30)
+does not itself decide those ORCHIDEE mappings.
 
 ---
 
@@ -97,16 +144,18 @@ offline LLM batch harmonization pipeline.
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 06.1 | Screening samples | excluded before deduplication | included | +5.6 % isolates; céfotaxime 16.96 &rarr; 25.19 %R (+8.23 pp); ertapénème x4.3. `docs/worked-examples/screening-exclusion.md` |
+| 06.1 | Screening samples | excluded locally before the site handoff and common audit, hence before deduplication | included | Historical: +5.6 % isolates; céfotaxime 16.96 &rarr; 25.19 %R (+8.23 pp); ertapénème x4.3. `docs/worked-examples/screening-exclusion.md` |
 | 06.2 | `ZIT` against `SFP` | `ZIT` is read as `SFP` under the ORCHIDEE mapping decision | `ZIT` treated as missing data | see 07.5: 4 441 isolates against 4 431 under the alternative conflict rule. `docs/worked-examples/deduplication.md` |
-| 06.3 | Isolate key | `(PATID, ELTID, souche_id)` | collapse same species within sample | 213 triples split across several `souche_id`, 214 extra isolates, 0.4 % |
-| 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; non-interpretive &rarr; `NA` | retain `I` as distinct 4th value | Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
+| 06.3 | Isolate key | `(PATID, ELTID, isolate_id)` | collapse same species within sample | 213 triples split across several local isolate identifiers (historical `souche_id`), 214 extra isolates, 0.4 % |
+| 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; individual `NA` defaults to not tested unless source information establishes otherwise | retain `I` as distinct 4th value | Historical Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
 | 06.5 | Resistance phenotypes | binary isolate attribute; absent phenotype signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
-| 06.6 | Interpretation standard documentation | Record site declaration and raw version tags by year; no tripwire threshold | Per-row rejection on raw version tags | Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance |
-| 06.7 | Screening contract | sample-level boolean `diagnostic_scope` from site adapter | internal string heuristics (`"recherche"`, `"rectal"`) | `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
-| 06.8 | Bacterial scope | open ingestion &rarr; mapping to the target species list (SPARES Annexe 5, pp. 28-30) &rarr; counted residual | closed hardcoded filter | isolates outside target species logged and surfaced; mapping dictionary maintained via offline LLM batch job |
+| 06.6 | Interpretation standard documentation | Record the site declaration and supplied version metadata by year; native tag inspection remains local; no audit threshold | Per-row rejection on raw version tags | Historical Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance |
+| 06.7 | Diagnostic selection | local adapter classifies and applies diagnostic scope before the handoff; common audit accepts the prepared population | common raw-label heuristics or reclassification | Historical: `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
+| 06.8 | Bacterial and antibiotic mappings | improve the previous ORCHIDEE mappings locally; common audit consumes prepared identities and inventories unassigned taxa | reinterpret local labels in the core or assume every previous entry correct | Existing mapping work is reused; no new measurement or dictionary validation is claimed. |
 
-Unproven: **0 of 8**.
+The boundary and mapping foundation are agreed design decisions. Historical
+figures above do not validate the revised common audit or settle the remaining
+mapping choices.
 
 ---
 
@@ -123,20 +172,21 @@ artificial discrepancies driven by delayed confirmatory testing. The pre-flight 
 antibiotic results without changing the reported phenotype (`00-audit-qualite.md`).
 
 ### 06.6 note — interpretation standard versions
-Rouen 2024 rows carry `CASFM == "2022"`. Version tags and site declarations are
-reported descriptively; no pre-flight tripwire threshold is set.
+Historical Rouen 2024 rows carry `CASFM == "2022"`. The common audit records
+supplied declarations descriptively, without a trigger threshold. Native tag
+inspection remains local.
 
 ---
 
 ## Open
 
-None. Section 06 is fully settled.
-- **Site screening coding variance**: As documented in `docs/worked-examples/screening-exclusion.md`,
-  differences in how hospital LISs categorize borderline screening samples directly impact
-  resistance rates. This cannot be resolved centrally by heuristics; ORCHIDEE publishes
-  the exact volume of excluded screening samples alongside resistance indicators so that
-  inter-hospital comparisons remain transparent and auditable.
-- **Taxonomy dictionary maintenance**: Target taxonomy mapping from local laboratory
-  microorganism strings to the target species list (SPARES Annexe 5, pp. 28-30) is scheduled as an
-  offline LLM batch job. ONERBA (p. 23) asks for species-level identification following bacterial
-  taxonomy but publishes no code list, so there are no "ONERBA standard codes".
+- **Mapping details**: exact antibiotic equivalences, bacterial species/complex
+  treatment and target lists remain open where not already settled, using the
+  previous mappings as the foundation. This revision neither implements an
+  offline dictionary job nor approves particular entries.
+- **Suite 6**: descriptive-profile definitions remain deferred to its separate
+  review. This recovery does not approve the existing profile calculations.
+
+Local diagnostic selection and the supplied antibiogram population are settled
+assumptions. They are not open questions about common classification, source
+certification or publication of excluded screening counts.

@@ -1,4 +1,4 @@
-# 00 - Pre-flight data quality and coherence audit
+# 00 - Audit of standardized input data
 
 Status: **Suites 1–5 recovered from the reviewed checkpoint; Suite 6 pending**.
 The audit documents and flags findings without automatic action or acceptance
@@ -33,24 +33,48 @@ denominator used (SPF p. 5):
 > numérateur et dénominateur utilisés (le nombre de souches avec une résistance, le
 > nombre de souches testés, le nombre total de JH).
 
-Data quality and plausibility cannot remain an unrecorded manual step or an informal
-exchange between the national mission and an establishment. In ORCHIDEE, data
-quality findings must be documented automatically and transparently before any population selection,
-exposure calculation, or deduplication takes place.
+ORCHIDEE specifies a common input audit of the prepared site handoff. The
+pipeline position below is an ORCHIDEE design decision; the source passages
+motivate explicit, documented quality information.
 
 ---
 
 ## What ORCHIDEE does
 
-ORCHIDEE operationalizes SPARES Page 16 §1 by introducing an **upfront, automated
-pre-flight data quality and coherence audit**. This audit runs as an automated assessment
-immediately upon ingestion of the **site handoff**, before any data reaches population
-selection, exposure calculation, or deduplication.
+The common audit examines the **standardized site handoff after local cleaning,
+antibiotic and bacterial mappings, diagnostic selection and retention of isolates
+with an antibiogram**. Correct local preparation is accepted as an input
+assumption. Shared hospital perimeter selection and analysis-specific specimen
+selection follow the audit and precede deduplication (ADR-0003).
 
-The audit documents and flags findings. It does not exclude records, alter reported
-results, or block processing. Population selection, exposure calculation and unit
-attribution remain governed by their respective chapters; an audit flag is not an
-eligibility decision.
+```
+Local sources
+    -> local preparation, mappings and diagnostic antibiogram selection
+    -> standardized site handoff
+    -> common input audit
+    -> shared hospital perimeter and analysis-specific specimen selection
+    -> deduplication
+    -> indicator construction
+```
+
+The shared core reads the prepared handoff. Each site owns its source-specific
+classification and preparation; the common audit does not inspect native
+comments, reclassify diagnostic samples or recover upstream exclusions. Local
+preparation does not authorise additional local hospital perimeter exclusions.
+Hospitalisation activity retains its own population, including relevant activity
+from patients without a culture or antibiogram. Emergency linkage remains governed
+by chapter 05 and ADR-0009.
+
+**Document findings only.** The audit sets no acceptance thresholds, changes no
+reported results, excludes no records and blocks no processing. Population
+selection, exposure calculation and unit attribution remain in their owning
+chapters. This recovery implements no executable audit and remeasures no counts.
+
+Fields such as `PATID`, `EVTID` and `ELTID` name concepts to bind to the prepared
+common input; they do not require Rouen's native schema. The reviewed checks use
+available values and history. A missing input is reported as not assessable;
+preparation may make earlier source variation unavailable to the common audit.
+The audit does not require sites to reconstruct discarded source histories.
 
 The pre-flight audit inspects six core domains:
 
@@ -82,7 +106,7 @@ Section 00 Pre-Flight Audit
 ├── Suite 5: Reported Microbiology and Interpretation Standards
 │   ├── Test 5.1: Count recorded S results against uppercase R rules in CA-SFM 2025 V1.1 (pp. 33-39)
 │   ├── Test 5.2: Summarise positive BLSE/carbapenemase flags with no recorded S/SFP/R marker result or with all recorded marker results S
-│   └── Test 5.3: Document the declared interpretation standard and raw CASFM version tags
+│   └── Test 5.3: Document the declared interpretation standard and supplied version metadata
 │
 └── Suite 6: Descriptive Profiling & Redundancy Statistics
     ├── Test 6.1: Global Entity Volumes (counts of distinct PATID, EVTID, ELTID, isolates)
@@ -119,7 +143,9 @@ these observations without inferring their cause.
 The audit does not construct, repair or deduplicate isolates. Multiple antibiotic-result
 rows belonging to one isolate are expected and are not counted as duplicate isolates.
 The composite keys remain the identification rule defined in ADR-0007: `(PATID, EVTID)`
-for stays and `(PATID, ELTID, souche_id)` for isolates (Decision 06.3).
+for stays and `(PATID, ELTID, isolate_id)` for isolates (Decision 06.3).
+Historical witness files name the local isolate field `souche_id`; Rouen's raw
+export names it `DLVL`. Those aliases do not change the complete isolate key.
 
 **Rouen examples:**
 
@@ -317,9 +343,12 @@ in the structure file are not included in these denominators.
   Neither finding establishes that a mechanism flag is wrong. Retain reported
   phenotypes and antibiotic results. No exclusion, correction or trigger threshold
   follows from these summaries.
-- **Interpretation standard versions (Test 5.3)**: Record the site's declared interpretation
-  standard and the distribution of raw `CASFM` version tags, when available, by year.
-  Document differences without imposing a trigger threshold or excluding records.
+- **Interpretation standard versions (Test 5.3)**: Record the site's declared
+  interpretation standard and any version metadata supplied through the handoff,
+  by year. Document differences without imposing a trigger threshold or excluding
+  records. Inspection of native tags such as Rouen's `CASFM` remains local; the
+  common audit does not read raw laboratory exports. A missing declaration is
+  reported as unavailable.
 
 ---
 
@@ -401,7 +430,7 @@ episodes with fewer repeat samples.
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 00.1 | Pre-flight documentation | Specify an upfront audit of supplied data before shared population selection | Informal, undocumented checks | Method requirement; executable common audit not implemented or remeasured here |
+| 00.1 | Common input audit | Audit the prepared diagnostic antibiogram handoff before shared hospital perimeter selection and deduplication; accept completed local preparation | Reclassify local source data in the common core | Agreed boundary; executable common audit not implemented or remeasured here |
 | 00.2 | Stay and sample identifier documentation | Report identifiers associated with multiple patients, affected patients and records, detail tables and separate missing-value counts; identification follows ADR-0007 | Assume single-column identifiers are globally unique or leave missing identifiers undocumented | In PMSI, 169 `EVTID`s span multiple patients (35 within the same source file); in lab, 135 `ELTID`s occur under multiple patients (up to 2.8 years apart) |
 | 00.3 | Movement chronology documentation | Report inverted intervals, missing start/end times and affected stays; no correction or audit exclusion | Leave chronology and missing timestamps undocumented | 80 of 442 183 raw movement rows (0.018 %) have `DATENT > DATSORT` (down to -27 days) and are flagged; 24 437 movements without an end time (`DATSORT == NA`) |
 | 00.4 | Timestamp profile | Report declared resolution and midnight shares by unit and period; no acceptance threshold | Infer timestamp quality from a fixed percentage | Rouen has **4.11 %** `DATENT` and **4.08 %** `DATSORT` at midnight; exposure method defined in `04-donnees-activite.md` (Decision 04.9) |
@@ -454,3 +483,9 @@ Measuring deduplication redundancy at ingestion provides vital clinical and oper
 - **Action following a quality finding.** In a separate discussion, specify and trace what happens
   after each check finds a problem, including when the outcome is report-only. Keep each action with
   its owning check or tripwire entry; this note is the follow-up marker, not a parallel action register.
+
+- **Common input fields.** Bind the reviewed concepts to the portable fields and
+  available metadata without changing their populations, counting units or
+  denominators. Unavailable inputs remain not assessable.
+- **Suite 6.** Its body, decision 00.8 and related note are retained from `main`
+  and await a separate review; their interpretations are not approved here.

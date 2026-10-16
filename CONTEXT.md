@@ -14,15 +14,36 @@ builds and first operates the product; it holds no privileged position in the
 model.
 _Avoid_: établissement (when the running hospital is meant), client, partner
 
+**Semantic mapping** (*mise en correspondance sémantique*):
+A documented correspondence between a source label or code and a defined
+category or concept, such as a specimen category, bacterial taxon or antibiotic
+identity. It classifies recorded information; it does not by itself define
+eligibility for a surveillance analysis.
+
+**Common input audit** (*audit des données standardisées en entrée*):
+Examination of the site handoff at the point where sites converge on a shared
+representation, after local cleaning, mappings, diagnostic selection and
+retention of isolates with an antibiogram, and before shared hospital perimeter
+selection and deduplication. It assesses the prepared data's structure and
+coherence, accepting correct local preparation as an input assumption. It does
+not revalidate diagnostic classification or recover records removed upstream.
+Hospitalisation activity keeps its own population, including relevant activity
+from patients without a culture or antibiogram.
+
 **Site handoff**:
 The fixed set of files a site produces to feed v3, in which the site has
-already translated its local codes into v3's vocabulary. The boundary
-between what a hospital owns and what v3 owns.
+already translated its local codes into v3's vocabulary. Its microbiology data
+contain diagnostic isolates with an antibiogram, selected by the site adapter.
+The shared hospital perimeter is applied later. The boundary between what a
+hospital owns and what v3 owns.
 _Avoid_: import, extract, input files
 
 **Site adapter**:
 Site-specific code and reference data that turns one hospital's raw exports
-into a site handoff. Lives outside the v3 core, which never reads it.
+into a site handoff. It owns cleaning, antibiotic and bacterial mappings,
+diagnostic classification and selection, and retention of isolates with an
+antibiogram. Lives outside the v3 core, which never reads it. Local preparation
+does not authorise additional local hospital perimeter exclusions.
 _Avoid_: connector, ETL
 
 **Indicator table**:
@@ -114,12 +135,75 @@ bacteriology export. A Rouen fact, not part of the model.
 
 ### Resistance measurement
 
+#### English–French terminology
+
+| English term used here | French term | Meaning |
+|---|---|---|
+| Species | Espèce bactérienne | Bacterial classification, such as *Escherichia coli*. |
+| Patient–species pair | Couple patient–espèce | One patient considered together with one bacterial species when counting isolates within a stated population, period and specimen scope. |
+| Sample / specimen | Prélèvement / échantillon | Material collected from a patient on a particular sampling occasion. |
+| Sample type | Type / nature de prélèvement | The category of sample, such as urine or blood culture. |
+| Isolate | Isolat; also called *souche* in source passages | An individual bacterial recovery recorded for a sample, before deciding whether it duplicates another recovery. |
+| Strain | Souche au sens de lignée biologique | A bacterial lineage that can persist across samples and patients. |
+| Antibiotype panel | Panel d'antibiotiques | The set of antibiotics on which the profile is read. |
+| Antibiotype | Antibiotype | The susceptibility results across that panel. |
+| Antibiogram | Antibiogramme | The susceptibility examination and, by extension, its results or report carrying the antibiotype. |
+| Antibiotic-result record | Ligne de résultat de sensibilité à un antibiotique | One recorded result for one antibiotic attached to an isolate. |
+| Compatible isolates | Isolats compatibles pour le dédoublonnage | Two isolates that satisfy the operational comparison rule. |
+| Retained isolate | Isolat conservé après dédoublonnage | The isolate selected from a duplicate group to contribute its results to an analysis. |
+
+The French word *souche* needs context. In its biological sense it refers to a
+lineage. The SPARES method also calls individual recoveries *souches*, defines
+duplicates through patient, species, antibiotype, period and sample type, and
+compares resistance phenotypes (SPARES pp. 10-11 and 14-15). Its phrase
+« pour une même souche » introduces the counting rule on p. 16. Our operational
+reading of that phrase is documented as an inference in
+`docs/methods/07-dedoublonnage.md`: compatible isolates may be grouped for an
+analysis, without establishing that they belong to one biological lineage.
+
+For example, two samples from the same patient can each yield an *E. coli*
+isolate. There are two isolates before deduplication. If they form one duplicate
+group under the declared rules, one retained isolate contributes to that
+analysis. Their matching antibiotypes alone do not establish a shared lineage.
+Incomplete antibiotypes can make grouping ambiguous; the grouping rule remains
+necessary alongside the pairwise comparison rule.
+
+**Species**:
+A bacterial classification, such as *Escherichia coli*. Several isolates can
+belong to the same species, including isolates recovered from the same sample.
+
+**Patient–species pair**:
+One patient considered together with one bacterial species when counting isolates
+within a stated population, period and specimen scope. Two or more isolates for
+that pair means at least two isolates of that species recorded for that patient;
+it does not establish infection episodes or membership of a duplicate group.
+_Avoid_: repeated pair, episode, duplicate group (when this descriptive pair is meant)
+
+**Sample / specimen**:
+Material collected from one patient on a particular sampling occasion and
+identified in the laboratory data. One sample can yield several isolates.
+
+**Sample type**:
+The category assigned to a sample, such as urine or blood culture. It describes
+the sample, while species describes the recovered bacteria.
+
 **Isolate**:
-The bacteria of one species recovered from one sample of one patient and tested
-against antibiotics. The unit that indicators count, and the unit deduplication
-removes. The source documents call it *souche*; their « même souche » is a
-relation between two isolates (see Compatible isolates), not the same strain.
+A separately recorded bacterial recovery from one sample of one patient, with
+its species identification and associated antibiotic susceptibility results.
+It exists before deciding whether it duplicates another recovery. A sample can
+contain several separately recorded isolates of the same species. Deduplication
+selects retained isolates for an analysis; it does not create the original
+isolates or establish their biological lineage.
 _Avoid_: souche (in English text), strain, germ
+
+**Isolate identifier (`isolate_id`)**:
+The laboratory's identifier distinguishing separately recorded isolates within a
+sample. The full isolate key is `(PATID, ELTID, isolate_id)`; the `isolate_id`
+value alone can recur in other samples. Historical witness files call this field
+`souche_id`, and Rouen's raw GLIMS export calls it `DLVL`. These names are mapped
+to `isolate_id` when preparing v3 data. Deduplication preserves the original
+isolate key for each retained isolate. Whether an isolate is retained or is a
+duplicate is a property of the analysis, not a change to its identity.
 
 **Strain**:
 A bacterial lineage, which can persist across several samples and several
@@ -131,9 +215,10 @@ _Avoid_: using "strain" where the counted unit is meant
 **Compatible isolates**:
 Two isolates of the same patient and species with no major discrepancy on any
 molecule tested in both, and the same resistance phenotypes. What the sources
-mean by « même souche » or « même antibiotype » between two isolates. A relation
-between two isolates, not a class: A compatible with B and B compatible with C
-does not make A compatible with C.
+call « même souche » or « même antibiotype » is given this operational reading
+in chapter 07, with the source locators and the limits of that inference.
+Compatibility is a relation between two isolates, not a class: A compatible with
+B and B compatible with C does not make A compatible with C.
 _Avoid_: same antibiotype, same souche, identical
 
 **Duplicate group**:
@@ -156,7 +241,8 @@ _Avoid_: doublon prélèvement (in English text)
 
 **Retained isolate**:
 The one isolate kept for a duplicate group. It alone carries the group's
-results into the indicators.
+results into the indicators. It keeps its original isolate identifier; the
+qualifier "retained" describes its role in that analysis.
 _Avoid_: representative, survivor
 
 **Retention rule**:
@@ -179,6 +265,22 @@ retention rule.
 An isolate's pattern of S / SFP / R results across a declared set of molecules.
 Not a property of the isolate alone: it exists only relative to a panel.
 _Avoid_: resistance profile, susceptibility pattern
+
+**Antibiogram**:
+The antibiotic susceptibility examination and, by extension, its results or
+report. The antibiotype is the susceptibility pattern read from those results
+on a declared panel.
+
+An individual antibiotic `NA` means not tested unless other source information
+explicitly establishes otherwise. Source-comment interpretation belongs to the
+site adapter. An individual `NA` does not remove an isolate already supplied
+with an antibiogram; it is distinct from an absent enzymatic phenotype signal.
+
+**Antibiotic-result record**:
+One record carrying a susceptibility result for one antibiotic attached to an
+isolate. Several such records describe one isolate's antibiogram. Repeated
+records for the same isolate and antibiotic require an explicit resolution rule;
+counting records does not count isolates.
 
 **Antibiotype panel**:
 The set of molecules an antibiotype is read on. Widening it changes which
@@ -203,14 +305,16 @@ blank result is never a difference.
 **Diagnostic sample**:
 A sample taken to identify the cause of a suspected infection (the sources'
 « prélèvement à visée diagnostique »). The only samples resistance indicators
-include. Each site decides which of its sample types are diagnostic; v3
-does not decide it for them.
+include. Each site classifies its samples and applies diagnostic selection
+before the site handoff; the common audit accepts that local decision.
 _Avoid_: clinical sample, prélèvement
 
 **Screening sample**:
 A sample taken to detect colonisation or carriage rather than to diagnose an
 infection (the sources' « prélèvement à visée écologique »: recherche de
-colonisation, portage, dépistage). Resistance indicators exclude it.
+colonisation, portage, dépistage). The site adapter excludes it before supplying
+the microbiology handoff. The common audit does not receive screening rows to
+reclassify them or calculate their excluded count.
 _Avoid_: surveillance sample, prélèvement écologique (in English text)
 
 **SFP** (sensible à forte posologie):
@@ -258,9 +362,11 @@ different profiles cannot be added: the sum has no unit.
 _Avoid_: counting method, convention
 
 **Population selection**:
-Every step that decides which isolates are analysed: the perimeter, the
-diagnostic samples, the period. It runs after ingestion and before deduplication,
-never after it, because deduplication is not monotone — removing an isolate from
+Every step that decides which isolates are analysed. Diagnostic selection and
+retention of isolates with an antibiogram occur locally before the common input
+audit. The shared pipeline subsequently applies the hospital perimeter, period
+and analysis-specific specimen restrictions before deduplication. Selection
+never follows deduplication, because it is not monotone — removing an isolate from
 its input can add one to its result. A selection applied afterwards is a
 different operation wearing the same name.
 _Avoid_: filtering, subsetting, scoping

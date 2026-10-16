@@ -47,8 +47,8 @@ collapsed.
 
 ## What ORCHIDEE does
 
-ORCHIDEE applies this rule, and records the four inputs it depends on with every
-number it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
+ORCHIDEE records the deduplication rules and input population with every number
+it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
 
 | Input | Value |
 |---|---|
@@ -57,7 +57,9 @@ number it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
 | Antibiotype panel | every antibiotic the site tests |
 | Conflict rule | `S <-> R` and `SFP <-> R` major; `S <-> SFP` minor; `ZIT` read as `SFP` |
 | Phenotypes | BLSE and carbapenemase compared; a blank flag is absent (`ADR-0005`) |
-| Population selection | the perimeter object and the diagnostic scope; see `03-activites.md` |
+| Supplied microbiology population | diagnostic isolates with an antibiogram; local selection completed before the common audit |
+| Hospital perimeter | the shared, versioned set of eligible units; see `03-activites.md` |
+| Period and specimen scope | the declared surveillance period and analysis-specific specimen restriction, applied before deduplication |
 
 The window is expressed as a predicate over a pair of isolates,
 `same_window(i, j)`, not as a grouping column. A calendar window is
@@ -65,8 +67,10 @@ The window is expressed as a predicate over a pair of isolates,
 refractory window cheap to add later.
 
 Deduplication runs **after** population selection and **before** indicator
-computation. It never runs before the screening exclusion; see
-`06-donnees-resistance.md` for why the order is part of the rule.
+computation. Diagnostic selection and retention of isolates with an antibiogram
+are completed locally before the site handoff and common audit. Shared hospital
+perimeter selection follows that audit; analysis-specific specimen selection
+also precedes deduplication. See `06-donnees-resistance.md` and ADR-0003.
 
 That ordering is not a precaution specific to screening. Deduplication is **not
 monotone**: removing a row from its input can add a row to its result, because
@@ -93,7 +97,7 @@ All witnesses are measured on real Rouen rows. Method and scripts:
 | 07.4 | Antibiotype panel | everything the site tests | the species\' SPF Annexe 3 list (SPF p. 20) | the 35-column supported panel and 19-column Annexe 3 *E. coli* list retain 4 441 isolates each, with identical retained IDs; guarded by a tripwire |
 | 07.5 | Conflict rule | `SFP <-> R` is major; `ZIT` is read as `SFP` | `ZIT` never conflicts | 4 441 vs 4 431 retained isolates; AMC %R is 39.23 % vs 39.16 % |
 | 07.6 | Comparison when antibiograms are incomplete | compare a new isolate with **every** isolate of a duplicate group | with the retained isolate only (the witness code until now); with the first isolate of the group; merge every chain of compatible isolates | Rouen 2022-2024: same retained isolates as the witness code in every group; comparing with the first isolate merges a major discrepancy in 1, 0 and 1 groups; `docs/worked-examples/incomplete-antibiotypes.md` |
-| 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `souche_id` | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
+| 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `isolate_id` (historical `souche_id`) | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
 
 Unproven: **2 of 7**.
 

@@ -1,6 +1,8 @@
 # Dynamic Pipeline Tripwire Register
 
-Status: **settled**. Five active tripwires, zero unproven, verified against Rouen 2024 baseline data.
+Status: **five downstream checks catalogued**. Common input audit measurements
+are report-only, without acceptance thresholds or enforcement actions. The
+catalogue does not establish implementation of an executable common audit.
 
 ---
 
@@ -33,7 +35,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ---
 
-Pre-flight measurements are documented in `00-audit-qualite.md`. They have no
+Common input measurements are documented in `00-audit-qualite.md`. They have no
 tripwire thresholds or enforcement actions; population selection and calculation
 rules remain owned by their method chapters.
 
@@ -101,8 +103,7 @@ rules remain owned by their method chapters.
 ### TW-08.1 — SARM Marker Precedence and Concordance
 
 - **Identifier**: `TW-08.1`
-- **Pipeline Stage**: Indicator construction (`08-indicateurs.md`, Decision 08.3; `00-audit-qualite.md`,
-  Decision 00.6)
+- **Pipeline Stage**: Indicator construction (`08-indicateurs.md`, Decision 08.3)
 - **Statement**: Cefoxitine is prioritized as primary marker for *S. aureus* methicillin resistance;
   oxacilline acts as surrogate fallback when cefoxitine is untested. Co-tested isolates are monitored
   for discordant clinical interpretations.
@@ -169,7 +170,7 @@ rules remain owned by their method chapters.
 
 ## 4. Tripwire Governance and Audit Integration
 
-All 5 dynamic tripwires are evaluated automatically during pipeline execution:
+The five remaining entries specify checks at their downstream stages:
 1. **Execution**: TW-04.1 executes during exposure calculation. TW-07.1 executes
    during deduplication. TW-08.1 executes during indicator construction. TW-09.1 and
    TW-09.2 execute during post-flight quality audit (`09-diffusion.md`) prior to
