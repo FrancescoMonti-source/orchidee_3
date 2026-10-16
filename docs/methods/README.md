@@ -24,7 +24,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
 | Données d'activité | [04](04-donnees-activite.md) | **settled** |
 | Structure de l'établissement | [05](05-structure.md) | **settled** |
-| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **settled** |
+| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **resistance rules retained; input boundary clarified; mapping details open** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |
 | Construction des indicateurs | [08](08-indicateurs.md) | **settled** |
 | Analyse et diffusion | [09](09-diffusion.md) | **settled** |
@@ -35,6 +35,15 @@ questions. `partial` means some decisions are settled and the section names what
 is still open.
 
 ## Cross-cutting catalogs
+
+Chapter 00 audits the prepared site handoff after local cleaning, antibiotic
+and bacterial mappings, diagnostic selection and retention of isolates with an
+antibiogram. Correct local preparation is accepted. Shared hospital perimeter
+selection and analysis-specific specimen selection follow the audit and precede
+deduplication. Hospitalisation activity keeps its own population, including
+relevant activity from patients without cultures or antibiograms. Suite 6's
+remaining counting and presentation choices stay explicitly open; no executable
+audit or automatic response is activated by this documentation revision.
 
 - [audit-checkpoints-deferred.md](audit-checkpoints-deferred.md) - Archived
   discussions, historical figures and the superseded raw-only specification.

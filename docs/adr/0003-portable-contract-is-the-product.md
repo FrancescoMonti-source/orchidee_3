@@ -18,8 +18,24 @@ references.
 - Anything the core needs must be expressible in the handoff. If a Rouen
   reference turns out to be necessary to the core, that is a defect in the
   contract, not a reason to read the file.
-- Chapter 00 audits the common site handoff after the mappings needed to
-  produce it and before population selection and deduplication. Native raw-data
-  auditing remains each site's responsibility; sites do not converge on
-  Rouen's raw schema. Coherence of the handoff alone does not establish that
-  the site's source mappings are correct.
+- The site adapter owns cleaning, antibiotic and bacterial mappings,
+  diagnostic classification and selection, and retention of isolates with an
+  antibiogram. Chapter 00 audits this prepared site handoff, accepting correct
+  local preparation and diagnostic selection as input assumptions (issue #22).
+  The common audit does not revalidate local decisions, read raw comments or
+  recover records removed upstream, including screening records.
+- The previous ORCHIDEE antibiotic and bacterial mappings are the foundation
+  for improvement, not a declaration that every existing entry is correct.
+  The common audit consumes prepared identities rather than interpreting
+  local labels; unresolved equivalences, species/complex groupings and target
+  lists remain mapping decisions. No dictionary changes are implemented here.
+- Hospital perimeter selection remains shared and follows the common audit.
+  Local diagnostic and antibiogram selection does not authorise additional
+  local perimeter exclusions. Analysis-specific specimen selection precedes
+  deduplication; Emergency linkage decisions remain unchanged.
+- Hospitalisation activity retains its own population, including relevant
+  activity from patients without cultures or antibiograms.
+- Native raw-data auditing remains local; sites do not converge on Rouen's
+  raw schema. Existing provenance qualifications in reviewed Suites 1–5 remain
+  intact. The current audit records findings only and activates no automatic
+  blocking, correction, quarantine or exclusion.

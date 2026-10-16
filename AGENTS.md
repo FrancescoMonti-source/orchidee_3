@@ -5,7 +5,7 @@ ORCHIDEE V3 establishes a transparent, national-level antimicrobial resistance (
 ## Architectural Boundaries
 
 - **Portable Contract is the Seam**: Hospitals own their local LIS and data management. Site adapters map local hospital data into the portable contract (`data/site_handoff/` CSVs, `diagnostic_scope`). Core ORCHIDEE enforces the contract and never applies fragile string heuristics to raw French free text (`ADR-0003`).
-- **Common Input Audit**: Chapter 00 inspects the common site handoff after the mappings needed to produce it and before population selection and deduplication. Raw-source audits are local site responsibilities; never require other hospitals to reproduce Rouen's raw schema (`ADR-0003`).
+- **Common Input Audit**: Chapter 00 accepts local cleaning, mappings, diagnostic selection and retention of isolates with an antibiogram as completed input preparation. It audits the standardized site handoff before shared hospital perimeter selection and deduplication. Hospitalisation activity keeps its own population. Raw-source audits remain local (`ADR-0003`).
 - **Raw Data Ingestion**: All pipelines and witnesses derive directly from local raw files (`data/bact22_24`, `data/pmsi`) and site handoffs. Never rely on legacy V2 intermediate bundles (`sir_wide.rds`).
 
 ## Non-Negotiable Methodological Invariants

@@ -1,8 +1,12 @@
 # Dynamic Pipeline Tripwire Register
 
 Status: **catalogue retained for review; common-input audit boundary agreed**.
-Chapter 00 now examines standardized site handoff data after the necessary
-mappings, before population selection and deduplication. Native raw-source
+Chapter 00 examines standardized site handoff data after local preparation,
+mappings, diagnostic selection and retention of isolates with an antibiogram,
+before shared hospital perimeter selection and deduplication. Correct local
+preparation is an accepted assumption; this audit does not revalidate diagnostic
+classification or account for records removed upstream. Hospitalisation
+activity keeps its own population. Native raw-source
 checks remain local. The already reviewed checks in Suites 1–5 are retained,
 including timestamp, structure and phenotype comparisons. Their portable
 field bindings and available provenance must be made explicit without
@@ -303,9 +307,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 The catalogue records planned governance, not a claim that all nine checks are
 implemented or active in the common input audit:
 
-1. **Execution boundary**: Chapter 00 is after the necessary site mappings and
-   before population selection and deduplication. Bind each retained check to
-   the common fields, row meanings and available metadata.
+1. **Execution boundary**: Chapter 00 follows completed local preparation,
+   diagnostic selection and retention of isolates with an antibiogram, and
+   precedes shared hospital perimeter selection and deduplication. Bind each
+   retained check to the common fields, row meanings and available metadata.
    The reviewed TW-04.2, TW-05.1, TW-06.1 and declaration part of TW-06.2 remain
    specified by Suites 1–5; input binding does not reopen their methodology.
    Their automatic response policies remain inactive. Native source inspection

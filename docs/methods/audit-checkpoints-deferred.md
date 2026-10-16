@@ -3,8 +3,11 @@
 Status: **archive only; previous scopes and examples, not active requirements**.
 
 On 2026-10-16 the user abandons the raw-only boundary for chapter 00. The
-shared audit now concerns standardized site handoff data after the necessary
-mappings, before population selection and deduplication. Native raw audits
+shared audit concerns standardized site handoff data. Issue #22 clarifies that
+local cleaning, mappings, diagnostic selection and retention of isolates with
+an antibiogram precede it; shared hospital perimeter selection and deduplication
+follow it. Correct local preparation is an accepted input assumption.
+Hospitalisation activity keeps its own population. Native raw audits
 are each site's responsibility; other hospitals do not reproduce Rouen's raw
 format. The active specification is [chapter 00](00-audit-qualite.md).
 

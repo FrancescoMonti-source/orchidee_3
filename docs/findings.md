@@ -1180,3 +1180,63 @@ or rerun, and no commit or push is performed.
 `docs/methods/tripwire-register.md`;
 `docs/adr/0007-relational-keys-are-composite-against-recycling.md`;
 `docs/methods/audit-checkpoints-deferred.md`
+
+### 2026-10-16 — Accept local preparation before the shared audit (issue #22)
+
+The user clarifies the previously recorded post-mapping boundary: each site
+cleans its data, applies antibiotic and bacterial mappings, classifies and
+selects diagnostic samples, and retains isolates with an antibiogram before
+supplying the standardized site handoff. Correct local preparation and
+diagnostic selection are accepted input assumptions. The common audit does
+not revalidate them, inspect raw comments or recover upstream exclusions.
+The former requirement to ingest screening rows and publish their excluded
+counts is superseded. Earlier discovery entries remain historical records.
+
+Shared hospital perimeter selection follows the common audit. Local diagnostic
+and antibiogram selection does not authorise additional local perimeter
+exclusions. Analysis-specific specimen restrictions still precede deduplication;
+Emergency linkage is unchanged. Hospitalisation activity retains its own
+population, including relevant activity from patients without cultures or
+antibiograms.
+
+The previous ORCHIDEE antibiotic and bacterial mappings are the foundation for
+improvement, without validating every entry or implementing dictionary changes.
+An individual antibiotic NA defaults to not tested unless other source
+information explicitly establishes otherwise; source-comment interpretation is
+local. That NA does not discard an isolate already supplied with an antibiogram.
+Existing I/ZIT and phenotype rules remain unchanged.
+
+Suites 1–5 are retained verbatim from the reviewed checkpoint
+`0e5902b05d0dbdc5062ad5ccc5ab441170b7dec4`. Suite 6 separates rows from entities
+identified by complete keys, uses the supplied antibiogram population, and
+states its annual/monthly and specimen contexts. Exact patient–species count
+distributions, the three explicit-denominator percentages, distinct-antibiotic
+counts and result coverage, species detail and the sample-level multiple-target
+species question are retained. Annual patients and pairs are recomputed;
+repeated result rows do not create isolates or antibiotics. The four-isolate,
+one-patient, two-pair example gives 50%, 50% and 75%; these are constructed
+explanatory values, not new Rouen measurements.
+
+Open choices remain visible: antibiotic equivalences, species/complex groupings
+and target lists; missing/unclassifiable specimen display and unassigned-taxon
+presentation; conflicting prepared values and incomplete keys in affected
+calculations; explicitly documented tests without interpretable results in
+result counts; empty-denominator presentation; and the exact 6.4 denominator
+and reporting detail. Suggested treatment of ambiguous information, “percentage
+not calculable,” and the at-least-two / at-least-one target-species fraction
+remain recommendations, not approved defaults. Diagnostic selection and the
+supplied antibiogram population are settled assumptions, not open findings.
+
+The removed beyond-one ratio and cross-species patient measure remain removed;
+actual deduplication inputs, retained isolates and removals remain in chapter
+07. Historical counts are not remeasured. This is a written-method revision:
+no executable audit, adapter, automatic blocking, correction, quarantine or
+exclusion is implemented or activated.
+
+→ `docs/methods/00-audit-qualite.md`;
+`docs/methods/06-donnees-resistance.md`;
+`CONTEXT.md`;
+`docs/adr/0003-portable-contract-is-the-product.md`;
+`docs/methods/07-dedoublonnage.md`;
+`docs/methods/tripwire-register.md`;
+`docs/worked-examples/screening-exclusion.md`

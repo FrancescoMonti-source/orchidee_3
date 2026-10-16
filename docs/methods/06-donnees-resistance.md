@@ -1,6 +1,8 @@
 # 06 - Bacterial resistance data
 
-Status: **settled**. Eight decisions, seven witnesses, one tripwire. Zero unproven.
+Status: **existing resistance rules retained; shared input boundary clarified**.
+Mapping details remain open below. Historical witnesses are not remeasured by
+this documentation revision; no executable audit or automatic response is activated.
 
 ## What SPARES says
 
@@ -54,23 +56,42 @@ See the [English–French glossary](../../CONTEXT.md#englishfrench-terminology).
 `EVTID` is retained for stay attribution and grouping witnesses.
 
 ### 2. Screening exclusion and site boundary
-**Screening is excluded** at population selection: after ingestion and before
-deduplication. Screening rows are ingested and marked via the boolean contract key
-`diagnostic_scope`, never dropped during extraction, allowing ORCHIDEE to publish
-exact excluded counts.
+The **site adapter** cleans and maps local data, classifies samples as diagnostic
+or screening, applies diagnostic selection, and retains isolates with an
+antibiogram **before supplying the standardized site handoff** (ADR-0003).
+The common microbiology audit starts from that prepared diagnostic antibiogram
+population and accepts correct local preparation and selection as assumptions.
+`diagnostic_scope` describes the site's diagnostic classification; it is not a
+requirement to supply screening rows for the common core to exclude later.
 
-Screening vs diagnostic classification is strictly a **site adapter responsibility**
-(ADR 0003). In French hospital bacteriology, `"Recherche de [X]"` is the standard
-prefix for both screening orders and targeted infectious diagnostics. Core ORCHIDEE
-never executes blanket text searches (e.g. `grepl("recherche")`), which corrupt
-diagnostic data.
+The shared audit does not revalidate local classification, recognise antibiogram
+eligibility again, inspect raw labels or comments, or recover upstream exclusions.
+No shared count of excluded screening records is required from unavailable rows.
+The historical keyword witness explains why interpretation belongs locally;
+the common core does not reinterpret local analysis codes.
+
+Shared hospital perimeter selection follows the audit. Analysis-specific
+specimen selection also precedes deduplication. Local diagnostic and antibiogram
+selection does not authorise additional local perimeter exclusions. Emergency
+linkage remains governed by chapter 05 and ADR-0009. Hospitalisation activity
+retains its own population, including relevant activity from patients without a
+culture or antibiogram.
 
 ### 3. Result alphabet
 For every tested molecule, clinical categories are mapped to a strict ternary alphabet:
 - **`S`** (sensible à posologie standard)
 - **`SFP`** (sensible à forte posologie / intermédiaire)
 - **`R`** (résistant)
-- **`NA`** (untested, missing, or uninterpretable tokens such as `NC` / `Non côté`)
+- **`NA`** (not tested by default, unless other source information explicitly establishes otherwise)
+
+An individual antibiotic `NA` does not remove an isolate whose antibiogram is
+already in the supplied population. If source information establishes a test
+with a missing or uninterpretable result (for example `NC` / `Non côté`), local
+preparation keeps that distinction explicit instead of treating every `NA` as
+equivalent evidence. Any source-comment interpretation belongs to that local
+preparation, not a common raw-comment reader or a new antibiogram eligibility
+check. The remaining treatment of explicitly documented tests without an
+interpretable result in Suite 6's result counts is stated there as open.
 
 Historical results with `I` (CA-SFM &le; 2022) are read as `SFP`. Measurement caveat
 `ZIT` (zone d'incertitude technique) is read as `SFP`.
@@ -117,12 +138,18 @@ files. The method does not reject historical rows solely because dictionary
 tags lagged behind clinical reporting.
 
 ### 6. Bacterial taxonomy
-Site preparation accepts open raw organism descriptions. A standardized dictionary maps raw
-taxa to the target ONERBA/SPARES species list. Unmapped isolates are logged and counted.
-Taxonomic mapping expansion is decoupled from pipeline execution and delegated to an
-offline LLM batch harmonization pipeline. This translation is site-side; the
-common core consumes the resulting handoff rather than interpreting local
-organism descriptions.
+Local preparation starts from the **previous ORCHIDEE bacterial and antibiotic
+mappings and improves them**. This is the user's agreed foundation, not a
+declaration that all existing entries are correct. No dictionary changes are
+implemented by this revision.
+
+Local organism descriptions are translated on the site side; the common audit
+consumes prepared identities rather than interpreting those descriptions.
+Isolates without an assignable mapped taxon remain visible in the inventory.
+They do not all form an invented “unknown species” pair. Exact antibiotic
+equivalences, species/complex groupings and target lists remain mapping decisions
+where not already settled. A source species list (SPARES Annexe 5, pp. 28–30)
+does not itself decide those ORCHIDEE mappings.
 
 ---
 
@@ -130,16 +157,18 @@ organism descriptions.
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 06.1 | Screening samples | excluded before deduplication | included | +5.6 % isolates; céfotaxime 16.96 &rarr; 25.19 %R (+8.23 pp); ertapénème x4.3. `docs/worked-examples/screening-exclusion.md` |
+| 06.1 | Screening samples | excluded locally before the site handoff and common audit, hence before deduplication | included | Historical: +5.6 % isolates; céfotaxime 16.96 &rarr; 25.19 %R (+8.23 pp); ertapénème x4.3. `docs/worked-examples/screening-exclusion.md` |
 | 06.2 | `ZIT` against `SFP` | `ZIT` is read as `SFP` under the ORCHIDEE mapping decision | `ZIT` treated as missing data | see 07.5: 4 441 isolates against 4 431 under the alternative conflict rule. `docs/worked-examples/deduplication.md` |
 | 06.3 | Isolate key | `(PATID, ELTID, isolate_id)` | collapse same species within sample | 213 triples split across several local isolate identifiers (historical `souche_id`), 214 extra isolates, 0.4 % |
-| 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; non-interpretive &rarr; `NA` | retain `I` as distinct 4th value | Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
+| 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; individual `NA` defaults to not tested unless source information establishes otherwise | retain `I` as distinct 4th value | Historical Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
 | 06.5 | Resistance phenotypes | binary isolate attribute; absent phenotype signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
 | 06.6 | CA-SFM validation | run metadata declaration; native tag inspection remains local | per-row rejection on raw `CASFM` | 100 % of Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance; per-row drop discards entire historical years <!-- citecheck: ok, decision row naming the CA-SFM version check; the CA-SFM/SPARES requirement is located in the TW-06.2 entry of tripwire-register.md --> |
-| 06.7 | Screening contract | sample-level boolean `diagnostic_scope` from site adapter | internal string heuristics (`"recherche"`, `"rectal"`) | `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
-| 06.8 | Bacterial scope | open site preparation &rarr; mapping to the target species list (SPARES Annexe 5, pp. 28-30) &rarr; counted residual | closed hardcoded filter | isolates outside target species logged and surfaced; mapping dictionary maintained via offline LLM batch job |
+| 06.7 | Diagnostic selection | local adapter classifies and applies diagnostic scope before the handoff; common audit accepts the prepared population | common raw-label heuristics or reclassification | Historical: `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
+| 06.8 | Bacterial and antibiotic mappings | improve the previous ORCHIDEE mappings locally; common audit consumes prepared identities and inventories unassigned taxa | reinterpret local labels in the core or assume every previous entry correct | Existing mapping work is reused; no new measurement or dictionary validation is claimed. |
 
-Unproven: **0 of 8**.
+The boundary and mapping foundation are agreed design decisions. Historical
+figures above do not validate the revised common audit or settle the remaining
+mapping choices.
 
 ---
 
@@ -157,20 +186,25 @@ is guarded by [tripwire TW-06.1](tripwire-register.md#tw-06-1), whose full trigg
 and actions are defined in that register entry.
 
 ### 06.6 tripwire (TW-06.2)
-**Statement**: Ingestion checks that raw `CASFM` &ge; 2020 on surveillance data from 2024 onward. (Cataloged as `TW-06.2` in `tripwire-register.md`).
-**Today**: 100 % of Rouen 2024 rows carry `CASFM == "2022"`.
+**Statement**: The common audit checks the supplied declaration; native `CASFM`
+tag inspection stays local. See `TW-06.2` in `tripwire-register.md` for the
+existing version rule and current report-only response policy.
+**Historical observation, not remeasured here**: 100 % of Rouen 2024 rows carry
+`CASFM == "2022"`.
 
 ---
 
 ## Open
 
-None. Section 06 is fully settled.
-- **Site screening coding variance**: As documented in `docs/worked-examples/screening-exclusion.md`,
-  differences in how hospital LISs categorize borderline screening samples directly impact
-  resistance rates. This cannot be resolved centrally by heuristics; ORCHIDEE publishes
-  the exact volume of excluded screening samples alongside resistance indicators so that
-  inter-hospital comparisons remain transparent and auditable.
-- **Taxonomy dictionary maintenance**: Target taxonomy mapping from local laboratory
-  microorganism strings to the target species list (SPARES Annexe 5, pp. 28-30) is scheduled as an
-  offline LLM batch job. ONERBA (p. 23) asks for species-level identification following bacterial
-  taxonomy but publishes no code list, so there are no "ONERBA standard codes".
+- **Mapping details**: exact antibiotic equivalences, bacterial species/complex
+  treatment and target lists remain open where not already settled, using the
+  previous mappings as the foundation. This revision neither implements an
+  offline dictionary job nor approves particular entries.
+- **Prepared-result counting**: Suite 6 records the remaining treatment of
+  explicitly documented tests with no interpretable result in its antibiotic
+  counts and coverage. This does not reopen supplied antibiogram eligibility
+  or the individual `NA` default.
+
+Local diagnostic selection and the supplied antibiogram population are settled
+assumptions. They are not open questions about common classification, source
+certification or publication of excluded screening counts.

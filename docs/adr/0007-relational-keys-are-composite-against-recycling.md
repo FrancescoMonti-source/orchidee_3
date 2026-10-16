@@ -33,7 +33,8 @@ cross-contaminating patient medical histories and corrupting unit attribution.
 - The primary isolate key is strictly `(PATID, ELTID, isolate_id)`. Its historical
   uniqueness result (48 595 / 48 595) concerns a derived diagnostic table;
   it does not validate a new site's common input.
-- Chapter 00 audits standardized input identities after the necessary site
-  mappings, before population selection and deduplication (`Decision 00.2`).
+- Chapter 00 audits standardized input identities after local preparation,
+  diagnostic selection and retention of isolates with an antibiogram, before
+  shared hospital perimeter selection and deduplication (`Decision 00.2`).
   Native source inspection remains local; bind the reviewed identifier checks
   to the corresponding common-input key fields and available ID components.

@@ -32,20 +32,22 @@ intersected with the eligible discipline domains.
 
 ## What ORCHIDEE does
 
-**The extraction is unbounded.** ORCHIDEE does not ask a site to extract to a
-perimeter. Everything the data warehouse holds for microbiology and for
-hospitalisation movements is extracted, and the perimeter is applied afterwards.
+**The handoff is unbounded by the hospital perimeter.** The site supplies
+prepared diagnostic isolates with an antibiogram, without additional local
+hospital perimeter exclusions. Local cleaning, mappings, diagnostic selection
+and retention of isolates with an antibiogram precede the common audit
+(chapter 00; ADR-0003). Hospitalisation activity retains its own population,
+including relevant activity from patients without cultures or antibiograms.
 
-This is not a convenience. SPF has stated the perimeter will be enlarged over
-time, and an extraction-time perimeter makes every enlargement a fresh
-extraction from the hospital's warehouse — a negotiation, a delay and a new
-dataset — where a downstream perimeter makes it a re-run of a pipeline over data
-already held. It is the same reasoning as decision 06.1 on screening: ingest and
-mark, never drop.
+Keeping the hospital perimeter downstream permits a perimeter change to be a
+new run over the supplied data, within the site's authorisation. This does not
+require the shared pipeline to ingest screening records or recover other local
+preparation exclusions.
 
-**"Afterwards" means before deduplication, not at the indicator stage.** The
-perimeter is a population selection and shares a place in the pipeline with the
-screening exclusion. It is the fifth input to deduplication, alongside the
+**The shared perimeter follows the common audit and precedes deduplication.**
+Analysis-specific specimen selection also precedes deduplication; local
+diagnostic selection has already occurred. The perimeter remains an input
+to deduplication, alongside the
 grouping key, the window, the antibiotype panel and the conflict rule. See
 `07-dedoublonnage.md`, and the general rule it now states:
 
@@ -77,7 +79,9 @@ Unproven: **2 of 6** (03.3 and 03.6 carry arguments, not numbers).
 ### 03.1 note — what unbounded extraction is and is not
 
 Unbounded means *within the site's data authorisation*, which is a real boundary
-and not an absence of one. Rouen's authorisation covers the full microbiology
+and not an absence of one, and concerns hospital perimeter breadth, not a
+requirement to supply non-diagnostic records or isolates without an antibiogram.
+Rouen's authorisation covers the full microbiology
 and movement scope. A site whose authorisation is narrower has an extraction
 perimeter, and for that site a perimeter widening **is** a re-extraction. The
 property claimed here holds inside the authorisation and the specification says
