@@ -10,7 +10,9 @@ How agents should consume and contribute to ORCHIDEE V3's domain documentation a
 - **`docs/methods/tripwire-register.md`**: review the dynamic tripwires that guard data quality and invariant violations.
 - **`docs/findings.md`**: read the append-only record of empirical discoveries.
 
-If a concept or decision is missing, proceed silently and rely on `/domain-modeling` (reached via `/grill-with-docs`) to capture it lazily as decisions crystallize.
+When a concept or decision is missing, use the installed `domain-modeling` skill
+to capture it as the discussion resolves it. See `skills/README.md` for the
+installed skills and repository-specific integration.
 
 ## Repository Domain Structure
 

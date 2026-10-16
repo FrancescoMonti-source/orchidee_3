@@ -5,6 +5,7 @@ ORCHIDEE V3 establishes a transparent, national-level antimicrobial resistance (
 ## Architectural Boundaries
 
 - **Portable Contract is the Seam**: Hospitals own their local LIS and data management. Site adapters map local hospital data into the portable contract (`data/site_handoff/` CSVs, `diagnostic_scope`). Core ORCHIDEE enforces the contract and never applies fragile string heuristics to raw French free text (`ADR-0003`).
+- **Common Input Audit**: Chapter 00 inspects the common site handoff after the mappings needed to produce it and before population selection and deduplication. Raw-source audits are local site responsibilities; never require other hospitals to reproduce Rouen's raw schema (`ADR-0003`).
 - **Raw Data Ingestion**: All pipelines and witnesses derive directly from local raw files (`data/bact22_24`, `data/pmsi`) and site handoffs. Never rely on legacy V2 intermediate bundles (`sir_wide.rds`).
 
 ## Non-Negotiable Methodological Invariants
@@ -30,6 +31,9 @@ ORCHIDEE V3 establishes a transparent, national-level antimicrobial resistance (
 Every citation in the docs must be checkable. A pre-commit hook (`tools/citecheck/`) blocks added lines where a reference disagrees with Crossref, a block quote is not verbatim in its source PDF, or a claim attributed to a named body (EARS-Net, SPARES, SPF...) has no page or section. Enable it once per clone with `git config core.hooksPath .githooks`. Do not bypass it with `--no-verify`: fix the citation, or, when a sentence only mentions a body, mark the paragraph `<!-- citecheck: ok, <reason> -->`.
 
 ## Agent skills
+
+For installed skills, invocation rules and repository-specific integration, read
+[`skills/README.md`](skills/README.md) before using a repo-local skill.
 
 ### Issue tracker
 

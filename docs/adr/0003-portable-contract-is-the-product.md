@@ -18,3 +18,8 @@ references.
 - Anything the core needs must be expressible in the handoff. If a Rouen
   reference turns out to be necessary to the core, that is a defect in the
   contract, not a reason to read the file.
+- Chapter 00 audits the common site handoff after the mappings needed to
+  produce it and before population selection and deduplication. Native raw-data
+  auditing remains each site's responsibility; sites do not converge on
+  Rouen's raw schema. Coherence of the handoff alone does not establish that
+  the site's source mappings are correct.

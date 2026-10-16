@@ -14,6 +14,31 @@ builds and first operates the product; it holds no privileged position in the
 model.
 _Avoid_: établissement (when the running hospital is meant), client, partner
 
+**Raw site data**:
+Hospital source data in their supplied representation, before semantic mapping,
+analytical preparation and population selection for surveillance deduplication. A raw
+laboratory row can be an observation about an isolate rather than an isolate.
+_Avoid_: selected analysis input, site handoff (when the original raw data are meant)
+
+**Semantic mapping** (*mise en correspondance sémantique*):
+A documented correspondence between a source label or code and a defined
+category or concept, such as a specimen category, bacterial taxon or antibiotic
+identity. It classifies recorded information; it does not by itself define
+eligibility for a surveillance analysis.
+
+**Raw pre-flight audit** (*audit pré-vol des données brutes*):
+Local examination of a site's source data in their supplied representation,
+before semantic mapping and surveillance transformations. Each site determines
+how to examine its own sources. This activity is outside the shared ORCHIDEE
+input audit and does not require sites to reproduce Rouen's source format.
+
+**Common input audit** (*audit des données standardisées en entrée*):
+Examination of the site handoff at the point where sites converge on a shared
+representation, after the mappings needed to produce it and before population
+selection and deduplication. It assesses the supplied data's structure and
+coherence; it does not by itself establish that local source mappings are
+correct.
+
 **Site handoff**:
 The fixed set of files a site produces to feed v3, in which the site has
 already translated its local codes into v3's vocabulary. The boundary
@@ -114,12 +139,76 @@ bacteriology export. A Rouen fact, not part of the model.
 
 ### Resistance measurement
 
+#### English–French terminology
+
+| English term used here | French term | Meaning |
+|---|---|---|
+| Species | Espèce bactérienne | Bacterial classification, such as *Escherichia coli*. |
+| Patient–species pair | Couple patient–espèce | One patient considered together with one bacterial species when counting isolates within a stated population, period and specimen scope. |
+| Sample / specimen | Prélèvement / échantillon | Material collected from a patient on a particular sampling occasion. |
+| Sample type | Type / nature de prélèvement | The category of sample, such as urine or blood culture. |
+| Isolate | Isolat; also called *souche* in source passages | An individual bacterial recovery recorded for a sample, before deciding whether it duplicates another recovery. |
+| Strain | Souche au sens de lignée biologique | A bacterial lineage that can persist across samples and patients. |
+| Antibiotype panel | Panel d'antibiotiques | The set of antibiotics on which the profile is read. |
+| Antibiotype | Antibiotype | The susceptibility results across that panel. |
+| Antibiogram | Antibiogramme | The susceptibility examination and, by extension, its results or report carrying the antibiotype. |
+| Antibiotic-result record | Ligne de résultat de sensibilité à un antibiotique | One recorded result for one antibiotic attached to an isolate. |
+| Compatible isolates | Isolats compatibles pour le dédoublonnage | Two isolates that satisfy the operational comparison rule. |
+| Retained isolate | Isolat conservé après dédoublonnage | The isolate selected from a duplicate group to contribute its results to an analysis. |
+| Deduplication mapping | Table de correspondance du dédoublonnage | For each analysis, a link from every input isolate to the retained isolate of its duplicate group. |
+
+The French word *souche* needs context. In its biological sense it refers to a
+lineage. The SPARES method also calls individual recoveries *souches*, defines
+duplicates through patient, species, antibiotype, period and sample type, and
+compares resistance phenotypes (SPARES pp. 10-11 and 14-15). Its phrase
+« pour une même souche » introduces the counting rule on p. 16. Our operational
+reading of that phrase is documented as an inference in
+`docs/methods/07-dedoublonnage.md`: compatible isolates may be grouped for an
+analysis, without establishing that they belong to one biological lineage.
+
+For example, two samples from the same patient can each yield an *E. coli*
+isolate. There are two isolates before deduplication. If they form one duplicate
+group under the declared rules, one retained isolate contributes to that
+analysis. Their matching antibiotypes alone do not establish a shared lineage.
+Incomplete antibiotypes can make grouping ambiguous; the grouping rule remains
+necessary alongside the pairwise comparison rule.
+
+**Species**:
+A bacterial classification, such as *Escherichia coli*. Several isolates can
+belong to the same species, including isolates recovered from the same sample.
+
+**Patient–species pair**:
+One patient considered together with one bacterial species when counting isolates
+within a stated population, period and specimen scope. Two or more isolates for
+that pair means at least two isolates of that species recorded for that patient;
+it does not establish infection episodes or membership of a duplicate group.
+_Avoid_: repeated pair, episode, duplicate group (when this descriptive pair is meant)
+
+**Sample / specimen**:
+Material collected from one patient on a particular sampling occasion and
+identified in the laboratory data. One sample can yield several isolates.
+
+**Sample type**:
+The category assigned to a sample, such as urine or blood culture. It describes
+the sample, while species describes the recovered bacteria.
+
 **Isolate**:
-The bacteria of one species recovered from one sample of one patient and tested
-against antibiotics. The unit that indicators count, and the unit deduplication
-removes. The source documents call it *souche*; their « même souche » is a
-relation between two isolates (see Compatible isolates), not the same strain.
+A separately recorded bacterial recovery from one sample of one patient, with
+its species identification and associated antibiotic susceptibility results.
+It exists before deciding whether it duplicates another recovery. A sample can
+contain several separately recorded isolates of the same species. Deduplication
+selects retained isolates for an analysis; it does not create the original
+isolates or establish their biological lineage.
 _Avoid_: souche (in English text), strain, germ
+
+**Isolate identifier (`isolate_id`)**:
+The laboratory's identifier distinguishing separately recorded isolates within a
+sample. The full isolate key is `(PATID, ELTID, isolate_id)`; the `isolate_id`
+value alone can recur in other samples. Historical witness files call this field
+`souche_id`, and Rouen's raw GLIMS export calls it `DLVL`. These names are mapped
+to `isolate_id` when preparing v3 data. Deduplication preserves the original
+isolate key for each retained isolate. Whether an isolate is retained or is a
+duplicate is a property of the analysis, not a change to its identity.
 
 **Strain**:
 A bacterial lineage, which can persist across several samples and several
@@ -131,9 +220,10 @@ _Avoid_: using "strain" where the counted unit is meant
 **Compatible isolates**:
 Two isolates of the same patient and species with no major discrepancy on any
 molecule tested in both, and the same resistance phenotypes. What the sources
-mean by « même souche » or « même antibiotype » between two isolates. A relation
-between two isolates, not a class: A compatible with B and B compatible with C
-does not make A compatible with C.
+call « même souche » or « même antibiotype » is given this operational reading
+in chapter 07, with the source locators and the limits of that inference.
+Compatibility is a relation between two isolates, not a class: A compatible with
+B and B compatible with C does not make A compatible with C.
 _Avoid_: same antibiotype, same souche, identical
 
 **Duplicate group**:
@@ -156,7 +246,8 @@ _Avoid_: doublon prélèvement (in English text)
 
 **Retained isolate**:
 The one isolate kept for a duplicate group. It alone carries the group's
-results into the indicators.
+results into the indicators. It keeps its original isolate identifier; the
+qualifier "retained" describes its role in that analysis.
 _Avoid_: representative, survivor
 
 **Retention rule**:
@@ -180,6 +271,17 @@ An isolate's pattern of S / SFP / R results across a declared set of molecules.
 Not a property of the isolate alone: it exists only relative to a panel.
 _Avoid_: resistance profile, susceptibility pattern
 
+**Antibiogram**:
+The antibiotic susceptibility examination and, by extension, its results or
+report. The antibiotype is the susceptibility pattern read from those results
+on a declared panel.
+
+**Antibiotic-result record**:
+One record carrying a susceptibility result for one antibiotic attached to an
+isolate. Several such records describe one isolate's antibiogram. Repeated
+records for the same isolate and antibiotic require an explicit resolution rule;
+counting records does not count isolates.
+
 **Antibiotype panel**:
 The set of molecules an antibiotype is read on. Widening it changes which
 isolates are duplicates, and therefore changes indicators on molecules the panel
@@ -199,6 +301,14 @@ _Avoid_: dédoublonnage (in English text), de-duping, filtering
 A difference of S↔R or SFP↔R on at least one molecule tested in both isolates,
 which makes them not compatible. A S↔SFP difference is minor and does not. A
 blank result is never a difference.
+
+**Deduplication mapping**:
+A local audit table saved alongside the retained isolates for an analysis. Each
+input isolate appears once and points to the original key of its group's
+retained isolate; retained isolates point to themselves. The analysis reference
+identifies the exact input version, population selection and deduplication
+rules. This preserves group membership without requiring a separate group
+identifier. See `docs/methods/07-dedoublonnage.md`, Deduplication audit output.
 
 **Diagnostic sample**:
 A sample taken to identify the cause of a suspected infection (the sources'

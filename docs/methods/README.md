@@ -18,7 +18,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 
 | SPARES section | ORCHIDEE section | Status |
 |---|---|---|
-| Traitement des données (contrôle qualité pré-vol) | [00](00-audit-qualite.md) | **settled** |
+| Traitement des données (contrôle qualité pré-vol) | [00](00-audit-qualite.md) | **Suites 1–5 reviewed and retained; Suite 6 revised, with open details identified** |
 | Période de surveillance | [01](01-periode-surveillance.md) | **settled** |
 | Établissements inclus / exclus | [02](02-etablissements.md) | **settled** |
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
@@ -36,6 +36,10 @@ is still open.
 
 ## Cross-cutting catalogs
 
+- [audit-checkpoints-deferred.md](audit-checkpoints-deferred.md) - Archived
+  discussions, historical figures and the superseded raw-only specification.
+  Chapter 00 restores the reviewed Suites 1–5 and retained Suite 6 decisions;
+  unresolved proposals and historical figures remain distinguished from them.
 - [tripwire-register.md](tripwire-register.md) - The unified catalog of all 9
   dynamic pipeline tripwires (TW-04.1 through TW-09.2), their mathematical trigger
   thresholds, action policies, and empirical Rouen baselines.

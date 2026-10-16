@@ -80,6 +80,69 @@ Measured on the perimeter: filtering then deduplicating keeps 2 445 *E. coli*
 isolates, deduplicating then filtering keeps 2 350, and 79 patients vanish
 entirely. `docs/worked-examples/perimeter-ordering.md`.
 
+### Deduplication audit output
+
+Each analysis saves a **deduplication mapping** alongside its retained isolates
+in the local run outputs. The mapping preserves the groups formed by decision
+07.6 so that their membership remains available for explaining exclusions,
+examining lost antibiotic results, and comparing retention choices.
+
+The mapping has one row per input isolate after population selection, including
+isolates in single-member groups. It records these fields:
+
+| Field | Meaning |
+|---|---|
+| `analysis_id` | Reference to the exact analysis context described below. |
+| `PATID`, `ELTID`, `isolate_id` | The original input isolate key. |
+| `retained_PATID`, `retained_ELTID`, `retained_isolate_id` | The original key of the retained isolate in the same duplicate group. |
+
+For example, with A, B and C standing for full isolate keys:
+
+| Analysis | Input isolate key | Retained isolate key |
+|---|---|---|
+| X | A | A |
+| X | B | A |
+| X | C | C |
+
+This records groups {A, B} and {C}, retaining A and C. A retained isolate maps
+to itself. A separate `duplicate_group_id` is unnecessary: within an analysis,
+the retained isolate key identifies the group.
+
+The audit of the actual effect of deduplication belongs here, after population
+selection. For one declared analysis, report $N_{\text{input}}$ input isolates,
+$N_{\text{retained}}$ retained isolates and their difference as the removed
+count. The fraction removed is
+$(N_{\text{input}}-N_{\text{retained}})/N_{\text{input}}$ when the input is nonempty.
+The common-input inventory in chapter 00 is not automatically this denominator:
+population selection and the declared analysis scope determine the input
+isolate set for deduplication.
+
+Each `analysis_id` resolves to metadata recording the version or hashes of the
+input data and site mappings, population selection (including perimeter and
+diagnostic scope), surveillance period, specimen scope, grouping key, window,
+antibiotype panel, phenotype and antibiotic comparison rules, grouping rule,
+retention rule, tie-break, and pipeline version. Changing any of this context
+requires computing a mapping for that context. Saved membership can be reused
+only with the same input and rules.
+
+The mapping must satisfy these invariants:
+
+- Every input isolate appears exactly once per analysis.
+- Every retained key refers to an input isolate in the same analysis and
+  patient/species/window/specimen partition.
+- Every retained isolate maps to itself, and every target of a mapping row is
+  one of those self-mapped isolates.
+- The self-mapped isolates are exactly the retained isolate table, and members
+  sharing a retained key satisfy decision 07.6's pairwise compatibility rule.
+- All original isolate keys remain unchanged.
+
+Isolates excluded by population selection remain in its exclusion audit; they
+do not acquire membership in a deduplication group for that analysis.
+
+This is an agreed audit-output requirement for implementation. The current
+witness functions return retained isolates without saving this mapping; their
+historical counts have not been remeasured by adding this specification.
+
 ## Decisions
 
 All witnesses are measured on real Rouen rows. Method and scripts:
@@ -93,7 +156,7 @@ All witnesses are measured on real Rouen rows. Method and scripts:
 | 07.4 | Antibiotype panel | everything the site tests | the species\' SPF Annexe 3 list (SPF p. 20) | the 35-column supported panel and 19-column Annexe 3 *E. coli* list retain 4 441 isolates each, with identical retained IDs; guarded by a tripwire |
 | 07.5 | Conflict rule | `SFP <-> R` is major; `ZIT` is read as `SFP` | `ZIT` never conflicts | 4 441 vs 4 431 retained isolates; AMC %R is 39.23 % vs 39.16 % |
 | 07.6 | Comparison when antibiograms are incomplete | compare a new isolate with **every** isolate of a duplicate group | with the retained isolate only (the witness code until now); with the first isolate of the group; merge every chain of compatible isolates | Rouen 2022-2024: same retained isolates as the witness code in every group; comparing with the first isolate merges a major discrepancy in 1, 0 and 1 groups; `docs/worked-examples/incomplete-antibiotypes.md` |
-| 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `souche_id` | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
+| 07.7 | Isolates sampled at the same date and hour | order by `ELTID`, then `isolate_id` (historical `souche_id`) | any other fixed order | reversing the order changes the retained isolate in 67, 63 and 51 groups, the number retained in none; `incomplete-antibiotypes.md` |
 
 Unproven: **2 of 7**.
 

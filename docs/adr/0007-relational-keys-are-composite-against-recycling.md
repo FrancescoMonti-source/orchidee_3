@@ -1,8 +1,14 @@
 # Relational identifiers are composite to prevent cross-patient counter recycling
 
 In hospital data pipelines, stays and microbiology isolates must be identified by
-composite primary keys `(PATID, EVTID)` and `(PATID, ELTID, souche_id)`. Single-column
+composite primary keys `(PATID, EVTID)` and `(PATID, ELTID, isolate_id)`. Single-column
 identifiers (`EVTID` or `ELTID`) are not globally unique across time.
+
+The methods name the local isolate identifier `isolate_id`. Historical witness
+files name the same field `souche_id`, and Rouen's raw export uses `DLVL`.
+Mapping the field name preserves its values, its scope within a sample, and the
+composite-key decision. A retained isolate keeps this same key after
+deduplication.
 
 ## Why
 
@@ -24,7 +30,10 @@ cross-contaminating patient medical histories and corrupting unit attribution.
 ## Consequences
 
 - Every join between microbiology and movements uses `(PATID, EVTID)`.
-- The primary isolate key is strictly `(PATID, ELTID, souche_id)`, ensuring 100 %
-  uniqueness across the 3-year surveillance extract (48 595 / 48 595).
-- Pre-flight audit Suite 1 tests stay and accession number collision defenses on
-  every site handoff (`Decision 00.2`).
+- The primary isolate key is strictly `(PATID, ELTID, isolate_id)`. Its historical
+  uniqueness result (48 595 / 48 595) concerns a derived diagnostic table;
+  it does not validate a new site's common input.
+- Chapter 00 audits standardized input identities after the necessary site
+  mappings, before population selection and deduplication (`Decision 00.2`).
+  Native source inspection remains local; bind the reviewed identifier checks
+  to the corresponding common-input key fields and available ID components.

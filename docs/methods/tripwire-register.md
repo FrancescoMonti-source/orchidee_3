@@ -1,6 +1,16 @@
 # Dynamic Pipeline Tripwire Register
 
-Status: **settled**. Nine active tripwires, zero unproven, verified against Rouen 2024 baseline data.
+Status: **catalogue retained for review; common-input audit boundary agreed**.
+Chapter 00 now examines standardized site handoff data after the necessary
+mappings, before population selection and deduplication. Native raw-source
+checks remain local. The already reviewed checks in Suites 1–5 are retained,
+including timestamp, structure and phenotype comparisons. Their portable
+field bindings and available provenance must be made explicit without
+withdrawing the reviewed rules. Existing proposed actions and historical
+witnesses below do not prove an implemented portable audit.
+Rouen field names in historical rules do not define a complete handoff schema.
+The current phase records findings only and activates no automatic blocking,
+correction, quarantine or exclusion.
 
 ---
 
@@ -27,8 +37,8 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
    Triggered when data diverges from historical expectations or standard baselines, but where
    the divergence may represent a legitimate hospital reorganization (e.g. ward closure, new
    microbiology panel, or clinical emergence). A non-blocking tripwire never silently halts
-   production; instead, it logs the event in the pre-flight quality ledger (`00-audit-qualite.md`)
-   or post-flight delivery manifest (`09-diffusion.md`) and requires an explicit acknowledgement
+   production; the proposed policy logs the event in its owning quality ledger
+   or delivery manifest (`09-diffusion.md`) and requires an explicit acknowledgement
    before publication ("converts *nobody noticed* into *someone signed*").
 
 ---
@@ -38,10 +48,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 | Tripwire ID | Name | Pipeline Stage | Target Scope | Action Policy | Rouen 2024 Witness |
 |---|---|---|---|---|---|
 | **TW-04.1** | Unit Denominator Annual Stability | Exposure derivation | PMSI movement exposure | Non-blocking (acknowledgement) | Denominators: 327 301 / 347 303 / 355 246 JH (2022–2024) |
-| **TW-04.2** | Timestamp Grain Resolution | Ingestion & pre-flight audit | Movement timestamps (`DATENT`, `DATSORT`) | Blocking refusal | Rouen: 4.11 % `DATENT`, 4.08 % `DATSORT` at 00:00 (clean `datetime`) |
-| **TW-05.1** | Structure Snapshot Referential Coverage | Referential linkage | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
-| **TW-06.1** | Resistance Flags and Antibiotic Test Results | Ingestion & pre-flight audit | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
-| **TW-06.2** | CA-SFM Interpretation Version Referential | Ingestion & pre-flight audit | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` <!-- citecheck: ok, index row naming the CA-SFM version check; the CA-SFM/SPARES claims are located in the TW-06.2 entry below --> |
+| **TW-04.2** | Timestamp Grain Resolution | Common input audit, Test 3.4 | Movement timestamps (`DATENT`, `DATSORT` in the Rouen witness) | Blocking refusal | Rouen: 4.11 % `DATENT`, 4.08 % `DATSORT` at 00:00 (clean `datetime`) |
+| **TW-05.1** | Structure Snapshot Referential Coverage | Common input audit, Suite 4 | UFs in movement and laboratory data | Non-blocking (divergence ledger) | Admin 362/362 (100 %); lab 272/278 UFs (99.9 % observations) |
+| **TW-06.1** | Resistance Flags and Antibiotic Test Results | Common input audit, Test 5.2 | BLSE/carbapenemase flags vs antibiotic results | Non-blocking warning; discordant results quarantined, missing results logged | 99.55 % concordance on absent BLSE / C3G-S; 0 wild-type BLSE+ |
+| **TW-06.2** | CA-SFM Interpretation Version Referential | Common-input declaration; native tag inspection local | Antibiogram interpretation standard | Ingestion warning / blocking on $\ge 2024$ | 100 % of Rouen 2024 rows carry `CASFM == "2022"` <!-- citecheck: ok, index row naming the CA-SFM version check; the CA-SFM/SPARES claims are located in the TW-06.2 entry below --> |
 | **TW-07.1** | Antibiotype Panel Deduplication Parity | Deduplication | Antibiotype panel molecules | Non-blocking (divergence ledger) | 4 441 under the 35-column supported panel and 4 441 under the 19-column Annexe 3 *E. coli* list; retained IDs identical |
 | **TW-08.1** | SARM Marker Concordance | Indicator construction | *S. aureus* Cefoxitine vs Oxacilline | Non-blocking (enforces Fox precedence) | 0 co-tested isolates at Rouen; concordance is not assessable; oxacilline fallback: 84 / 1 093 R |
 | **TW-09.1** | EUCAST Exceptional Phenotype Integrity | Diffusion & post-flight audit | Output tables & unquarantined isolates | Non-blocking warning (`manifest.json` flagged for biologist review) | Rouen 2024: 0 exceptional phenotypes (0 VRSA, 0 Amp-S *K. pneumoniae*) |
@@ -77,8 +87,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 ### TW-04.2 — Timestamp Grain Resolution
 
 - **Identifier**: `TW-04.2`
-- **Pipeline Stage**: Ingestion & pre-flight audit (`00-audit-qualite.md`, Decision 00.4;
-  `04-donnees-activite.md`, Decision 04.9)
+- **Pipeline Stage**: Common input audit (`00-audit-qualite.md`, Test 3.4,
+  Decision 00.4; `04-donnees-activite.md`, Decision 04.9). Bind the retained
+  rule to the supplied timestamps and resolution metadata; standardized
+  timestamp formatting alone does not establish original source precision.
 - **Statement**: The observed distribution of timestamps falling at exactly `00:00:00` matches
   the site's declared resolution (`datetime` or `date`).
 - **Rationale & Risk**: On pure date-only movements, occupancy hours divided by 24 simplifies
@@ -102,8 +114,11 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 ### TW-05.1 — Structure Snapshot Referential Coverage
 
 - **Identifier**: `TW-05.1`
-- **Pipeline Stage**: Referential linkage (`05-structure.md`, Decision 05.2; `00-audit-qualite.md`,
-  Decision 00.5)
+- **Pipeline Stage**: Derived structure linkage (`05-structure.md`, Decision 05.2).
+  The reviewed common-input check is retained in chapter 00, Suite 4.
+  Direct membership checks against a native source structure
+  remain local; the shared core uses references supplied through the common
+  input, not Rouen's source structure files.
 - **Statement**: 100 % of administration UFs with hospitalisation activity, and $\ge 99.9\,\%$
   of microbiology observations, resolve in the annual establishment structure snapshot.
 - **Rationale & Risk**: In accordance with Decision 03.5, the perimeter is defined positively:
@@ -127,8 +142,10 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 ### TW-06.1 — Resistance Flags and Antibiotic Test Results
 
 - **Identifier**: `TW-06.1`
-- **Pipeline Stage**: Ingestion & pre-flight audit (`00-audit-qualite.md`, Decision 00.7;
-  `06-donnees-resistance.md`, Decision 06.5)
+- **Pipeline Stage**: Requires recognised phenotype and antibiotic meanings
+  (`06-donnees-resistance.md`, Decision 06.5). The reviewed comparison is
+  retained in chapter 00, Test 5.2, on the prepared common input. See
+  [Archived audit discussion](audit-checkpoints-deferred.md).
 - **Statement**: Positive BLSE and carbapenemase flags are checked against results for the
   corresponding antibiotics. Wild-type susceptible Enterobacterales have 0 unexplained positive
   phenotype flags.
@@ -160,10 +177,13 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ---
 
+<a id="tw-06-2"></a>
 ### TW-06.2 — CA-SFM Interpretation Version Referential
 
 - **Identifier**: `TW-06.2`
-- **Pipeline Stage**: Ingestion & standardization (`06-donnees-resistance.md`, Decision 06.6)
+- **Pipeline Stage**: Common-input metadata review (`06-donnees-resistance.md`,
+  Decision 06.6). Portable declaration fields remain to be specified; native
+  source-tag inspection is local site work.
 - **Statement**: The antibiogram interpretation referential declared by the site corresponds to
   CA-SFM/EUCAST $\ge 2020$ (SPARES p. 15) on surveillance campaigns from 2024 onward.
 - **Rationale & Risk**: SPARES requires CA-SFM $\ge 2020$ rules (pp. 7 and 15), where the intermediate
@@ -171,11 +191,13 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
   p. 40 for the SFP category). Testing at the row level
   against raw laboratory version strings (`CASFM`) is dangerous because LIS dictionary updates
   often lagged behind bench practice (e.g. Rouen 2022 rows carried `CASFM = "2019"` despite clinical
-  2020 compliance; row-level drops discarded whole years). The tripwire verifies site metadata
-  declaration while inspecting raw tags.
+  2020 compliance; row-level drops discarded whole years). The common part
+  verifies the declaration supplied through the handoff. Any supporting raw-tag
+  inspection is local; the core does not read native laboratory exports.
 - **Trigger Condition**:
   - Surveillance campaign $\ge 2024$ with site declared referential $< 2020$.
-  - In raw laboratory data from 2024 onward, $> 5\,\%$ of rows carry explicit `CASFM < 2020`.
+  - Historical local source-tag rule, not a common-core requirement: in raw
+    laboratory data from 2024 onward, $> 5\,\%$ of rows carry explicit `CASFM < 2020`.
 - **Action on Trip**: Warning for historical campaigns ($\le 2023$); blocking refusal on
   metadata declaration for campaigns $\ge 2024$.
 - **Rouen Baseline Witness**: 100 % of Rouen 2024 raw laboratory rows carry `CASFM == "2022"`.
@@ -211,8 +233,7 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 ### TW-08.1 — SARM Marker Precedence and Concordance
 
 - **Identifier**: `TW-08.1`
-- **Pipeline Stage**: Indicator construction (`08-indicateurs.md`, Decision 08.3; `00-audit-qualite.md`,
-  Decision 00.6)
+- **Pipeline Stage**: Indicator construction (`08-indicateurs.md`, Decision 08.3).
 - **Statement**: Cefoxitine is prioritized as primary marker for *S. aureus* methicillin resistance;
   oxacilline acts as surrogate fallback when cefoxitine is untested. Co-tested isolates are monitored
   for discordant clinical interpretations.
@@ -279,11 +300,18 @@ Every tripwire in ORCHIDEE defines an explicit trigger condition and an action p
 
 ## 4. Tripwire Governance and Audit Integration
 
-All 9 dynamic tripwires are evaluated automatically during pipeline execution:
-1. **Execution**: Tripwires TW-04.2, TW-05.1, TW-06.1, and TW-06.2 execute during the pre-flight
-   audit (`00-audit-qualite.md`). TW-04.1 executes during exposure calculation. TW-07.1 executes
-   during deduplication. TW-08.1 executes during indicator construction. TW-09.1 and TW-09.2 execute
-   during post-flight quality audit (`09-diffusion.md`) prior to delivery bundle packaging.
+The catalogue records planned governance, not a claim that all nine checks are
+implemented or active in the common input audit:
+
+1. **Execution boundary**: Chapter 00 is after the necessary site mappings and
+   before population selection and deduplication. Bind each retained check to
+   the common fields, row meanings and available metadata.
+   The reviewed TW-04.2, TW-05.1, TW-06.1 and declaration part of TW-06.2 remain
+   specified by Suites 1–5; input binding does not reopen their methodology.
+   Their automatic response policies remain inactive. Native source inspection
+   remains local and does not require a shared raw schema or mandatory raw
+   report. Exposure, deduplication, indicator and delivery checks retain their
+   owning chapters; further checkpoint organisation is deferred.
 2. **Ledger Recording**: The status of all tripwires (PASS / TRIP / ACKNOWLEDGED), their numerical
    readings, and baseline comparisons are recorded in the run metadata (`manifest.json`) and published alongside
    the **indicator table**.
