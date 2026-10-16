@@ -47,21 +47,26 @@ preparation exclusions.
 **The shared perimeter follows the common audit and precedes deduplication.**
 Analysis-specific specimen selection also precedes deduplication; local
 diagnostic selection has already occurred. The perimeter remains an input
-to deduplication, alongside the
-grouping key, the window, the antibiotype panel and the conflict rule. See
+to deduplication, alongside the grouping key, the window, the antibiotype panel
+and the conflict rule. See
 `07-dedoublonnage.md`, and the general rule it now states:
 
 > Any selection on isolates is an input to deduplication, never a filter on its
 > output.
 
-**The perimeter is one named, versioned object.** It carries every axis that
-selects the analysed population — unit eligibility, period, establishment,
-diagnostic scope, sample-type scope — and its version is recorded on every
-published number, in the same slot that already carries the four deduplication
-inputs. Two selections resolved independently would each be defensible and their
-ratio would be a rate of nothing; see 04.7 and
-`docs/evidence/2024_consores_rouen_denominator.md` for what that costs in
-practice.
+**The hospital perimeter is one named, versioned set of eligible units.**
+Resolve it once for the declared establishment and surveillance period, then
+use the same set for the microbiology numerator and hospitalisation exposure
+denominator. Record its version with every published number; see 04.7 and
+`docs/evidence/2024_consores_rouen_denominator.md` for the consequence of
+resolving unit eligibility independently for numerator and denominator.
+
+Record the period, completed local diagnostic and antibiogram selection,
+analysis-specific specimen scope and deduplication inputs separately in the
+analysis context. Numerator and exposure denominator use the same establishment
+and period. Specimen restrictions apply only to microbiology: a blood-culture
+analysis still uses all relevant hospitalisation exposure within that perimeter
+and period, including activity from patients without a culture or antibiogram.
 
 ## Decisions
 
@@ -69,7 +74,7 @@ practice.
 |---|---|---|---|---|
 | 03.1 | Extraction scope | unbounded; the perimeter is applied downstream | extract to the perimeter | 56 % of Rouen's 2024 diagnostic *E. coli* sits outside the SPARES perimeter (3 651 of 6 519). A perimeter change is a re-run, not a re-extraction |
 | 03.2 | Where the perimeter applies | population selection, **before** deduplication | after deduplication, or at the indicator stage | 2 445 isolates against 2 350, **79 patients lost entirely**. `docs/worked-examples/perimeter-ordering.md` |
-| 03.3 | Perimeter shape | one named, versioned object carrying every selection axis | unit eligibility only, other axes separate | the argument that made the panel a deduplication input applies unchanged to every other selection |
+| 03.3 | Perimeter shape | one named, versioned set of eligible units shared by numerator and exposure denominator; other selections recorded separately in the analysis context | mix microbiology restrictions into the hospital perimeter or resolve unit eligibility independently for numerator and denominator | glossary definition and 04.7; methodological clarification, not a new measurement |
 | 03.4 | Units with unknown `TA`/`DE` | not eligible; counted and published | eligible until proven otherwise; or blocking | 6 UFs of 1 159 unclassified — 2 with `TA 03/20` and no `DE`, 4 absent from the structure file |
 | 03.5 | Perimeter definition | **positive** — eligible codes are listed | negative — excluded codes are listed | forced by 03.4: a code nobody has classified must not become eligible by omission |
 | 03.6 | Unmapped vocabulary | lazy — mapped when a value reaches an indicator, residue counted per run | eager, or within the perimeter only | not measured. `unproven` |

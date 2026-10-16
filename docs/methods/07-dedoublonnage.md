@@ -47,8 +47,8 @@ collapsed.
 
 ## What ORCHIDEE does
 
-ORCHIDEE applies this rule, and records the four inputs it depends on with every
-number it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
+ORCHIDEE records the deduplication rules and input population with every number
+it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
 
 | Input | Value |
 |---|---|
@@ -57,7 +57,9 @@ number it publishes. See `docs/adr/0001-deduplication-is-parameterised.md`.
 | Antibiotype panel | every antibiotic the site tests |
 | Conflict rule | `S <-> R` and `SFP <-> R` major; `S <-> SFP` minor; `ZIT` read as `SFP` |
 | Phenotypes | BLSE and carbapenemase compared; a blank flag is absent (`ADR-0005`) |
-| Population selection | the perimeter object and the diagnostic scope; see `03-activites.md` |
+| Supplied microbiology population | diagnostic isolates with an antibiogram; local selection completed before the common audit |
+| Hospital perimeter | the shared, versioned set of eligible units; see `03-activites.md` |
+| Period and specimen scope | the declared surveillance period and analysis-specific specimen restriction, applied before deduplication |
 
 The window is expressed as a predicate over a pair of isolates,
 `same_window(i, j)`, not as a grouping column. A calendar window is
@@ -120,12 +122,14 @@ population selection and the declared analysis scope determine the input
 isolate set for deduplication.
 
 Each `analysis_id` resolves to metadata recording the version or hashes of the
-input data and site mappings, population selection (including perimeter and
-diagnostic scope), surveillance period, specimen scope, grouping key, window,
-antibiotype panel, phenotype and antibiotic comparison rules, grouping rule,
-retention rule, tie-break, and pipeline version. Changing any of this context
-requires computing a mapping for that context. Saved membership can be reused
-only with the same input and rules.
+input data and site mappings, the supplied diagnostic antibiogram population,
+hospital perimeter version, surveillance period, analysis-specific specimen
+scope, grouping key, window, antibiotype panel, phenotype and antibiotic
+comparison rules, grouping rule, retention rule, tie-break, and pipeline
+version. The supplied population records completed local diagnostic and
+antibiogram selection. Changing any of this context requires computing a
+mapping for that context. Saved membership can be reused only with the same
+input and rules.
 
 The mapping must satisfy these invariants:
 
