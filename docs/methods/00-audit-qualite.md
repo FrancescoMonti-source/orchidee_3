@@ -1,6 +1,5 @@
 # 00 - Audit of standardized input data
 
-Status: **Suites 1–5 preserved; Suite 6 revised for review, with open choices**.
 The audit documents and flags findings without automatic action or acceptance
 thresholds. This chapter specifies the method; this documentation revision
 implements no executable common audit and remeasures no hospital data.
