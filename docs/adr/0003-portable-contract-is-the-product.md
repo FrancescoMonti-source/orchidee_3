@@ -24,6 +24,10 @@ references.
   local preparation and diagnostic selection as input assumptions (issue #22).
   The common audit does not revalidate local decisions, read raw comments or
   recover records removed upstream, including screening records.
+- The handoff format specification defines row meanings, fields and complete
+  entity keys. The common audit uses those definitions rather than inferring
+  row meanings. A missing definition is a contract gap to resolve in that
+  specification.
 - The previous ORCHIDEE antibiotic and bacterial mappings are the foundation
   for improvement, not a declaration that every existing entry is correct.
   The common audit consumes prepared identities rather than interpreting

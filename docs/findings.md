@@ -430,3 +430,31 @@ remains on the preserved
 `CONTEXT.md`; `docs/adr/0001-deduplication-is-parameterised.md`;
 `docs/adr/0003-portable-contract-is-the-product.md`;
 `docs/adr/0007-relational-keys-are-composite-against-recycling.md`
+
+
+### 2026-10-17 — Suite 6 describes the prepared input (issue #22)
+
+The [updated specification](https://github.com/FrancescoMonti-source/orchidee_3/issues/22)
+places Suite 6 on the prepared diagnostic antibiogram handoff, before shared
+hospital perimeter selection and deduplication. The input format owns row
+meanings and keys; the audit uses those definitions. Suites 1–5 retain their
+recovered checks and rules.
+
+The profile counts isolates of each species for each patient. Species are
+counted separately for each patient, and summary percentages use summed
+counts rather than means of patient percentages. Exact distributions,
+antibiotic-result coverage and species detail have explicit counting units
+and denominators. Sample co-detection remains restricted to the supplied
+antibiogram population, with its proposed denominator still open.
+
+The earlier Rouen tables and interpretations remain in the
+[pre-revision chapter](https://github.com/FrancescoMonti-source/orchidee_3/blob/d5fd57a4a5032c266a753cbe6e61132e9299243c/docs/methods/00-audit-qualite.md).
+The new examples are constructed; historical values have not been remeasured.
+Result-counting conventions, mapping details, ambiguous-input treatment,
+empty-denominator display and sample-profile details remain explicitly open.
+This documentation revision implements no executable audit, changes no
+dictionary and activates no automatic response.
+
+→ `docs/methods/00-audit-qualite.md`; `docs/methods/README.md`;
+`docs/methods/06-donnees-resistance.md`;
+`docs/adr/0003-portable-contract-is-the-product.md`

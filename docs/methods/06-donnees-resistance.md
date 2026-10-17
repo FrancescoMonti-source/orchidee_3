@@ -90,7 +90,9 @@ with a missing or uninterpretable result (for example `NC` / `Non côté`), loca
 preparation keeps that distinction explicit instead of treating every `NA` as
 equivalent evidence. Any source-comment interpretation belongs to that local
 preparation, not a common raw-comment reader or a new antibiogram eligibility
-check. Result-profile counting remains part of the separate Suite 6 review.
+check. The proposed result-counting definition is recorded in
+[Suite 6](00-audit-qualite.md#6-descriptive-profiles-of-the-supplied-data)
+and its Open section.
 
 Historical results with `I` (CA-SFM &le; 2022) are read as `SFP`. Measurement caveat
 `ZIT` (zone d'incertitude technique) is read as `SFP`.
@@ -184,8 +186,10 @@ inspection remains local.
   treatment and target lists remain open where not already settled, using the
   previous mappings as the foundation. This revision neither implements an
   offline dictionary job nor approves particular entries.
-- **Suite 6**: descriptive-profile definitions remain deferred to its separate
-  review. This recovery does not approve the existing profile calculations.
+- **Suite 6**: the descriptive profiles are specified in
+  [chapter 00](00-audit-qualite.md#6-descriptive-profiles-of-the-supplied-data).
+  Its Open section records the remaining result-counting, mapping and
+  reporting choices; the proposed conventions are not approved defaults.
 
 Local diagnostic selection and the supplied antibiogram population are settled
 assumptions. They are not open questions about common classification, source
