@@ -1,9 +1,9 @@
 # 00 - Audit of standardized input data
 
-Status: **Suites 1–5 recovered from the reviewed checkpoint; Suite 6 pending**.
+Status: **Suites 1–5 preserved; Suite 6 revised for review, with open choices**.
 The audit documents and flags findings without automatic action or acceptance
-thresholds. This is a method specification; its executable common audit has not
-been implemented or remeasured by this recovery.
+thresholds. This chapter specifies the method; this documentation revision
+implements no executable common audit and remeasures no hospital data.
 
 ---
 
@@ -68,13 +68,19 @@ by chapter 05 and ADR-0009.
 **Document findings only.** The audit sets no acceptance thresholds, changes no
 reported results, excludes no records and blocks no processing. Population
 selection, exposure calculation and unit attribution remain in their owning
-chapters. This recovery implements no executable audit and remeasures no counts.
+chapters. This documentation revision implements no executable audit and
+remeasures no counts.
 
 Fields such as `PATID`, `EVTID` and `ELTID` name concepts to bind to the prepared
 common input; they do not require Rouen's native schema. The reviewed checks use
 available values and history. A missing input is reported as not assessable;
 preparation may make earlier source variation unavailable to the common audit.
 The audit does not require sites to reconstruct discarded source histories.
+
+The expected input-format specification defines what each row represents, the
+fields and the complete entity keys. The audit uses those definitions rather
+than discovering the meaning of a row. Missing definitions belong to the
+[portable contract](../adr/0003-portable-contract-is-the-product.md).
 
 The pre-flight audit inspects six core domains:
 
@@ -108,18 +114,19 @@ Section 00 Pre-Flight Audit
 │   ├── Test 5.2: Summarise positive BLSE/carbapenemase flags with no recorded S/SFP/R marker result or with all recorded marker results S
 │   └── Test 5.3: Document the declared interpretation standard and supplied version metadata
 │
-└── Suite 6: Descriptive Profiling & Redundancy Statistics
-    ├── Test 6.1: Global Entity Volumes (counts of distinct PATID, EVTID, ELTID, isolates)
-    ├── Test 6.2: Deduplication Redundancy Profiling (distribution of isolates per patient)
-    ├── Test 6.3: Target Pathogen Redundancy Hierarchy (species-specific repeat culture rates)
-    └── Test 6.4: Polymicrobial Rate Profiling (specimens yielding multiple target taxa)
+└── Suite 6: Descriptive Profiles of the Supplied Data
+    ├── Test 6.1: Row counts and complete-key entity counts
+    ├── Test 6.2: Isolates of each species for each patient, and antibiotic results
+    ├── Test 6.3: Detail by species within the same population
+    └── Test 6.4: Samples containing at least two target species
 ```
 
 ---
 
-All numerical examples and witnesses below come from Rouen data covering
-**2022–2024**. Unless a narrower period is explicitly stated (for example, 2024
-alone), each figure refers to that full three-year period.
+The historical Rouen examples and witnesses in Suites 1–5 cover **2022–2024**.
+Unless a narrower period is explicitly stated (for example, 2024 alone), each
+figure refers to that full three-year period. Suite 6 uses explicitly
+constructed examples, separate from those hospital observations.
 
 ### 1. Stay and Sample Identifiers
 
@@ -352,77 +359,173 @@ in the structure file are not included in these denominators.
 
 ---
 
-Suite 6, decision 00.8 and its related note retain the text from `main` for a
-separate review. Their definitions, figures and interpretations are not approved
-by this recovery.
+### 6. Descriptive Profiles of the Supplied Data
 
-### 6. Descriptive Profiling and Deduplication Redundancy Statistics
+The inventory in 6.1 describes each supplied dataset's own population. The
+microbiology profiles in 6.2–6.4 describe the supplied diagnostic antibiogram
+isolates before shared hospital perimeter selection, analysis-specific specimen
+selection and deduplication. Correct local preparation is an input assumption.
 
-The pre-flight audit generates a comprehensive descriptive profile of the site handoff:
+For every output, identify the site, input version and dataset coverage, the
+applicable mapping versions, period and specimen scope, and the population and
+counting unit. Every percentage carries its numerator and denominator. State
+the taxon definitions and antibiotic identities used by the relevant profile.
+The [Open](#open) section distinguishes proposed conventions from agreed rules.
 
-#### Global Entity Volumes (Rouen 2022–2024 Baseline)
+#### 6.1 How much data was received?
 
-| Entity Level | Raw Bacteriology (`bact22_24`) | PMSI Movements (`pmsi$main`) | Handoff Observations | Surveillance Isolates (`sir_wide.rds`) |
-|---|---|---|---|---|
-| **Total Rows** | 5 154 206 | 442 183 | 679 101 | 48 595 |
-| **Distinct `PATID`** | 107 049 | 106 491 | 23 763 | 23 072 |
-| **Distinct `EVTID`** | 196 066 non-NA (262 NA) | 194 566 | 33 406 | 32 399 |
-| **Distinct `ELTID`** | 507 416 | 442 183 (movement rows) | 44 767 | 41 951 |
-| **Distinct `souche_id`** | — | — | 7 | 7 |
+Use the row meanings and complete entity keys defined by the expected input
+format. For each supplied dataset separately, report its row count and the
+distinct patients, stays, samples and isolates represented, where applicable.
+These are counts of different units, each with the dataset's stated coverage.
 
-#### Deduplication Redundancy Profiling (Within-Species Partition)
+In the methods' notation, the keys are patient `PATID`, stay `(PATID, EVTID)`,
+sample `(PATID, ELTID)` and isolate `(PATID, ELTID, isolate_id)` (ADR-0007).
+A local isolate number alone does not count isolates. Several antibiotic-result
+rows can describe one isolate. Historical `souche_id` is an alias for the local
+isolate identifier, as explained in Suite 1 and Decision 06.3.
 
-Deduplication never operates across different bacterial species (*E. coli* is never deduplicated
-against *K. pneumoniae*). The deduplication universe is strictly partitioned by **`(PATID, species)`**
-(and specimen scope).
+For each entity key, separately report rows with a missing or incomplete key.
+State **rows** as the unit; these are not a count of unidentified patients,
+samples or isolates. Keep identifiable isolates without an assignable taxon
+visible in the inventory. The treatment of incomplete or conflicting information
+in affected calculations is proposed under Open.
 
-Across the 3-year surveillance extract (`sir_wide.rds`, $N = 48\,595$ isolates entering deduplication,
-$N = 23\,072$ unique patients, representing **$33\,017$ distinct `(PATID, species)` episodes**):
-- **Episodes with exactly 1 isolate**: **24 810 (75.14 %)** of `(PATID, species)` pairs have zero duplicate candidates.
-- **Episodes with repeat isolates ($\ge 2$)**: **8 207 (24.86 %)** of `(PATID, species)` pairs undergo deduplication.
-- **Isolates entering repeat episodes**: **23 785 (48.95 %)** of all surveillance isolates.
-- **True Within-Species Redundancy Ratio** $\frac{\text{Isolates} - (\text{PATID, species})}{\text{Isolates}}$:
-  - **32.06 %** over the 3-year surveillance window (48 595 isolates $\to$ 33 017 unique episodes).
-  - **26.54 %** in 2024 alone (16 545 isolates $\to$ 12 154 unique episodes; 77.88 % single, 22.12 % repeat).
-  - **23.83 %** in 2024 Blood Cultures alone (2 069 isolates $\to$ 1 576 unique episodes; 78.55 % single, 21.45 % repeat).
+Preserve the omission of movements from this comparative volume table. The
+inventory does not restrict hospitalisation activity to microbiology patients.
 
-```
-Distribution of Isolates per (PATID, Species) Episode (N = 33 017 episodes, 48 595 isolates):
-  1 isolate  : [████████████████████████████████████] 75.1 % (24 810 episodes -> 24 810 isolates)
-  2 isolates : [████████]                             15.1 % ( 4 985 episodes ->  9 970 isolates)
-  3 isolates : [███]                                   5.0 % ( 1 661 episodes ->  4 983 isolates)
-  4 isolates : [█]                                     2.1 % (   701 episodes ->  2 804 isolates)
-  5 isolates : [ ]                                     1.0 % (   326 episodes ->  1 630 isolates)
-  6-9 isolates: [█]                                    1.2 % (   407 episodes ->  2 813 isolates)
-  10+ isolates: [ ]                                    0.4 % (   127 episodes ->  1 585 isolates)
-```
+#### 6.2 Isolates of each species recorded for each patient
 
-*(Note on cross-species multi-infection: Across all species combined, 40.83 % of patients have $\ge 2$ total isolates of any organism, demonstrating frequent polymicrobial infection or sequential hospitalizations across distinct infectious episodes, but these isolates never compete in deduplication).*
+For each period, overall and by specimen type, count the isolates of each
+species for each patient. Show how many patients have one, two, three… isolates
+of that species. Consider each patient separately for every species present.
 
-#### Target Pathogen Redundancy Hierarchy (2024 Alone)
+**Population and reporting groups.** Use complete-key input isolates with an
+assignable patient, mapped taxon and reporting period. Count each isolate once,
+irrespective of its number of antibiotic-result rows. Separately account for
+data that cannot be assigned to these groups, using isolates where their keys
+are complete and rows where isolate identity cannot be established. Unassigned
+taxa do not form an invented common “unknown species”.
 
-| Target Pathogen (`bact_norm`) | Total Isolates (2024) | Distinct Patients | Mean Isolates / Patient | Repeat Patients (%) | Redundancy Ratio (%) |
-|---|---|---|---|---|---|
-| ***Pseudomonas aeruginosa*** | 1 223 | 785 | **1.56** | **29.6 %** | **35.8 %** |
-| ***Klebsiella pneumoniae*** | 1 201 | 803 | **1.50** | **26.3 %** | **33.1 %** |
-| ***Enterobacter cloacae complex*** | 743 | 503 | **1.48** | **27.8 %** | **32.3 %** |
-| ***Staphylococcus aureus*** | 2 461 | 1 749 | **1.41** | **25.5 %** | **28.9 %** |
-| ***Enterococcus faecium*** | 482 | 352 | **1.37** | **20.2 %** | **27.0 %** |
-| ***Escherichia coli*** | 6 519 | 4 839 | **1.35** | **21.9 %** | **25.8 %** |
-| ***Proteus mirabilis*** | 781 | 609 | **1.28** | **19.5 %** | **22.0 %** |
-| ***Enterococcus faecalis*** | 1 092 | 878 | **1.24** | **16.2 %** | **19.6 %** |
+Produce profiles by sampling calendar year and calendar year-month, overall
+and by mapped specimen type. A known year can support an annual profile when
+the month is unknown. Stay dates do not replace sampling dates. Keep isolates
+with a missing or unclassifiable specimen type in the overall profile when
+the other required information is usable; account for them explicitly.
 
-*Epidemiological Insight*: *P. aeruginosa* exhibits the highest redundancy (35.8 %), reflecting
-chronic colonization and intensive repeat culturing in ICUs and pulmonology. Conversely,
-*E. faecalis* and *E. coli* show the lowest redundancy (~20–25 %), representing acute urinary
-episodes with fewer repeat samples.
+Recompute patient and species counts within each period and specimen group.
+Annual distinct-patient counts are not sums of monthly counts. A species
+represented once in urine and once in blood for a patient contributes one
+isolate to each specimen-specific profile and two to the overall profile.
 
-#### Polymicrobial Rate Profiling
+**Counts.** Report total isolates, distinct patients and the total number of
+species counted separately for each patient. The glossary calls the latter
+the **patient–species pair count**: E. coli in two patients contributes twice.
+Use the declared taxon mapping for species and complexes, without guessing
+equivalences between overlapping labels.
 
-- In raw bacteriology (`bact22_24`): **36.86 % of samples** (39 013 / 105 836) are polymicrobial
-  ($\ge 2$ distinct species).
-- In surveillance targets (`sir_wide.rds`): **13.53 % of sample containers** (5 677 / 41 951)
-  yield $\ge 2$ distinct surveillance target species.
+For every observed exact isolate count, report how many patient–species
+combinations have that count and how many isolates they contain. Retain each
+count 1, 2, 3… rather than arbitrary bins. Combination counts sum to the total
+patient–species count; their isolate contributions sum to total included
+isolates.
+
+**Three summary percentages.** For each patient, count how many species have
+just one isolate and how many have at least two isolates. Sum those counts
+across patients, then calculate the percentages below. Each denominator uses
+the same population, period and specimen group as its numerator.
+
+| Summary | Numerator | Denominator |
+|---|---|---|
+| Species with one isolate, counted separately for each patient | Sum across patients of the number of species with one isolate | Sum across patients of the number of all included species |
+| Species with at least two isolates, counted separately for each patient | Sum across patients of the number of species with at least two isolates | The same total species count |
+| Isolates belonging to the second group | All isolates of those species in those patients, including the first isolate | All included isolates |
+
+Calculate these percentages from the summed counts, rather than averaging
+individual patients' percentages. The first two count species separately for
+each patient; the third counts isolates.
+
+**Constructed example**, within one period and specimen scope:
+
+| Patient | Species | Isolates |
+|---|---|---:|
+| A | E. coli | 3 |
+| A | K. pneumoniae | 1 |
+
+There are **four isolates, one patient and two species counted for that
+patient**:
+
+- One species has one isolate: **1/2 = 50%**.
+- One species has at least two isolates: **1/2 = 50%**.
+- All three E. coli isolates belong to the latter group: **3/4 = 75%**.
+
+The exact distribution has one patient–species combination with one isolate
+and one with three isolates. Adding patient B with one E. coli isolate gives
+three combinations and five isolates: the three fractions become **2/3, 1/3
+and 3/5**. These are explanatory examples, not hospital measurements.
+
+##### Antibiotic results
+
+Within each species, period and specimen group, report:
+
+- The distribution of distinct mapped antibiotics with a recorded result per
+  isolate. Each included isolate contributes one count, including zero if none
+  of its supplied results meets the declared counting rule.
+- For each antibiotic, isolates with a recorded result divided by **all
+  included isolates in that group**, with both counts and the percentage.
+  An isolate contributes at most once to that antibiotic's numerator.
+
+These outputs describe the available antibiotic results. An individual `NA`
+does not remove an isolate from the denominator or reopen its antibiogram
+eligibility. The proposed definition of a countable result is under Open;
+local interpretation of source information stays local (chapter 06).
+
+Use all supplied mapped antibiotics rather than an indicator-only panel.
+Repeated rows do not increase isolate or antibiotic counts. Phenotype
+attributes are not antibiotic results. Document the antibiotic counting key
+and its relationship to the key used to resolve several results for one
+isolate and antibiotic during preparation. This profile does not choose a
+new result-resolution rule or infer tests absent from the handoff.
+
+#### 6.3 Detail by species
+
+Use the same population, taxon definitions, periods and specimen groups as
+6.2. For each species report:
+
+- Isolates and distinct patients.
+- Mean isolates per patient: species isolates / patients with that species.
+- Patients with at least two isolates of that species, the number of all
+  patients with that species, and their percentage.
+
+Species isolate counts sum to the 6.2 isolate total. Species patient counts
+sum to the patient–species count. Their sum can exceed the distinct-patient
+total because one patient may have several species. Unassigned taxa remain
+visible in the inventory.
+
+#### 6.4 Samples containing at least two target species
+
+Use samples represented by the supplied diagnostic antibiogram isolates,
+before shared hospital perimeter selection and deduplication. Count complete
+sample keys `(PATID, ELTID)` and distinct mapped target species represented
+by the supplied isolates. Two isolates of one species contribute one species.
+
+**Proposal awaiting confirmation:** within one declared period and specimen
+scope, report samples with at least two target species, samples with at least
+one target species, and their percentage:
+
+> Samples with at least two target species / samples with at least one target species.
+
+The denominator, exact target list and reporting detail remain open. The
+restriction to samples represented by the supplied antibiogram population is
+agreed. Several identification labels are not automatically distinct taxa;
+use the declared species/complex mapping. Keep unassigned taxa distinguishable
+from confirmed absence of another target species. Incomplete or conflicting
+sample information follows the explicit proposals under Open.
+
+The profiles describe the supplied input. They do not identify infection
+episodes, biological strains or actual deduplication removals. The latter are
+specified for each selected analysis in
+[chapter 07](07-dedoublonnage.md#deduplication-audit-output).
 
 ---
 
@@ -437,7 +540,7 @@ episodes with fewer repeat samples.
 | 00.5 | Recorded UF structure matches | Compare recorded PMSI and laboratory ordering UFs to the structure file; report matched/unmatched codes, affected records and missing UF counts; no audit exclusion or coverage threshold | Check all structure UFs against the data or enforce a minimum match percentage | Admin 362/362 (100 %); lab 272/278 recorded UFs found in structure (6 unmatched UFs, 68 raw records) |
 | 00.6 | Susceptible results against natural resistance reference | Count and document S results against uppercase R rules in CA-SFM 2025 V1.1, Section 2, pp. 33-39, respecting exceptions; retain reported results | Infer an error or alter results from the reference comparison alone | In 2024 raw extract, 1 *K. pneumoniae* reported S to ampicillin (outpatient ELTID 376198529); 604/604 results R in the eligible hospitalisation perimeter |
 | 00.7 | Positive phenotype marker summaries | By species, phenotype and year, report positive flags without recorded S/SFP/R marker results and those with all recorded marker results S, using explicit audit panels and denominators; retain values | Infer mechanism validity from susceptibility categories or routinely list every positive isolate | Definitions specified in Test 5.2; measured counts for these two summaries are not documented here |
-| 00.8 | Pre-flight descriptive profiling | Export comprehensive descriptive profile and divergence ledger (`audit_qualite.rds`) | Omit ingestion profiling | Quantifies true within-species redundancy (32.1 % 3-year ratio; 24.9 % repeat episodes; 26.5 % in 2024) and polymicrobial rates (13.5 % target samples) |
+| 00.8 | Descriptive profiles of the supplied input | Report rows and complete-key entities, isolates of each species for each patient, antibiotic results and target species per sample; show populations and denominators and keep unresolved definitions explicit | Omit descriptive profiles or interpret repeat counts as actual deduplication removals | Constructed examples in 6.2; no new hospital measurement or executable-audit validation; proposals remain under Open |
 
 The historical examples illustrate the available observations; they do not establish implementation or validation of every check defined here.
 
@@ -464,19 +567,23 @@ inferring why dates are inverted or end times are missing. The 24 437 rows are
 not necessarily 24 437 distinct stays. Missing final movement end times must
 remain visible when documenting whole-stay boundaries.
 
-### 00.8 note — clinical significance of deduplication redundancy profiling
+### 00.8 note — reading the descriptive profiles
 
-Measuring deduplication redundancy at ingestion provides vital clinical and operational context:
-- In acute urinary tract infections (*E. coli*, *E. faecalis*), redundancy is low (~20–25 %),
-  meaning most isolates represent independent primary infectious episodes.
-- In intensive care and chronic respiratory pathogens (*P. aeruginosa*, *K. pneumoniae*),
-  redundancy reaches 33–36 %, reflecting prolonged colonization, treatment monitoring, and
-  frequent repeat sampling.
-- Within the true deduplication partition `(PATID, species)`, **24.86 % of episodes contain repeat
-  isolates**, representing **48.95 % of all surveillance isolates**. The consolidated within-species
-  redundancy ratio is **32.06 %** over 3 years and **26.54 %** in 2024, confirming why deduplication
-  rules and window definitions govern published AMR rates. Deduplication collapses these repeat isolates
-  to retain one representative isolate per deduplication episode.
+The first two percentages in 6.2 describe species counted separately for each
+patient. The third describes isolates and includes every isolate belonging to
+those repeated-species counts, including the first. These percentages describe
+the input before shared population selection. Deduplication removals depend on
+the selected analysis and its rules in chapter 07.
+
+Species-specific repeat counts do not establish chronic colonisation, acute
+infection or a reason for repeated sampling. Several target species in a
+sample do not establish polymicrobial infection.
+
+The former Rouen tables, figures and interpretations remain preserved in the
+[pre-revision chapter](https://github.com/FrancescoMonti-source/orchidee_3/blob/d5fd57a4a5032c266a753cbe6e61132e9299243c/docs/methods/00-audit-qualite.md#6-descriptive-profiling-and-deduplication-redundancy-statistics).
+They concern historical source data or derived extracts, not measurements of
+the revised common-input profiles. They have not been remeasured here and
+do not determine the new profiles' populations or denominators.
 
 ## Open
 
@@ -487,5 +594,32 @@ Measuring deduplication redundancy at ingestion provides vital clinical and oper
 - **Common input fields.** Bind the reviewed concepts to the portable fields and
   available metadata without changing their populations, counting units or
   denominators. Unavailable inputs remain not assessable.
-- **Suite 6.** Its body, decision 00.8 and related note are retained from `main`
-  and await a separate review; their interpretations are not approved here.
+
+The following Suite 6 choices remain proposals or unresolved definitions;
+this revision does not turn them into approved defaults:
+
+- **Antibiotic result counts.** Proposed: count available `S`, `SFP` and `R`
+  results, using the existing `I` and `ZIT` mappings. Untested `NA` placeholders
+  do not count as results. Where the prepared input distinguishes a test
+  without a usable result, keep that information separate. This does not
+  change an isolate's inclusion in the supplied antibiogram population.
+- **Mapping details.** Declare the antibiotic counting identities, their
+  relationship to result-resolution identities, species/complex equivalences
+  and the target list. Improve the previous mappings without assuming every
+  existing entry is correct. No dictionaries are changed by this revision.
+- **Incomplete or conflicting information.** Proposed: retain the available
+  data, use only unambiguous year/month, specimen and taxon attribution, and
+  report an affected calculation as not assessable where attribution or
+  identity cannot be established. Report affected isolates when identifiable
+  and affected rows when isolate counting is impossible. This does not
+  exclude records from surveillance or change eligibility.
+- **Empty denominators.** Proposed: display “percentage not calculable” and
+  retain the numerator and denominator.
+- **Missing classifications.** Decide the separate or combined display of
+  missing and unclassifiable specimen types, and the presentation of
+  unassigned taxa. Keep their different meanings and affected counts visible.
+- **Samples with several target species.** Confirm the proposed 6.4
+  denominator, target list and reporting detail.
+
+Local diagnostic selection, retention of isolates with an antibiogram and
+the position of the common audit are agreed input assumptions.
