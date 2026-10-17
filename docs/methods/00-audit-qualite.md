@@ -7,39 +7,7 @@ implements no executable common audit and remeasures no hospital data.
 
 ---
 
-## What SPARES says
-
-> L'analyse des données est assurée par la mission nationale SPARES. Elle comprend,
-> en premier lieu, un contrôle de cohérence/vraisemblance de l'ensemble de la base
-> de données avec possibilité de contacter les ES en cas de besoin. (Page 16, §1)
-
-> Il est indispensable de s'assurer de la cohérence stricte entre la codification
-> des UF utilisée par l'administration, la pharmacie et le laboratoire afin de
-> relier ces informations entre elles lors de l'analyse des résultats. (Page 12)
-
-> les phénotypes de résistance BLSE et carbapénémase des Enterobacterales et Pseudomonas
-> doivent être renseignés en cas de positivité et après vérification. Une case vide est
-> considérée comme une absence de phénotype de résistance (et non comme une donnée
-> manquante). (p. 31)
-
----
-
-## What SPF asks
-
-SPF asks to receive, for every aggregated indicator, the numerator and
-denominator used (SPF p. 5):
-
-> nous souhaiterions recevoir, pour tous les indicateurs agrégés demandés, le
-> numérateur et dénominateur utilisés (le nombre de souches avec une résistance, le
-> nombre de souches testés, le nombre total de JH).
-
-ORCHIDEE specifies a common input audit of the prepared site handoff. The
-pipeline position below is an ORCHIDEE design decision; the source passages
-motivate explicit, documented quality information.
-
----
-
-## What ORCHIDEE does
+## Audit scope
 
 The common audit examines the **standardized site handoff after local cleaning,
 antibiotic and bacterial mappings, diagnostic selection and retention of isolates
@@ -81,6 +49,8 @@ The expected input-format specification defines what each row represents, the
 fields and the complete entity keys. The audit uses those definitions rather
 than discovering the meaning of a row. Missing definitions belong to the
 [portable contract](../adr/0003-portable-contract-is-the-product.md).
+
+## Audit suites
 
 The pre-flight audit inspects six core domains:
 
@@ -526,6 +496,26 @@ The profiles describe the supplied input. They do not identify infection
 episodes, biological strains or actual deduplication removals. The latter are
 specified for each selected analysis in
 [chapter 07](07-dedoublonnage.md#deduplication-audit-output).
+
+---
+
+## Source context
+
+The SPARES method describes a global coherence/plausibility check (SPARES p. 16,
+§1) and calls for consistent UF coding across administration, pharmacy and
+laboratory (SPARES p. 12). The common audit's position, populations and
+report-only behaviour are v3 design decisions
+([ADR-0003](../adr/0003-portable-contract-is-the-product.md)).
+
+The blank-cell convention for enzymatic phenotype flags (SPARES Annexe 6,
+note a, p. 31) is documented with the
+[resistance data](06-donnees-resistance.md#4-resistance-phenotypes-blse-carbapenemase)
+and in [ADR-0005](../adr/0005-phenotype-indicators-use-spares-note-xa.md).
+
+SPF asks for the numerator and denominator of each aggregated surveillance
+indicator (SPF p. 5); their construction is covered in
+[chapter 08](08-indicateurs.md). Audit percentages use the populations and
+denominators specified in their own suites above.
 
 ---
 
