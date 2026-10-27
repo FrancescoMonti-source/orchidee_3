@@ -12,16 +12,17 @@ button{cursor:pointer}button[aria-pressed=true]{background:#1f6b53;color:white}b
 details{margin:12px 0}code{overflow-wrap:anywhere}#cell{font-size:22px}a{color:#1f6b53}
 </style>
 <div class="tag">THROWAWAY PROTOTYPE · LOCAL DATA · NO NETWORK REQUESTS</div>
-<h1>Can AMR for Python work with Rouen’s data?</h1>
+<h1>Can AMR for R work with Rouen’s data?</h1>
 <p>This trial sends real local organism and laboratory result labels to AMR, keeps its mapping suggestions visible, and calculates a small resistance table. Use the buttons to inspect mappings and follow a resistant-isolate count through to its tested denominator.</p>
+<p id="label-selection" class="small"></p>
 <section class="notice"><strong>Exploratory, undeduplicated data.</strong> All raw sample types are included; diagnostic selection and hospital perimeter selection have not been applied. These figures are not ORCHIDEE surveillance indicators. Identical rows for one isolate–molecule result are collapsed; separate isolates from the same patient remain separate.</section>
 <p class="small">R means resistant; S means susceptible at standard exposure; I means susceptible with increased exposure under the EUCAST convention. The French source category SFP has the latter meaning. ZIT is a technical uncertainty flag; this trial follows ORCHIDEE’s explicit decision to map it to I as well.</p>
 <section><h2>Current state</h2><div id="state" class="state"></div><p id="changed" class="small" aria-live="polite"></p></section>
 <section><h2>Explore freely</h2><div id="views" class="row"></div><div class="row"><label>Organism <select id="species"></select></label><label>Antibiotic <select id="drug"></select></label><button id="reset">Reset</button></div></section>
 <section><h2>Guided walkthroughs</h2><div id="scenarios" class="row"></div><p id="story"></p><div id="steps"></div></section>
 <section><h2 id="result-title"></h2><p id="explanation"></p><div id="cell"></div><div class="scroll" id="results"></div></section>
-<section><h2>Run details</h2><p id="run-details"></p><details><summary>All preparation counts and software versions</summary><div id="metadata"></div></details><p class="small">The file contains aggregate counts and laboratory labels. Patient, stay, sample and isolate identifiers remain in memory during the Python run.</p></section>
-<p class="small">Package references: <a href="https://amr-for-r.org/articles/AMR_for_Python.html">AMR for Python</a> · <a href="https://amr-for-r.org/reference/as.mo.html">Organism mapping and uncertainties</a> · <a href="https://amr-for-r.org/reference/as.ab.html">Antibiotic mapping</a> · <a href="https://amr-for-r.org/reference/proportion.html">Resistance calculation</a></p>
+<section><h2>Run details</h2><p id="run-details"></p><details><summary>All preparation counts and software versions</summary><div id="metadata"></div></details><p class="small">The file contains aggregate counts and laboratory labels. Patient, stay, sample and isolate identifiers remain in memory during the R run.</p></section>
+<p class="small">Package references: <a href="https://amr-for-r.org/reference/as.mo.html">Organism mapping and uncertainties</a> · <a href="https://amr-for-r.org/reference/as.ab.html">Antibiotic mapping</a> · <a href="https://amr-for-r.org/reference/proportion.html">Resistance calculation</a></p>
 <script>
 const data = /*PROTOTYPE_DATA*/null;
 // The pure module only selects recorded package outputs; it does not reimplement AMR.
@@ -75,7 +76,7 @@ function render(message="Ready to explore.") {
     el("explanation").textContent="These are laboratory labels attached to recognised result categories; some are phenotype assays or other tests. The trial uses seven explicit source labels plus agreement with the local molecule mapping. GENTAMICINE FORTE is kept for review even though both automatic and legacy mappings call it ordinary gentamicin. The existing site mapping is a comparator.";
     el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["site_mapping","Existing local mapping"],["used_in_table","Used in trial table"]]);
   }else{
-    el("explanation").textContent="‘Recognised’ means AMR did not flag uncertainty; it is not human validation. The trial table uses five exact source species names only. Uncertain and unmapped labels remain visible here.";
+    el("explanation").textContent="This is every distinct organism label within the stated year and result-category selection, with no frequency cutoff. ‘Recognised’ means AMR did not flag uncertainty; it is not human validation. The trial table uses five exact source species names only. Uncertain and unmapped labels remain visible here.";
     el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["status","Mapping status"]]);
   }
 }
@@ -85,6 +86,7 @@ if(data){
   el("species").onchange=e=>act({species:e.target.value,view:"resistance"},"Changed the displayed organism.");
   el("drug").onchange=e=>act({drug:e.target.value,view:"resistance"},"Changed the displayed antibiotic.");
   el("reset").onclick=()=>act({reset:true},"Reset to the starting state.");
+  el("label-selection").textContent=`The ${data.organisms.length} organism labels are the complete distinct list from ${data.metadata.year} rows with S, SFP, I, R or ZIT results, with no frequency cutoff. Multiple labels can refer to the same organism. The small resistance table separately uses five manually selected species and seven antibiotic labels.`;
   el("run-details").textContent=`${data.metadata.rows_raw.toLocaleString()} raw rows → ${data.metadata.rows_year.toLocaleString()} rows dated in ${data.metadata.year} → ${data.metadata.result_rows.toLocaleString()} rows with recognised result categories. ${data.metadata.table_isolates.toLocaleString()} source isolates across the five selected exact species names; ${data.metadata.conflicting_result_cells} conflicting isolate–molecule cells excluded. Package counts and resistance agree with independent arithmetic.`;
   const details=Object.entries(data.metadata).map(([k,v])=>({field:k,value:typeof v==="object"?JSON.stringify(v):v}));
   el("metadata").innerHTML=table(details,[["field","Field"],["value","Recorded state"]]);render();
