@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMR × Rouen — throwaway data trial</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;color:#17312c;background:#f4f7f5;max-width:1160px;margin:36px auto;padding:0 24px}
+h1{font-size:30px;line-height:1.2}h2{font-size:21px}p{max-width:95ch}.tag{color:#1f6b53;font-size:13px;letter-spacing:.07em;font-weight:700}
+section{background:white;border:1px solid #d7e3dc;border-radius:9px;padding:20px;margin:18px 0}.notice{border-left:4px solid #ad7621;background:#fff9ee}
+button,select,input{font:inherit;padding:8px 12px;border:1px solid #b5cbbf;border-radius:5px;background:white;margin:4px 5px 4px 0}
+button{cursor:pointer}button[aria-pressed=true]{background:#1f6b53;color:white}button:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.state{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:15px}.state strong{display:block}
+.small{font-size:14px;color:#53665c}.scroll{overflow:auto;max-height:510px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e0e9e3;vertical-align:top}th{position:sticky;top:0;background:#edf3ef}
+details{margin:12px 0}code{overflow-wrap:anywhere}#cell{font-size:22px}a{color:#1f6b53}
+</style>
+<div class="tag">THROWAWAY PROTOTYPE · LOCAL DATA · NO NETWORK REQUESTS</div>
+<h1>Can AMR for Python work with Rouen’s data?</h1>
+<p>This trial sends real local organism and laboratory result labels to AMR, keeps its mapping suggestions visible, and calculates a small resistance table. Use the buttons to inspect mappings and follow a resistant-isolate count through to its tested denominator.</p>
+<section class="notice"><strong>Exploratory, undeduplicated data.</strong> All raw sample types are included; diagnostic selection and hospital perimeter selection have not been applied. These figures are not ORCHIDEE surveillance indicators. Identical rows for one isolate–molecule result are collapsed; separate isolates from the same patient remain separate.</section>
+<p class="small">R means resistant; S means susceptible at standard exposure; I means susceptible with increased exposure under the EUCAST convention. The French source category SFP has the latter meaning. ZIT is a technical uncertainty flag; this trial follows ORCHIDEE’s explicit decision to map it to I as well.</p>
+<section><h2>Current state</h2><div id="state" class="state"></div><p id="changed" class="small" aria-live="polite"></p></section>
+<section><h2>Explore freely</h2><div id="views" class="row"></div><div class="row"><label>Organism <select id="species"></select></label><label>Antibiotic <select id="drug"></select></label><button id="reset">Reset</button></div></section>
+<section><h2>Guided walkthroughs</h2><div id="scenarios" class="row"></div><p id="story"></p><div id="steps"></div></section>
+<section><h2 id="result-title"></h2><p id="explanation"></p><div id="cell"></div><div class="scroll" id="results"></div></section>
+<section><h2>Run details</h2><p id="run-details"></p><details><summary>All preparation counts and software versions</summary><div id="metadata"></div></details><p class="small">The file contains aggregate counts and laboratory labels. Patient, stay, sample and isolate identifiers remain in memory during the Python run.</p></section>
+<p class="small">Package references: <a href="https://amr-for-r.org/articles/AMR_for_Python.html">AMR for Python</a> · <a href="https://amr-for-r.org/reference/as.mo.html">Organism mapping and uncertainties</a> · <a href="https://amr-for-r.org/reference/as.ab.html">Antibiotic mapping</a> · <a href="https://amr-for-r.org/reference/proportion.html">Resistance calculation</a></p>
+<script>
+const data = /*PROTOTYPE_DATA*/null;
+// The pure module only selects recorded package outputs; it does not reimplement AMR.
+const initial = () => ({view:"organisms", species:"Escherichia coli", drug:"CTX", scenario:0, step:0});
+function transition(state, action) {
+  if(action.reset) return initial();
+  return {...state,...action};
+}
+function rowsFor(state, payload) {
+  if(state.view === "custom") return [payload.metadata.custom_mapping_trial];
+  if(state.view === "organisms") return payload.organisms;
+  if(state.view === "uncertain") return payload.organisms.filter(r => r.status !== "recognised");
+  if(state.view === "analyses") return payload.analyses;
+  if(state.view === "drug-review") return payload.analyses.filter(r => !r.used_in_table);
+  return payload.table.filter(r => r.organism === state.species);
+}
+const scenarios = [
+  {name:"A named species", text:"Start with a full species name. Inspect the package’s suggested identity, then the resistance table for that exact source name.", steps:[{label:"Inspect organism suggestions",action:{view:"organisms"}},{label:"Open the E. coli table",action:{view:"resistance",species:"Escherichia coli",drug:"CTX"}}]},
+  {name:"Labels that need a decision", text:"An automatic match is a suggestion. Check uncertain organisms, then see how an explicit site reference can preserve a complex identity. Finally inspect antibiotic labels such as amoxicillin / ampicillin and GENTAMICINE FORTE.", steps:[{label:"Inspect uncertain organisms",action:{view:"uncertain"}},{label:"See the explicit complex-mapping proposal",action:{view:"custom"}},{label:"Inspect antibiotic suggestions requiring review",action:{view:"drug-review"}}]},
+  {name:"The tested denominator", text:"Read R / tested for one molecule, alongside the number of source isolates in the trial. The AMR calculation uses minimum = 0 and EUCAST interpretation, so I is on the susceptible side and small counts remain visible.", steps:[{label:"Inspect cefotaxime in E. coli",action:{view:"resistance",species:"Escherichia coli",drug:"CTX"}},{label:"Switch to ertapenem",action:{view:"resistance",species:"Escherichia coli",drug:"ETP"}}]}
+];
+const views = {organisms:"Organism suggestions",uncertain:"Uncertain organisms",custom:"Explicit mapping proposal",analyses:"Antibiotic suggestions","drug-review":"Antibiotic review",resistance:"Resistance table"};
+let state = initial();
+const el = id => document.getElementById(id);
+const esc = value => String(value ?? "—").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const drugName = code => `${data.analyses.find(r=>r.amr_code===code)?.amr_name ?? code} (${code})`;
+function table(rows, columns){return `<table><thead><tr>${columns.map(([key,label])=>`<th>${esc(label)}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${columns.map(([key])=>`<td>${esc(key==="resistance_pct" && row[key]!=null ? row[key].toFixed(2)+"%" : key==="antibiotic" ? drugName(row[key]) : row[key])}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
+function act(action, message){state=transition(state,action);render(message)}
+function render(message="Ready to explore.") {
+  const m=data.metadata, rows=rowsFor(state,data), s=scenarios[state.scenario];
+  el("state").innerHTML = [["View",views[state.view]],["Year",m.year],["Organism",state.species],["Antibiotic",drugName(state.drug)],["Deduplication","Not applied"],["Interpretation","EUCAST; SFP / I / ZIT → I"],["Minimum count","0; no suppression"],["Visible rows",rows.length]].map(([k,v])=>`<div><strong>${esc(k)}</strong>${esc(v)}</div>`).join("");
+  el("changed").textContent=message;
+  el("views").innerHTML=Object.entries(views).map(([v,label])=>`<button data-view="${v}" aria-pressed="${state.view===v}">${label}</button>`).join("");
+  el("views").querySelectorAll("button").forEach(b=>b.onclick=()=>act({view:b.dataset.view},`Showing ${views[b.dataset.view].toLowerCase()}.`));
+  el("species").value=state.species;el("drug").value=state.drug;
+  el("scenarios").innerHTML=scenarios.map((s,i)=>`<button data-scenario="${i}" aria-pressed="${i===state.scenario}">${s.name}</button>`).join("");
+  el("scenarios").querySelectorAll("button").forEach(b=>b.onclick=()=>{state=initial();act({scenario:Number(b.dataset.scenario)},"Walkthrough reset to its starting state.")});
+  el("story").textContent=s.text;
+  el("steps").innerHTML=s.steps.map((step,i)=>`<button data-step="${i}" ${i>state.step?"disabled":""}>${i+1}. ${step.label}</button>`).join("");
+  el("steps").querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.step);act({...s.steps[i].action,step:i+1},s.steps[i].label)});
+  el("result-title").textContent=views[state.view];el("cell").textContent="";
+  if(state.view==="resistance"){
+    const cell=rows.find(r=>r.antibiotic===state.drug);
+    el("explanation").textContent="One result per complete source isolate key and molecule. Conflicting results are left out and counted below. This is not surveillance deduplication.";
+    el("cell").textContent=cell ? `${drugName(cell.antibiotic)}: ${cell.resistant} resistant / ${cell.tested} tested = ${cell.resistance_pct==null?"not calculable":cell.resistance_pct.toFixed(2)+"%"} · ${cell.total_isolates} source isolates` : "This species–antibiotic pair is outside the selected trial pairs.";
+    el("results").innerHTML=table(rows,[["antibiotic","Antibiotic"],["resistant","Resistant (R)"],["tested","Tested (S + I + R)"],["total_isolates","Source isolates"],["resistance_pct","Resistance"]]);
+  }else if(state.view==="custom"){
+    el("explanation").textContent="This second real AMR call used reference_df, an explicit local label-to-code table, to preserve the Enterobacter cloacae complex identity. The proposal awaits site validation and was not applied to the resistance table.";
+    el("results").innerHTML=table([data.metadata.custom_mapping_trial],[["local_label","Source label"],["default_suggestion","Default AMR suggestion"],["configured_code","Configured AMR code"],["configured_name","Configured identity"],["status","Decision status"]]);
+  }else if(state.view==="analyses"||state.view==="drug-review"){
+    el("explanation").textContent="These are laboratory labels attached to recognised result categories; some are phenotype assays or other tests. The trial uses seven explicit source labels plus agreement with the local molecule mapping. GENTAMICINE FORTE is kept for review even though both automatic and legacy mappings call it ordinary gentamicin. The existing site mapping is a comparator.";
+    el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["site_mapping","Existing local mapping"],["used_in_table","Used in trial table"]]);
+  }else{
+    el("explanation").textContent="‘Recognised’ means AMR did not flag uncertainty; it is not human validation. The trial table uses five exact source species names only. Uncertain and unmapped labels remain visible here.";
+    el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["status","Mapping status"]]);
+  }
+}
+if(data){
+  el("species").innerHTML=[...new Set(data.table.map(r=>r.organism))].map(s=>`<option>${esc(s)}</option>`).join("");
+  el("drug").innerHTML=[...new Set(data.table.map(r=>r.antibiotic))].map(s=>`<option value="${esc(s)}">${esc(drugName(s))}</option>`).join("");
+  el("species").onchange=e=>act({species:e.target.value,view:"resistance"},"Changed the displayed organism.");
+  el("drug").onchange=e=>act({drug:e.target.value,view:"resistance"},"Changed the displayed antibiotic.");
+  el("reset").onclick=()=>act({reset:true},"Reset to the starting state.");
+  el("run-details").textContent=`${data.metadata.rows_raw.toLocaleString()} raw rows → ${data.metadata.rows_year.toLocaleString()} rows dated in ${data.metadata.year} → ${data.metadata.result_rows.toLocaleString()} rows with recognised result categories. ${data.metadata.table_isolates.toLocaleString()} source isolates across the five selected exact species names; ${data.metadata.conflicting_result_cells} conflicting isolate–molecule cells excluded. Package counts and resistance agree with independent arithmetic.`;
+  const details=Object.entries(data.metadata).map(([k,v])=>({field:k,value:typeof v==="object"?JSON.stringify(v):v}));
+  el("metadata").innerHTML=table(details,[["field","Field"],["value","Recorded state"]]);render();
+}else{el("changed").textContent="This is the template. Run run.ps1, then open outputs/amr-python-prototype/demo.html."}
+</script>
+</html>
