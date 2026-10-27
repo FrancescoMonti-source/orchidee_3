@@ -1,11 +1,12 @@
-# Throwaway AMR R data trial
+# Throwaway AMR classification explorer
 
-Question: can AMR map Rouen's raw laboratory labels and calculate a small
-resistance table directly in R, reproducing the preceding Python-wrapper trial?
+Question: can AMR add useful organism and antibiotic classifications to our
+local labels while preserving the uncertainty of their proposed mappings?
 
-This is a local site-adapter experiment on branch `prototype/amr-r`. It implements
-no common input audit or surveillance pipeline. The preceding Python version is
-archived on `prototype/amr-python`; this version runs the R package directly.
+This is a local site-adapter experiment on branch `prototype/amr-classification`.
+It extends the direct R trial archived on `prototype/amr-r`; the preceding
+Python version is on `prototype/amr-python`. The prototype implements no common
+input audit or surveillance pipeline.
 
 From the repository root on Windows:
 
@@ -19,9 +20,16 @@ Or, with `Rscript` available:
 Rscript --vanilla docs/worked-examples/amr-r-prototype/run.R
 ```
 
-Then double-click `outputs/amr-r-prototype/demo.html`. The self-contained demo
-has free-play controls and three guided walkthroughs: named organisms, ambiguous
-labels, and the tested denominator. It needs no server to explore.
+Then double-click `outputs/amr-classification-prototype/demo.html`. The demo
+is self-contained and needs no server. Explore every source label, choose a
+classification level and group, select a mapping status, and search. Click a
+source label to inspect its full classification and other labels sharing the
+same proposed AMR code.
+
+Four guided walkthroughs cover organism hierarchy, complex versus subspecies,
+antibiotic classifications and preservation of source assay distinctions.
+The earlier mapping, resistance views and three walkthroughs remain accessible
+under expandable controls.
 
 Setup uses an installed R and installs AMR 3.1.0 if needed. Supporting packages
 are `data.table`, `jsonlite` and `digest`; missing packages are installed into
@@ -48,6 +56,50 @@ its missing-value placeholder was counted as a label.
 Call `AMR::as.ab()` on every distinct result label in the same population;
 these include non-antibiotic assays. Compare its suggestions with the existing
 Rouen mapping in `ref/rouen/atb_regex_map.csv`, treated as a comparator.
+
+## What the classifications mean
+
+All mapped organism suggestions receive AMR's taxonomic rank, organism type,
+Gram stain, taxonomic class, order, family and genus. Explicit species/complex
+memberships come from `AMR::microorganisms.groups`. Missing properties remain
+missing; the prototype invents no more precise classification for an unknown
+identity. Properties still describe a suggestion when its mapping is uncertain.
+An unflagged suggestion remains distinct from human validation.
+
+All mapped analysis suggestions receive AMR's drug group, ATC broad class and
+subgroup, and every ATC code supplied by the reference. ATC means Anatomical
+Therapeutic Chemical, a classification of medicines. A catalogue drug can have
+several codes for different uses, including veterinary uses. No formulation is
+inferred from those codes.
+
+Five real AMR class selectors demonstrate overlapping membership: beta-lactams,
+third-generation cephalosporins, carbapenems, fluoroquinolones and aminoglycosides.
+They use `only_treatable=TRUE`; this affects the catalogue membership, not which
+source labels are retained in the explorer. No drug class is guessed from a
+local name in JavaScript.
+
+Every source label remains separate even when several share the same proposed
+code. In particular, an antibiotic classification does not resolve a local
+assay distinction such as high-level gentamicin testing. Selection for the
+earlier resistance table is shown as a trial choice, not a general mapping
+approval. Frequencies are source result-row counts, never isolate counts.
+
+For the high-level gentamicin labels, show the separate `GEN` and `GEH`
+catalogue entries and compare `aminoglycosides(only_treatable=TRUE/FALSE)`.
+The high-level test identity is available; adopting it for the French labels
+requires a local decision. The comparison does not change their current mapping.
+
+The walkthrough also exposes non-antibiotic comment labels that receive a drug
+suggestion and inherit its class. Source-field eligibility and mapping review
+must precede adoption of grouped counts. An AMR drug group and an ATC subgroup
+can select different rows because some candidate identities lack ATC metadata.
+
+The explicit complex-reference example additionally compares taxonomic ranks
+and orders, showing how a complex can retain its broader identity while still
+receiving a useful order/family/genus classification.
+
+Sample type and infection context are different concepts. Sample-type mapping
+and diagnostic selection remain local preparation; neither is added here.
 
 ## What the resistance table contains
 
@@ -86,6 +138,10 @@ laboratory labels, input SHA-256 and software versions. They are ignored by Git.
 
 - [Organism mapping: arguments and uncertainty diagnostics](https://amr-for-r.org/reference/as.mo.html).
 - [Antibiotic mapping: details and custom entries](https://amr-for-r.org/reference/as.ab.html).
+- [Organism properties: taxonomy, rank and Gram stain](https://amr-for-r.org/reference/mo_property.html).
+- [Antibiotic properties: drug groups and ATC](https://amr-for-r.org/reference/ab_property.html).
+- [Antibiotic class selectors and their arguments](https://amr-for-r.org/reference/antimicrobial_selectors.html).
+- [Explicit species/complex memberships](https://amr-for-r.org/reference/microorganisms.groups.html).
 - [Resistance: usage and the minimum argument](https://amr-for-r.org/reference/proportion.html).
 - Repository boundaries: [ADR-0003](../../adr/0003-portable-contract-is-the-product.md),
   [chapter 06](../../methods/06-donnees-resistance.md),
@@ -93,11 +149,11 @@ laboratory labels, input SHA-256 and software versions. They are ignored by Git.
 
 ## Trial verdict
 
-**Direct R is sufficient for this trial.** It calls the same AMR package without
-the Python bridge or its Windows path workaround. The resistance table agrees
-with the previous run. Mapping suggestions agree after correcting the earlier
-missing-value placeholder and failed-mapping statuses. The source mapping CSV
-is read explicitly as UTF-8 so accented labels retain the existing mapping.
+**Classification is feasible as an enrichment of proposed identities.** AMR
+supplies organism hierarchy and antibiotic groups directly. Taxonomic rank,
+ATC groupings and overlapping selector membership can be explored without
+flattening complexes or merging source assay labels. The package's clear
+classification of a candidate identity does not validate the source mapping.
 
 The local run completed, each populated resistance cell agreed with independent
 arithmetic, and syntax, citation and browser checks passed. No tests, production
@@ -105,5 +161,5 @@ core, site dictionary or surveillance deduplication implementation were added.
 
 The archive contains runnable source and a qualitative verdict only. Measured
 hospital-data counts, mapping frequencies, proportions and input hash stay in
-ignored local artifacts under `outputs/amr-r-prototype/`. Open `demo.html` or
-`summary.json` there to inspect the run.
+ignored local artifacts under `outputs/amr-classification-prototype/`. Open
+`demo.html` or `summary.json` there to inspect the run.
