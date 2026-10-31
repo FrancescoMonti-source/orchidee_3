@@ -3,10 +3,11 @@
 Question: can AMR add useful organism and antibiotic classifications to our
 local labels while preserving the uncertainty of their proposed mappings?
 
-This is a local site-adapter experiment on branch `prototype/amr-classification`.
-It extends the direct R trial archived on `prototype/amr-r`; the preceding
-Python version is on `prototype/amr-python`. The prototype implements no common
-input audit or surveillance pipeline.
+This is a local site-adapter experiment on branch `prototype/amr-label-review`.
+It extends the classification trial archived on `prototype/amr-classification`,
+the direct R trial on `prototype/amr-r` and the preceding Python version on
+`prototype/amr-python`. The prototype implements no common input audit or
+surveillance pipeline.
 
 From the repository root on Windows:
 
@@ -30,6 +31,35 @@ Four guided walkthroughs cover organism hierarchy, complex versus subspecies,
 antibiotic classifications and preservation of source assay distinctions.
 The earlier mapping, resistance views and three walkthroughs remain accessible
 under expandable controls.
+
+## Chosen direction and label review
+
+The user chose AMR to replace the DIY bacterial mapping, with a small set of
+local corrections. The prototype already uses AMR for organism suggestions.
+There is no production surveillance runner in this checkout to switch yet.
+Antibiotic mapping will also build on AMR; a finite local label review supplies
+the corrections and preserves assay or interpretation distinctions.
+
+The inputs reviewed here are `LBLANA` antibiotic/test labels, including some
+technical and comment fields. They are not sample labels. Sample-type mapping
+remains local and is a settled, separate responsibility.
+
+After running the classification trial, prepare the draft review with:
+
+```sh
+Rscript --vanilla docs/worked-examples/amr-r-prototype/prepare-antibiotic-review.R
+```
+
+Open `outputs/amr-classification-prototype/antibiotic-label-review.md`. It covers
+the complete label list, groups the proposed changes and unresolved meanings,
+and retains the original suggestions for comparison. It applies no decisions.
+
+Technical/comment fields stay outside molecule-name matching, while remaining
+available for separate handling. Context-labelled antibiotic results retain
+their molecule and their recorded context separately; a label containing
+MENINGITE is not converted into a screening-test identity or a sample type.
+Compound test labels and underspecified families retain an explicit local
+meaning question. No surveillance selection or deduplication rule is added.
 
 Setup uses an installed R and installs AMR 3.1.0 if needed. Supporting packages
 are `data.table`, `jsonlite` and `digest`; missing packages are installed into
