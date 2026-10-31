@@ -16,6 +16,7 @@ button{cursor:pointer}button[aria-pressed=true]{background:#1f6b53;color:white}b
 .state,.properties{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.state strong,.properties strong{display:block;font-size:13px;color:#53665c}.properties div{overflow-wrap:anywhere}
 .small{font-size:14px;color:#53665c}.scroll{overflow:auto;max-height:470px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:8px;border-bottom:1px solid #e0e9e3;vertical-align:top}th{position:sticky;top:0;background:#edf3ef}
 .label-pick{font-size:14px;text-align:left;margin:0;padding:3px 6px}.path{font-size:20px;color:#1f6b53;overflow-wrap:anywhere}.badge{font-size:12px;display:inline-block;border-radius:4px;padding:2px 6px;background:#edf3ef}.badge.review{background:#fff1cc;color:#715014}
+.sort-heading{display:flex;align-items:center;gap:6px;font:inherit;font-weight:650;text-align:left;border:0;background:transparent;padding:0;margin:0}.sort-heading span{color:#53665c}.sort-heading:focus-visible{outline:2px solid #1f6b53;outline-offset:4px}
 details{margin:12px 0}summary{cursor:pointer}code{overflow-wrap:anywhere}#cell{font-size:21px}a{color:#1f6b53}[hidden]{display:none!important}
 </style>
 <div class="tag">THROWAWAY PROTOTYPE · LOCAL DATA · NO NETWORK REQUESTS</div>
@@ -46,20 +47,44 @@ const fields = {
   "organism-class": {taxonomic_order:"Order",family:"Family",genus:"Genus",gram_stain:"Gram stain",organism_type:"Organism type",taxonomic_rank:"Taxonomic rank",species_groups:"AMR species/complex group"},
   "drug-class": {drug_group:"AMR drug group",atc_class:"ATC broad class",atc_subclass:"ATC subgroup",selector_groups:"AMR selector membership"}
 };
-const initial = () => ({view:"organism-class",groupBy:"taxonomic_order",group:"",status:"all",query:"",selectedOrganism:"Escherichia coli",selectedAnalysis:"CEFOTAXIME",species:"Escherichia coli",drug:"CTX",scenario:0,step:0});
+const initial = () => ({view:"organism-class",groupBy:"taxonomic_order",group:"",status:"all",query:"",sortBy:"result_rows",sortDirection:"desc",selectedOrganism:"Escherichia coli",selectedAnalysis:"CEFOTAXIME",species:"Escherichia coli",drug:"CTX",scenario:0,step:0});
 const isClass = state => state.view === "organism-class" || state.view === "drug-class";
 const sourceRows = (state,payload) => state.view === "organism-class" ? payload.organisms : payload.analyses;
 const selectedKey = state => state.view === "organism-class" ? "selectedOrganism" : "selectedAnalysis";
 const valuesFor = (row,key) => row[key] == null || row[key] === "" ? [] : String(row[key]).split(" | ");
 const mappingStatus = (row,organism) => organism ? row.status : !row.amr_code ? "unmapped" : "suggested";
 const statusNames = {all:"All suggestions",recognised:"Unflagged suggestion",uncertain:"Uncertain suggestion",unmapped:"Unmapped",suggested:"Suggestion only"};
+const sortNames={local_label:"Source label",amr_name:"AMR suggestion",classification:"Classification",status:"Mapping status",result_rows:"Result rows"};
+function sortRows(state,rows) {
+  const field=state.sortBy === "classification" ? state.groupBy : state.sortBy;
+  const priority={uncertain:0,unmapped:1,recognised:2,suggested:2},direction=state.sortDirection === "desc" ? -1 : 1;
+  return rows.sort((a,b)=>{
+    const av=field === "status" ? priority[mappingStatus(a,state.view === "organism-class")] : a[field];
+    const bv=field === "status" ? priority[mappingStatus(b,state.view === "organism-class")] : b[field];
+    const am=av == null || av === "",bm=bv == null || bv === "";
+    if(am !== bm) return am ? 1 : -1;
+    const comparison=typeof av === "number" && typeof bv === "number" ? av-bv : String(av??"").localeCompare(String(bv??""));
+    return comparison*direction || b.result_rows-a.result_rows || a.local_label.localeCompare(b.local_label);
+  });
+}
+function sortDescription(state) {
+  const ascending=state.sortDirection === "asc";
+  const label=state.sortBy === "classification" ? fields[state.view][state.groupBy] : sortNames[state.sortBy];
+  let order=ascending ? "A to Z" : "Z to A";
+  if(state.sortBy === "result_rows") order=ascending ? "lowest first" : "highest first";
+  if(state.sortBy === "status") order=state.view === "organism-class"
+    ? ascending ? "uncertain, then unmapped, then unflagged" : "unflagged, then unmapped, then uncertain"
+    : ascending ? "unmapped, then suggestions" : "suggestions, then unmapped";
+  return `${label}: ${order}`;
+}
 function rowsFor(state,payload) {
   if(isClass(state)) {
     const query=state.query.trim().toLocaleLowerCase();
-    return sourceRows(state,payload).filter(row =>
+    const rows=sourceRows(state,payload).filter(row =>
       (state.status === "all" || mappingStatus(row,state.view === "organism-class") === state.status) &&
       (!state.group || (state.group === "__missing__" ? valuesFor(row,state.groupBy).length === 0 : valuesFor(row,state.groupBy).includes(state.group))) &&
       (!query || [row.local_label,row.amr_name,row.amr_code,...Object.keys(fields[state.view]).map(key=>row[key])].filter(Boolean).join(" ").toLocaleLowerCase().includes(query)));
+    return sortRows(state,rows);
   }
   if(state.view === "custom") return [payload.metadata.custom_mapping_trial];
   if(state.view === "organisms") return payload.organisms;
@@ -71,7 +96,7 @@ function rowsFor(state,payload) {
 function transition(state,action,payload) {
   if(action.reset) return initial();
   let next={...state};
-  if(action.view && action.view !== state.view && fields[action.view]) Object.assign(next,{groupBy:Object.keys(fields[action.view])[0],group:"",status:"all",query:""});
+  if(action.view && action.view !== state.view && fields[action.view]) Object.assign(next,{groupBy:Object.keys(fields[action.view])[0],group:"",status:"all",query:"",sortBy:"result_rows",sortDirection:"desc"});
   if(action.groupBy && action.groupBy !== next.groupBy) next.group="";
   Object.assign(next,action);
   if(isClass(next)) {
@@ -126,6 +151,10 @@ function act(action,message) {
     el("results").scrollTop=scrollTop;
     if(focusedRow) el("results").querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
   }
+  if(Object.hasOwn(action,"sortBy")) {
+    el("results").scrollTop=0;
+    el("results").querySelector(`[data-sort="${state.sortBy}"]`)?.focus({preventScroll:true});
+  }
 }
 function inspectAdjacent(direction) {
   const rows=rowsFor(state,data),index=rows.findIndex(row=>row.local_label === state[selectedKey(state)]);
@@ -162,7 +191,7 @@ function render(message="Ready to explore.") {
     el("previous-label").disabled=index<=0;el("next-label").disabled=index<0 || index>=rows.length-1;
     el("clear-filters").disabled=!state.group && state.status === "all" && !state.query;
     el("selection-summary").textContent=`${rows.length} of ${collection.length} source labels · ${unique.size} proposed AMR identities · ${rows.reduce((sum,row)=>sum+row.result_rows,0).toLocaleString()} result rows`;
-    current.push(["Group by",fields[state.view][state.groupBy]],["Group",state.group === "__missing__" ? "Not recorded" : state.group || "All groups"],["Mapping status",statusNames[state.status]],["Search",state.query || "None"],["Selected source label",state[selectedKey(state)]],["Visible source labels",`${rows.length} / ${collection.length}`],["Distinct proposed AMR codes",unique.size],["Source result rows",rows.reduce((sum,row)=>sum+row.result_rows,0).toLocaleString()]);
+    current.push(["Group by",fields[state.view][state.groupBy]],["Group",state.group === "__missing__" ? "Not recorded" : state.group || "All groups"],["Mapping status",statusNames[state.status]],["Search",state.query || "None"],["Sort order",sortDescription(state)],["Selected source label",state[selectedKey(state)]],["Visible source labels",`${rows.length} / ${collection.length}`],["Distinct proposed AMR codes",unique.size],["Source result rows",rows.reduce((sum,row)=>sum+row.result_rows,0).toLocaleString()]);
     el("group-by").innerHTML=Object.entries(fields[state.view]).map(([key,label])=>`<option value="${key}">${esc(label)}</option>`).join("");el("group-by").value=state.groupBy;
     el("group").innerHTML='<option value="">All groups</option>'+groupChoices(state,data).map(value=>`<option value="${esc(value)}">${esc(value === "__missing__" ? "Not recorded" : value)}</option>`).join("");el("group").value=state.group;
     const statuses=state.view === "organism-class" ? ["all","recognised","uncertain","unmapped"] : ["all","suggested","unmapped"];
@@ -185,9 +214,15 @@ function render(message="Ready to explore.") {
   el("result-title").textContent=views[state.view];el("cell").textContent="";
   if(classification) {
     const organism=state.view === "organism-class";
-    el("explanation").textContent="Every matching source label remains visible separately, even when several labels share an AMR identity. Group totals count labels, and frequencies count recorded result rows. Neither is a count of deduplicated isolates. Click a label to inspect its classifications.";
-    el("results").innerHTML=`<table><thead><tr><th>Source label</th><th>AMR suggestion</th><th>${esc(fields[state.view][state.groupBy])}</th><th>Mapping status</th><th>Result rows</th></tr></thead><tbody>${rows.map((row,index)=>`<tr><td><button class="label-pick" data-source-index="${index}" aria-pressed="${row.local_label === state[selectedKey(state)]}">${esc(row.local_label)}</button></td><td>${esc(row.amr_name)}</td><td>${esc(row[state.groupBy])}</td><td>${statusBadge(mappingStatus(row,organism))}</td><td>${row.result_rows.toLocaleString()}</td></tr>`).join("")}</tbody></table>`;
-    el("results").querySelectorAll("button").forEach(button=>button.onclick=()=>act({[selectedKey(state)]:rows[Number(button.dataset.sourceIndex)].local_label},"Changed the inspected source label."));
+    el("explanation").textContent=`Sorted by ${sortDescription(state)}. Click column headings to rearrange the table; click a source label to inspect it. Equal values are ordered by result-row frequency, highest first. Counts are result rows, not isolates.`;
+    const columns=[["local_label","Source label"],["amr_name","AMR suggestion"],["classification",fields[state.view][state.groupBy]],["status","Mapping status"],["result_rows","Result rows"]];
+    el("results").innerHTML=`<table><thead><tr>${columns.map(([key,label])=>`<th aria-sort="${state.sortBy === key ? state.sortDirection === "asc" ? "ascending" : "descending" : "none"}"><button class="sort-heading" data-sort="${key}" title="Sort by ${esc(label)}; click again to reverse">${esc(label)} <span aria-hidden="true">${state.sortBy === key ? state.sortDirection === "asc" ? "↑" : "↓" : "↕"}</span></button></th>`).join("")}</tr></thead><tbody>${rows.map((row,index)=>`<tr><td><button class="label-pick" data-source-index="${index}" aria-pressed="${row.local_label === state[selectedKey(state)]}">${esc(row.local_label)}</button></td><td>${esc(row.amr_name)}</td><td>${esc(row[state.groupBy])}</td><td>${statusBadge(mappingStatus(row,organism))}</td><td>${row.result_rows.toLocaleString()}</td></tr>`).join("")}</tbody></table>`;
+    el("results").querySelectorAll(".sort-heading").forEach(button=>button.onclick=()=>{
+      const key=button.dataset.sort;
+      const direction=state.sortBy === key ? state.sortDirection === "asc" ? "desc" : "asc" : key === "result_rows" ? "desc" : "asc";
+      act({sortBy:key,sortDirection:direction},`Changed the table order by ${sortNames[key]}.`);
+    });
+    el("results").querySelectorAll(".label-pick").forEach(button=>button.onclick=()=>act({[selectedKey(state)]:rows[Number(button.dataset.sourceIndex)].local_label},"Changed the inspected source label."));
   } else if(state.view === "resistance") {
     const cell=rows.find(row=>row.antibiotic === state.drug);
     el("explanation").textContent="Earlier exploratory table: one result per source isolate and molecule, with SFP / I / ZIT mapped to I and counted on the susceptible side. Separate isolates from a patient remain separate. Counts agree with independent arithmetic.";

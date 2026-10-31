@@ -31,6 +31,11 @@ The page follows controls, selected source label, then the matching-label table.
 Previous/Next move through the current filtered list. Clear filters keeps the
 current view; Reset demo returns to the initial view and closes optional panels.
 Inspecting a table row preserves the list scroll position and keyboard focus.
+Click any classification-table heading to sort; click it again to reverse the
+order. Mapping status groups uncertain, then unmapped, then unflagged organism
+suggestions. Equal values retain a highest-frequency-first order. Missing
+classification values stay last. The source selector and Previous/Next follow
+the same visible order. Sorting retains the current filters and selected label.
 
 Walkthroughs are collapsed above the controls, so they do not interrupt the
 control-to-result relationship. Long ATC-code lists and explanatory material
