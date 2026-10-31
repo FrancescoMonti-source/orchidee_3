@@ -3,11 +3,16 @@
 <title>AMR classification explorer — throwaway prototype</title>
 <style>
 body{font:16px/1.5 system-ui,sans-serif;color:#17312c;background:#f4f7f5;max-width:1160px;margin:32px auto;padding:0 24px}
-h1{font-size:30px;line-height:1.2}h2{font-size:21px;margin-top:0}p{max-width:95ch}.tag{color:#1f6b53;font-size:13px;letter-spacing:.07em;font-weight:700}
-section{background:white;border:1px solid #d7e3dc;border-radius:9px;padding:20px;margin:18px 0}.notice{border-left:4px solid #ad7621;background:#fff9ee}
+h1{font-size:30px;line-height:1.2;margin:0 0 12px}h2{font-size:21px;margin-top:0}p{max-width:95ch}.tag{color:#1f6b53;font-size:13px;letter-spacing:.07em;font-weight:700;margin-bottom:10px}#label-selection{margin:6px 0 10px}
+section,.guide-panel,.run-panel{background:white;border:1px solid #d7e3dc;border-radius:9px;padding:18px;margin:14px 0}.notice{border-left:4px solid #ad7621;background:#fff9ee;padding:10px 14px;border-radius:5px;font-size:14px;margin:12px 0}
 button,select,input{font:inherit;padding:8px 12px;border:1px solid #b5cbbf;border-radius:5px;background:white;margin:4px 5px 4px 0;max-width:100%}
 button{cursor:pointer}button[aria-pressed=true]{background:#1f6b53;color:white}button:disabled{opacity:.45;cursor:default}
 .row{display:flex;flex-wrap:wrap;align-items:end;gap:10px}.row label{display:flex;flex-direction:column;font-size:14px}.row select{max-width:355px}.row input{width:250px}
+.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.section-heading h2{margin:0}.section-heading button{font-size:14px}
+.filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0}.filter-grid label{display:flex;flex-direction:column;font-size:14px}.filter-grid select,.filter-grid input{box-sizing:border-box;width:100%;min-width:0}
+.source-picker label{flex:1;min-width:220px}.source-picker select{width:100%;max-width:none}.selection-summary{margin:10px 0 0;font-size:14px;color:#53665c}#changed{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.guide-panel{padding:0;border:0;background:transparent;margin:10px 0}.guide-panel>summary{font-size:14px}.guide-panel[open]{padding:16px 18px;border:1px solid #d7e3dc;background:white}.run-panel{padding:14px 18px}.run-panel>summary{font-size:17px;font-weight:650}.guide-panel[open]>summary,.run-panel[open]>summary{margin-bottom:14px}.path{margin:10px 0}
+@media(max-width:760px){body{margin:20px auto;padding:0 14px}h1{font-size:26px}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.source-picker label{flex-basis:100%}}
 .state,.properties{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.state strong,.properties strong{display:block;font-size:13px;color:#53665c}.properties div{overflow-wrap:anywhere}
 .small{font-size:14px;color:#53665c}.scroll{overflow:auto;max-height:470px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:8px;border-bottom:1px solid #e0e9e3;vertical-align:top}th{position:sticky;top:0;background:#edf3ef}
 .label-pick{font-size:14px;text-align:left;margin:0;padding:3px 6px}.path{font-size:20px;color:#1f6b53;overflow-wrap:anywhere}.badge{font-size:12px;display:inline-block;border-radius:4px;padding:2px 6px;background:#edf3ef}.badge.review{background:#fff1cc;color:#715014}
@@ -15,25 +20,24 @@ details{margin:12px 0}summary{cursor:pointer}code{overflow-wrap:anywhere}#cell{f
 </style>
 <div class="tag">THROWAWAY PROTOTYPE · LOCAL DATA · NO NETWORK REQUESTS</div>
 <h1>How can AMR classify our organisms and antibiotics?</h1>
-<p>Explore the classifications AMR adds to our local labels. Follow an organism through order, family and genus, or compare an antibiotic’s drug group with its medicine classification. Click a source label to inspect the full result.</p>
+<p>Choose a source label to inspect AMR’s proposed identity and classifications.</p>
 <p id="label-selection" class="small"></p>
-<section class="notice"><strong>Source mappings are proposals for local review.</strong> The properties describe AMR’s suggested identity. Unflagged, uncertain and unmapped suggestions remain distinguishable. Frequencies count source result rows, not isolates. Sample type and infection context are separate concepts and are outside this classification trial.</section>
-<section><h2>Current state</h2><div id="state" class="state"></div><p id="changed" class="small" aria-live="polite"></p></section>
-<section><h2>Explore freely</h2><div id="views" class="row"></div>
-<div id="classification-controls" class="row">
+<div class="notice">These are AMR’s original suggestions; local corrections are reviewed separately. Frequencies count result rows, not isolates.</div>
+<details id="walkthrough-panel" class="guide-panel"><summary>Guided walkthroughs</summary><div id="scenarios" class="row"></div><p id="story"></p><div id="steps"></div><details><summary>Earlier walkthroughs</summary><div id="earlier-scenarios" class="row"></div></details></details>
+<section id="explore-panel"><div class="section-heading"><h2>Explore freely</h2><button id="reset">Reset demo</button></div><div id="views" class="row"></div>
+<div id="classification-controls"><div class="filter-grid">
   <label>Group by<select id="group-by"></select></label>
   <label>Group<select id="group"></select></label>
   <label>Mapping status<select id="status"></select></label>
   <label>Search labels or classifications<input id="query" type="search" placeholder="e.g. Enterobacter or cefotaxime"></label>
-  <label>Inspect a source label<select id="source-label"></select></label>
-</div>
-<details><summary>Earlier mapping and resistance views</summary><div id="earlier-views" class="row"></div></details>
+  </div><div class="row source-picker"><label>Inspect a source label<select id="source-label"></select></label><button id="previous-label">Previous</button><button id="next-label">Next</button><button id="clear-filters">Clear filters</button></div></div>
 <div id="resistance-controls" class="row" hidden><label>Organism<select id="species"></select></label><label>Antibiotic<select id="drug"></select></label></div>
-<button id="reset">Reset</button></section>
-<section><h2>Guided walkthroughs</h2><div id="scenarios" class="row"></div><p id="story"></p><div id="steps"></div><details><summary>Earlier walkthroughs</summary><div id="earlier-scenarios" class="row"></div></details></section>
-<section id="classification-detail"><h2 id="detail-title">Selected source label</h2><p id="classification-path" class="path"></p><p id="detail-note" class="small"></p><div id="properties" class="properties"></div><div id="assay-proposal" hidden><p><strong>AMR also distinguishes gentamicin-high.</strong> A local reference could preserve this assay identity if the hospital confirms the meaning of its label. The comparison below uses actual AMR catalogue entries; it is not applied to the source mappings.</p><div id="assay-comparison" class="scroll"></div></div><details id="related"><summary id="related-title"></summary><div id="related-rows" class="scroll"></div></details></section>
-<section><h2 id="result-title"></h2><p id="explanation"></p><div id="cell"></div><div class="scroll" id="results"></div></section>
-<section><h2>Run details</h2><p id="run-details"></p><details><summary>Preparation counts, functions and software versions</summary><div id="metadata"></div></details><p class="small">The source population includes all raw sample types, including possible screening. Diagnostic selection, hospital perimeter selection and surveillance deduplication have not been applied. The earlier resistance table is exploratory. Patient, stay, sample and isolate identifiers remain in memory during the R run.</p></section>
+<p id="selection-summary" class="selection-summary"></p><p id="changed" aria-live="polite"></p>
+</section>
+<section id="classification-detail"><h2 id="detail-title">Selected source label</h2><p id="classification-path" class="path"></p><div id="properties" class="properties"></div><div id="assay-proposal" hidden><p><strong>AMR also distinguishes gentamicin-high.</strong> A local reference could preserve this assay identity if the hospital confirms the meaning of its label. The comparison below uses actual AMR catalogue entries; it is not applied to the source mappings.</p><div id="assay-comparison" class="scroll"></div></div><details id="atc-reference" hidden><summary>All reference ATC codes</summary><p id="atc-values" class="small"></p></details><details id="related"><summary id="related-title"></summary><div id="related-rows" class="scroll"></div></details><details><summary>About these classifications</summary><p id="detail-note" class="small"></p></details></section>
+<section id="matching-panel"><h2 id="result-title"></h2><p id="explanation"></p><div id="cell"></div><div class="scroll" id="results"></div></section>
+<details><summary>Earlier mapping and resistance views</summary><div id="earlier-views" class="row"></div></details>
+<details id="run-panel" class="run-panel"><summary>Run details</summary><p id="run-details"></p><details><summary>Selection details</summary><div id="state" class="state"></div></details><details><summary>Preparation counts, functions and software versions</summary><div id="metadata"></div></details><p class="small">The source population includes all raw sample types, including possible screening. Diagnostic selection, hospital perimeter selection and surveillance deduplication have not been applied. The earlier resistance table is exploratory. Patient, stay, sample and isolate identifiers remain in memory during the R run. Sample type and infection context are separate concepts outside this classification trial.</p></details>
 <p class="small">AMR references: <a href="https://amr-for-r.org/reference/mo_property.html">Organism properties</a> · <a href="https://amr-for-r.org/reference/ab_property.html">Antibiotic properties</a> · <a href="https://amr-for-r.org/reference/antimicrobial_selectors.html">Antibiotic class selectors</a> · <a href="https://amr-for-r.org/reference/microorganisms.groups.html">Species and complex groups</a></p>
 <script>
 const data = /*PROTOTYPE_DATA*/null;
@@ -48,7 +52,7 @@ const sourceRows = (state,payload) => state.view === "organism-class" ? payload.
 const selectedKey = state => state.view === "organism-class" ? "selectedOrganism" : "selectedAnalysis";
 const valuesFor = (row,key) => row[key] == null || row[key] === "" ? [] : String(row[key]).split(" | ");
 const mappingStatus = (row,organism) => organism ? row.status : !row.amr_code ? "unmapped" : row.used_in_table ? "selected" : "suggested";
-const statusNames = {all:"All suggestions",recognised:"Unflagged suggestion",uncertain:"Uncertain suggestion",unmapped:"Unmapped",selected:"Selected for earlier table",suggested:"Suggestion only"};
+const statusNames = {all:"All suggestions",recognised:"Unflagged suggestion",uncertain:"Uncertain suggestion",unmapped:"Unmapped",selected:"Used in resistance demo",suggested:"Suggestion only"};
 function rowsFor(state,payload) {
   if(isClass(state)) {
     const query=state.query.trim().toLocaleLowerCase();
@@ -114,16 +118,31 @@ const esc=value=>String(value??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&
 const drugName=code=>`${data.analyses.find(row=>row.amr_code===code)?.amr_name??code} (${code})`;
 const statusBadge=status=>`<span class="badge ${status === "uncertain" || status === "unmapped" ? "review" : ""}">${esc(statusNames[status])}</span>`;
 function table(rows,columns) {return `<table><thead><tr>${columns.map(([key,label])=>`<th>${esc(label)}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${columns.map(([key])=>`<td>${key === "status" ? statusBadge(row[key]) : esc(key === "resistance_pct" && row[key]!=null ? row[key].toFixed(2)+"%" : key === "antibiotic" ? drugName(row[key]) : typeof row[key] === "boolean" ? row[key] ? "Yes" : "No" : row[key])}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
-function act(action,message) {state=transition(state,action,data);render(message)}
+function act(action,message) {
+  const inspecting=isClass(state) && Object.keys(action).length === 1 && Object.hasOwn(action,selectedKey(state));
+  const scrollTop=el("results").scrollTop,focusedRow=document.activeElement?.matches("#results .label-pick");
+  state=transition(state,action,data);render(message);
+  if(inspecting) {
+    el("results").scrollTop=scrollTop;
+    if(focusedRow) el("results").querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
+  }
+}
+function inspectAdjacent(direction) {
+  const rows=rowsFor(state,data),index=rows.findIndex(row=>row.local_label === state[selectedKey(state)]);
+  const row=rows[index+direction];
+  if(row) act({[selectedKey(state)]:row.local_label},direction>0 ? "Inspecting the next source label." : "Inspecting the previous source label.");
+}
 function renderDetail(row) {
-  el("assay-proposal").hidden=true;
+  el("assay-proposal").hidden=true;el("atc-reference").hidden=true;
+  el("detail-title").textContent=row ? `Selected source label: ${row.local_label}` : "Selected source label";
   if(!row) {el("classification-path").textContent="No source label matches these controls.";el("detail-note").textContent="Change the group, status or search to explore another label.";el("properties").innerHTML="";el("related").hidden=true;return}
   const organism=state.view === "organism-class",status=mappingStatus(row,organism);
   el("classification-path").textContent=(organism ? [row.taxonomic_order,row.family,row.genus,row.amr_name] : [row.drug_group,row.amr_name]).filter(Boolean).join(" → ") || "No mapped identity";
   el("detail-note").textContent=organism ? "Taxonomy describes AMR's proposed identity. Rank tells you whether that identity is a species, subspecies, genus or species group. Empty fields are not supplied at that rank; species/complex memberships list only relationships recorded in AMR." : "AMR drug groups and ATC classes are separate classifications. ATC codes can cover several uses, including veterinary uses; some entries have no ATC subgroup. Class selections use the treatment-only catalogue setting, which leaves laboratory-only entries out. Selection for the earlier table is a limited trial choice.";
   const common=[["Source label",row.local_label],["AMR suggestion",row.amr_name],["Mapping status",statusNames[status]],["AMR code",row.amr_code]];
-  const properties=organism ? [["Taxonomic rank",row.taxonomic_rank],["Organism type",row.organism_type],["Gram stain",row.gram_stain],["Taxonomic class",row.taxonomic_class],["Order",row.taxonomic_order],["Family",row.family],["Genus",row.genus],["AMR species/complex groups",row.species_groups]] : [["AMR drug group",row.drug_group],["ATC broad class",row.atc_class],["ATC subgroup",row.atc_subclass],["AMR selector membership",row.selector_groups],["All ATC codes in AMR",row.atc_codes],["Existing local molecule mapping",row.site_mapping]];
+  const properties=organism ? [["Taxonomic rank",row.taxonomic_rank],["Organism type",row.organism_type],["Gram stain",row.gram_stain],["Taxonomic class",row.taxonomic_class],["Order",row.taxonomic_order],["Family",row.family],["Genus",row.genus],["AMR species/complex groups",row.species_groups]] : [["AMR drug group",row.drug_group],["ATC broad class",row.atc_class],["ATC subgroup",row.atc_subclass],["AMR selector membership",row.selector_groups],["Existing local molecule mapping",row.site_mapping]];
   el("properties").innerHTML=[...common,...properties,["Source result rows",row.result_rows.toLocaleString()]].map(([key,value])=>`<div><strong>${esc(key)}</strong>${esc(value)}</div>`).join("");
+  el("atc-reference").hidden=organism || !row.atc_codes;el("atc-values").textContent=row.atc_codes??"";
   const assay=data.metadata.laboratory_test_example;
   if(!organism && assay.source_labels.includes(row.local_label)) {
     el("assay-proposal").hidden=false;
@@ -139,6 +158,10 @@ function render(message="Ready to explore.") {
   let current=[["View",views[state.view]],["Year",m.year]];
   if(classification) {
     const collection=sourceRows(state,data),unique=new Set(rows.map(row=>row.amr_code).filter(Boolean));
+    const index=rows.findIndex(row=>row.local_label === state[selectedKey(state)]);
+    el("previous-label").disabled=index<=0;el("next-label").disabled=index<0 || index>=rows.length-1;
+    el("clear-filters").disabled=!state.group && state.status === "all" && !state.query;
+    el("selection-summary").textContent=`${rows.length} of ${collection.length} source labels · ${unique.size} proposed AMR identities · ${rows.reduce((sum,row)=>sum+row.result_rows,0).toLocaleString()} result rows`;
     current.push(["Group by",fields[state.view][state.groupBy]],["Group",state.group === "__missing__" ? "Not recorded" : state.group || "All groups"],["Mapping status",statusNames[state.status]],["Search",state.query || "None"],["Selected source label",state[selectedKey(state)]],["Visible source labels",`${rows.length} / ${collection.length}`],["Distinct proposed AMR codes",unique.size],["Source result rows",rows.reduce((sum,row)=>sum+row.result_rows,0).toLocaleString()]);
     el("group-by").innerHTML=Object.entries(fields[state.view]).map(([key,label])=>`<option value="${key}">${esc(label)}</option>`).join("");el("group-by").value=state.groupBy;
     el("group").innerHTML='<option value="">All groups</option>'+groupChoices(state,data).map(value=>`<option value="${esc(value)}">${esc(value === "__missing__" ? "Not recorded" : value)}</option>`).join("");el("group").value=state.group;
@@ -146,7 +169,7 @@ function render(message="Ready to explore.") {
     el("status").innerHTML=statuses.map(value=>`<option value="${value}">${esc(statusNames[value])}</option>`).join("");el("status").value=state.status;el("query").value=state.query;
     el("source-label").innerHTML=rows.map(row=>`<option value="${esc(row.local_label)}">${esc(row.local_label)}</option>`).join("");el("source-label").value=state[selectedKey(state)]??"";
     renderDetail(rows.find(row=>row.local_label === state[selectedKey(state)]));
-  } else current.push(["Visible rows",rows.length],["Organism",state.species],["Antibiotic",drugName(state.drug)],["Surveillance deduplication","Not applied"]);
+  } else {current.push(["Visible rows",rows.length],["Organism",state.species],["Antibiotic",drugName(state.drug)],["Surveillance deduplication","Not applied"]);el("selection-summary").textContent=`${rows.length} rows in ${views[state.view].toLowerCase()}`}
   el("state").innerHTML=current.map(([key,value])=>`<div><strong>${esc(key)}</strong>${esc(value)}</div>`).join("");el("changed").textContent=message;
   for(const [id,entries] of [["views",Object.entries(views).slice(0,2)],["earlier-views",Object.entries(views).slice(2)]]) {
     el(id).innerHTML=entries.map(([view,label])=>`<button data-view="${view}" aria-pressed="${state.view === view}">${label}</button>`).join("");
@@ -158,7 +181,7 @@ function render(message="Ready to explore.") {
     el(id).querySelectorAll("button").forEach(button=>button.onclick=()=>{state=initial();act({scenario:Number(button.dataset.scenario)},"Walkthrough reset to its starting state.")});
   }
   el("story").textContent=scenario.text;el("steps").innerHTML=scenario.steps.map((step,index)=>`<button data-step="${index}" ${index>state.step?"disabled":""}>${index+1}. ${step.label}</button>`).join("");
-  el("steps").querySelectorAll("button").forEach(button=>button.onclick=()=>{const index=Number(button.dataset.step);act({...scenario.steps[index].action,step:index+1},scenario.steps[index].label)});
+  el("steps").querySelectorAll("button").forEach(button=>button.onclick=()=>{const index=Number(button.dataset.step);if(index===0) state={...initial(),scenario:state.scenario};act({...scenario.steps[index].action,step:index+1},scenario.steps[index].label)});
   el("result-title").textContent=views[state.view];el("cell").textContent="";
   if(classification) {
     const organism=state.view === "organism-class";
@@ -191,10 +214,12 @@ if(data) {
   el("status").onchange=event=>act({status:event.target.value},"Changed the mapping-status selection.");
   el("query").oninput=event=>act({query:event.target.value},"Updated the search.");
   el("source-label").onchange=event=>act({[selectedKey(state)]:event.target.value},"Changed the inspected source label.");
+  el("previous-label").onclick=()=>inspectAdjacent(-1);el("next-label").onclick=()=>inspectAdjacent(1);
+  el("clear-filters").onclick=()=>act({group:"",status:"all",query:""},"Cleared the filters; kept the current classification view.");
   el("species").onchange=event=>act({species:event.target.value,view:"resistance"},"Changed the displayed organism.");
   el("drug").onchange=event=>act({drug:event.target.value,view:"resistance"},"Changed the displayed antibiotic.");
-  el("reset").onclick=()=>act({reset:true},"Reset to the starting state.");
-  el("label-selection").textContent=`All ${data.organisms.length} non-missing organism labels and ${data.analyses.length} laboratory result labels from ${data.metadata.year} rows with S, SFP, I, R or ZIT results. No frequency cutoff or hand-picked classification list. AMR ${data.metadata.versions.AMR}.`;
+  el("reset").onclick=()=>{document.querySelectorAll("details[open]").forEach(details=>details.open=false);act({reset:true},"Reset to the starting state.")};
+  el("label-selection").textContent=`${data.organisms.length} organism labels · ${data.analyses.length} antibiotic/test labels · ${data.metadata.year}`;
   el("run-details").textContent=`${data.metadata.rows_raw.toLocaleString()} raw rows → ${data.metadata.rows_year.toLocaleString()} rows dated in ${data.metadata.year} → ${data.metadata.result_rows.toLocaleString()} rows with the selected result categories. ${data.metadata.missing_organism_rows.toLocaleString()} rows lack an organism label and are counted separately.`;
   const details=Object.entries(data.metadata).map(([field,value])=>({field,value:typeof value === "object" ? JSON.stringify(value) : value}));
   el("metadata").innerHTML=table(details,[["field","Field"],["value","Recorded state"]]);render();

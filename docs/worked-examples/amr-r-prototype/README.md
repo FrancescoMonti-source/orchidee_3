@@ -3,11 +3,11 @@
 Question: can AMR add useful organism and antibiotic classifications to our
 local labels while preserving the uncertainty of their proposed mappings?
 
-This is a local site-adapter experiment on branch `prototype/amr-label-review`.
-It extends the classification trial archived on `prototype/amr-classification`,
-the direct R trial on `prototype/amr-r` and the preceding Python version on
-`prototype/amr-python`. The prototype implements no common input audit or
-surveillance pipeline.
+This is a local site-adapter experiment on branch `prototype/amr-demo-ergonomics`.
+It extends the label review on `prototype/amr-label-review`, classification
+trial on `prototype/amr-classification`, direct R trial on `prototype/amr-r`
+and preceding Python version on `prototype/amr-python`. The prototype
+implements no common input audit or surveillance pipeline.
 
 From the repository root on Windows:
 
@@ -26,6 +26,17 @@ is self-contained and needs no server. Explore every source label, choose a
 classification level and group, select a mapping status, and search. Click a
 source label to inspect its full classification and other labels sharing the
 same proposed AMR code.
+
+The page follows controls, selected source label, then the matching-label table.
+Previous/Next move through the current filtered list. Clear filters keeps the
+current view; Reset demo returns to the initial view and closes optional panels.
+Inspecting a table row preserves the list scroll position and keyboard focus.
+
+Walkthroughs are collapsed above the controls, so they do not interrupt the
+control-to-result relationship. Long ATC-code lists and explanatory material
+are expandable within the selected-label card. Full selection state and run
+provenance remain available under Run details. The earlier-table usage flag is
+labelled "Used in resistance demo" to make its limited meaning clearer.
 
 Four guided walkthroughs cover organism hierarchy, complex versus subspecies,
 antibiotic classifications and preservation of source assay distinctions.
