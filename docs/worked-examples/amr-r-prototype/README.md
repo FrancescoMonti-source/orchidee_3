@@ -35,8 +35,10 @@ Inspecting a table row preserves the list scroll position and keyboard focus.
 Walkthroughs are collapsed above the controls, so they do not interrupt the
 control-to-result relationship. Long ATC-code lists and explanatory material
 are expandable within the selected-label card. Full selection state and run
-provenance remain available under Run details. The earlier-table usage flag is
-labelled "Used in resistance demo" to make its limited meaning clearer.
+provenance remain available under Run details. Earlier-table usage appears only
+in its own "Used in resistance demo" column in the earlier antibiotic view.
+It is not a mapping status. Antibiotic mapping status reports whether AMR
+returned a candidate; it does not assign a confidence score or approval.
 
 Four guided walkthroughs cover organism hierarchy, complex versus subspecies,
 antibiotic classifications and preservation of source assay distinctions.

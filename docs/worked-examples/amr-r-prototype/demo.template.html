@@ -51,8 +51,8 @@ const isClass = state => state.view === "organism-class" || state.view === "drug
 const sourceRows = (state,payload) => state.view === "organism-class" ? payload.organisms : payload.analyses;
 const selectedKey = state => state.view === "organism-class" ? "selectedOrganism" : "selectedAnalysis";
 const valuesFor = (row,key) => row[key] == null || row[key] === "" ? [] : String(row[key]).split(" | ");
-const mappingStatus = (row,organism) => organism ? row.status : !row.amr_code ? "unmapped" : row.used_in_table ? "selected" : "suggested";
-const statusNames = {all:"All suggestions",recognised:"Unflagged suggestion",uncertain:"Uncertain suggestion",unmapped:"Unmapped",selected:"Used in resistance demo",suggested:"Suggestion only"};
+const mappingStatus = (row,organism) => organism ? row.status : !row.amr_code ? "unmapped" : "suggested";
+const statusNames = {all:"All suggestions",recognised:"Unflagged suggestion",uncertain:"Uncertain suggestion",unmapped:"Unmapped",suggested:"Suggestion only"};
 function rowsFor(state,payload) {
   if(isClass(state)) {
     const query=state.query.trim().toLocaleLowerCase();
@@ -138,7 +138,7 @@ function renderDetail(row) {
   if(!row) {el("classification-path").textContent="No source label matches these controls.";el("detail-note").textContent="Change the group, status or search to explore another label.";el("properties").innerHTML="";el("related").hidden=true;return}
   const organism=state.view === "organism-class",status=mappingStatus(row,organism);
   el("classification-path").textContent=(organism ? [row.taxonomic_order,row.family,row.genus,row.amr_name] : [row.drug_group,row.amr_name]).filter(Boolean).join(" → ") || "No mapped identity";
-  el("detail-note").textContent=organism ? "Taxonomy describes AMR's proposed identity. Rank tells you whether that identity is a species, subspecies, genus or species group. Empty fields are not supplied at that rank; species/complex memberships list only relationships recorded in AMR." : "AMR drug groups and ATC classes are separate classifications. ATC codes can cover several uses, including veterinary uses; some entries have no ATC subgroup. Class selections use the treatment-only catalogue setting, which leaves laboratory-only entries out. Selection for the earlier table is a limited trial choice.";
+  el("detail-note").textContent=organism ? "Taxonomy describes AMR's proposed identity. Rank tells you whether that identity is a species, subspecies, genus or species group. Empty fields are not supplied at that rank; species/complex memberships list only relationships recorded in AMR." : "AMR drug groups and ATC classes are separate classifications. ATC codes can cover several uses, including veterinary uses; some entries have no ATC subgroup. Class selections use the treatment-only catalogue setting, which leaves laboratory-only entries out. Mapping status indicates whether AMR returned a candidate, not a confidence score or approval.";
   const common=[["Source label",row.local_label],["AMR suggestion",row.amr_name],["Mapping status",statusNames[status]],["AMR code",row.amr_code]];
   const properties=organism ? [["Taxonomic rank",row.taxonomic_rank],["Organism type",row.organism_type],["Gram stain",row.gram_stain],["Taxonomic class",row.taxonomic_class],["Order",row.taxonomic_order],["Family",row.family],["Genus",row.genus],["AMR species/complex groups",row.species_groups]] : [["AMR drug group",row.drug_group],["ATC broad class",row.atc_class],["ATC subgroup",row.atc_subclass],["AMR selector membership",row.selector_groups],["Existing local molecule mapping",row.site_mapping]];
   el("properties").innerHTML=[...common,...properties,["Source result rows",row.result_rows.toLocaleString()]].map(([key,value])=>`<div><strong>${esc(key)}</strong>${esc(value)}</div>`).join("");
@@ -165,7 +165,7 @@ function render(message="Ready to explore.") {
     current.push(["Group by",fields[state.view][state.groupBy]],["Group",state.group === "__missing__" ? "Not recorded" : state.group || "All groups"],["Mapping status",statusNames[state.status]],["Search",state.query || "None"],["Selected source label",state[selectedKey(state)]],["Visible source labels",`${rows.length} / ${collection.length}`],["Distinct proposed AMR codes",unique.size],["Source result rows",rows.reduce((sum,row)=>sum+row.result_rows,0).toLocaleString()]);
     el("group-by").innerHTML=Object.entries(fields[state.view]).map(([key,label])=>`<option value="${key}">${esc(label)}</option>`).join("");el("group-by").value=state.groupBy;
     el("group").innerHTML='<option value="">All groups</option>'+groupChoices(state,data).map(value=>`<option value="${esc(value)}">${esc(value === "__missing__" ? "Not recorded" : value)}</option>`).join("");el("group").value=state.group;
-    const statuses=state.view === "organism-class" ? ["all","recognised","uncertain","unmapped"] : ["all","selected","suggested","unmapped"];
+    const statuses=state.view === "organism-class" ? ["all","recognised","uncertain","unmapped"] : ["all","suggested","unmapped"];
     el("status").innerHTML=statuses.map(value=>`<option value="${value}">${esc(statusNames[value])}</option>`).join("");el("status").value=state.status;el("query").value=state.query;
     el("source-label").innerHTML=rows.map(row=>`<option value="${esc(row.local_label)}">${esc(row.local_label)}</option>`).join("");el("source-label").value=state[selectedKey(state)]??"";
     renderDetail(rows.find(row=>row.local_label === state[selectedKey(state)]));
@@ -200,7 +200,7 @@ function render(message="Ready to explore.") {
     el("cell").textContent=trial.local_label;
   } else if(state.view === "analyses" || state.view === "drug-review") {
     el("explanation").textContent="These laboratory result labels include non-antibiotic assays. The earlier resistance table uses seven explicit source labels; other suggestions remain review material. The existing local mapping is a comparator.";
-    el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["site_mapping","Existing local mapping"],["used_in_table","Used in earlier table"]]);
+    el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["site_mapping","Existing local mapping"],["used_in_table","Used in resistance demo"]]);
   } else {
     el("explanation").textContent="All distinct non-missing organism labels in the declared year and result categories, without a frequency cutoff. An unflagged suggestion has not received human validation.";
     el("results").innerHTML=table(rows,[["local_label","Source label"],["result_rows","Result rows"],["amr_code","AMR code"],["amr_name","AMR suggestion"],["status","Mapping status"]]);
