@@ -82,17 +82,16 @@ For every tested molecule, clinical categories are mapped to a strict ternary al
 - **`S`** (sensible à posologie standard)
 - **`SFP`** (sensible à forte posologie / intermédiaire)
 - **`R`** (résistant)
-- **`NA`** (not tested by default, unless other source information explicitly establishes otherwise)
+- **`NA`** (not tested)
 
-An individual antibiotic `NA` does not remove an isolate whose antibiogram is
-already in the supplied population. If source information establishes a test
-with a missing or uninterpretable result (for example `NC` / `Non côté`), local
-preparation keeps that distinction explicit instead of treating every `NA` as
-equivalent evidence. Any source-comment interpretation belongs to that local
-preparation, not a common raw-comment reader or a new antibiogram eligibility
-check. The proposed result-counting definition is recorded in
-[Suite 6](00-audit-qualite.md#6-descriptive-profiles-of-the-supplied-data)
-and its Open section.
+An individual antibiotic `NA` means not tested and does not remove an isolate
+whose antibiogram is already in the supplied population. In
+[Suite 6](00-audit-qualite.md#6-descriptive-profiles-of-the-supplied-data),
+recorded `S`, `SFP` and `R` categories count as results on each mapped
+antibiotic (`atb_norm`), while `NA` does not count as a result. Grouping
+multiple antibiotics into composite families (such as third-generation
+cephalosporins) belongs to indicator construction in
+[chapter 08](08-indicateurs.md), not to the input profile.
 
 Historical results with `I` (CA-SFM &le; 2022) are read as `SFP`. Measurement caveat
 `ZIT` (zone d'incertitude technique) is read as `SFP`.
@@ -149,7 +148,7 @@ does not itself decide those ORCHIDEE mappings.
 | 06.1 | Screening samples | excluded locally before the site handoff and common audit, hence before deduplication | included | Historical: +5.6 % isolates; céfotaxime 16.96 &rarr; 25.19 %R (+8.23 pp); ertapénème x4.3. `docs/worked-examples/screening-exclusion.md` |
 | 06.2 | `ZIT` against `SFP` | `ZIT` is read as `SFP` under the ORCHIDEE mapping decision | `ZIT` treated as missing data | see 07.5: 4 441 isolates against 4 431 under the alternative conflict rule. `docs/worked-examples/deduplication.md` |
 | 06.3 | Isolate key | `(PATID, ELTID, isolate_id)` | collapse same species within sample | 213 triples split across several local isolate identifiers (historical `souche_id`), 214 extra isolates, 0.4 % |
-| 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; individual `NA` defaults to not tested unless source information establishes otherwise | retain `I` as distinct 4th value | Historical Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
+| 06.4 | Result alphabet | ternary `S`, `SFP`, `R`; historical `I` and `ZIT` &rarr; `SFP`; individual `NA` means not tested | retain `I` as distinct 4th value | Historical Rouen 2024: 31 847 SFP, 1 028 ZIT, 279 I. Preserves historical continuity across CA-SFM 2022 transition |
 | 06.5 | Resistance phenotypes | binary isolate attribute; absent phenotype signal = `FALSE` (SPARES Note Xa) | require explicit negative test or treat absence as `NA` | Rouen 2024: 99.55 % of C3G-susceptible *E. coli* have no BLSE row (8 636 / 8 675); treating absent as `NA` discards 90 % of wild-type isolates. `docs/worked-examples/phenotypes-and-screening.md` |
 | 06.6 | Interpretation standard documentation | Record the site declaration and supplied version metadata by year; native tag inspection remains local; no audit threshold | Per-row rejection on raw version tags | Historical Rouen 2022 rows carried `CASFM = "2019"` despite clinical 2020 compliance |
 | 06.7 | Diagnostic selection | local adapter classifies and applies diagnostic scope before the handoff; common audit accepts the prepared population | common raw-label heuristics or reclassification | Historical: `"recherche"` matches 80 700 rows across 118 tests in 2024, catching 6 231 gonococcal swabs, 18 969 *C. diff* tests, 2 519 malaria smears. `docs/worked-examples/phenotypes-and-screening.md` |
@@ -182,14 +181,11 @@ inspection remains local.
 
 ## Open
 
-- **Mapping details**: exact antibiotic equivalences, bacterial species/complex
-  treatment and target lists remain open where not already settled, using the
-  previous mappings as the foundation. This revision neither implements an
-  offline dictionary job nor approves particular entries.
-- **Suite 6**: the descriptive profiles are specified in
-  [chapter 00](00-audit-qualite.md#6-descriptive-profiles-of-the-supplied-data).
-  Its Open section records the remaining result-counting, mapping and
-  reporting choices; the proposed conventions are not approved defaults.
+- **Mapping dictionary entries**: ongoing curation of individual antibiotic and
+  bacterial entries in the site mappings, using the previous ORCHIDEE mappings
+  as the foundation. In [Suite 6](00-audit-qualite.md#6-descriptive-profiles-of-the-supplied-data),
+  profiles count directly on the supplied mapped identities (`atb_norm` and
+  `bact_norm`), without a separate target-species filter.
 
 Local diagnostic selection and the supplied antibiogram population are settled
 assumptions. They are not open questions about common classification, source

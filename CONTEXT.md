@@ -272,10 +272,10 @@ The antibiotic susceptibility examination and, by extension, its results or
 report. The antibiotype is the susceptibility pattern read from those results
 on a declared panel.
 
-An individual antibiotic `NA` means not tested unless other source information
-explicitly establishes otherwise. Source-comment interpretation belongs to the
-site adapter. An individual `NA` does not remove an isolate already supplied
-with an antibiogram; it is distinct from an absent enzymatic phenotype signal.
+An individual antibiotic `NA` means not tested and does not count as a result.
+Source-comment interpretation belongs to the site adapter. An individual `NA`
+does not remove an isolate already supplied with an antibiogram; it is distinct
+from an absent enzymatic phenotype signal.
 
 **Antibiotic-result record**:
 One record carrying a susceptibility result for one antibiotic attached to an

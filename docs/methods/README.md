@@ -18,7 +18,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 
 | SPARES section | ORCHIDEE section | Status |
 |---|---|---|
-| Traitement des données (contrôle qualité pré-vol) | [00](00-audit-qualite.md) | **Suites 1–5 preserved; Suite 6 revised for review, with open choices** |
+| Traitement des données (contrôle qualité pré-vol) | [00](00-audit-qualite.md) | **Suites 1–6 specified; field binding and post-finding actions open** |
 | Période de surveillance | [01](01-periode-surveillance.md) | **settled** |
 | Établissements inclus / exclus | [02](02-etablissements.md) | **settled** |
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
@@ -39,9 +39,11 @@ is still open.
 Chapter 00 specifies a report-only audit of the prepared diagnostic antibiogram
 handoff, after local preparation and before shared hospital perimeter selection
 and deduplication. Hospitalisation activity keeps its own population. Suites 1–5
-use the earlier reviewed definitions. Suite 6 specifies descriptive profiles
-with remaining proposals and mapping choices explicitly listed under Open.
-No executable common audit is implemented or remeasured by this revision.
+use the earlier reviewed definitions. Suite 6 specifies descriptive profiles of
+datasets, patient–species pairs, `S`/`SFP`/`R` antibiotic result coverage across
+mapped `atb_norm` identities, and exact isolate/species distributions per sample,
+stay and patient. No executable common audit is implemented or remeasured by this
+revision.
 
 - [tripwire-register.md](tripwire-register.md) - The unified catalog of the 5
   dynamic pipeline tripwires (TW-04.1 through TW-09.2), their mathematical trigger
