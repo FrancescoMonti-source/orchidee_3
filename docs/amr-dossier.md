@@ -426,6 +426,16 @@ Where each piece comes from **[F]**:
   decision. Moving `CLOXA` to cloxacillin (`CLO`), which the user finds fair,
   would leave the fallback with no input if `CLOXA` was its only source. That
   consequence is what needs a decision, not the chemistry.
+- **Decision [F], settled by the user on 2026-11-12** (project thread):
+  cloxacillin results are **not** accepted as the SARM fallback. Only a true
+  oxacilline result counts when cefoxitine is missing. This is not yet written
+  on `main` (see P18 in section 5A).
+- **Open data check [I]**: the 1 093 "oxacilline" results behind decision 08.3
+  (`docs/methods/08-indicateurs.md:142`, `:171`) and the TW-08.1 baseline
+  (`docs/methods/tripwire-register.md:121-124`) came from a v2 bundle whose
+  dictionary maps `CLOXA` to oxacilline. They probably include `CLOXA` results.
+  They need re-checking against the raw data (`data/bact22_24`, `LBLANA` labels
+  for *S. aureus*) before they can stand as the witness of the decision above.
 
 ### K5. `GENTAMICINE FORTE`: one identity (legacy, AMR default) vs high-level assay `GEH` (branch)
 
@@ -549,7 +559,8 @@ Short paths: `README` and `run.R` are under
 | P6 | Only antibiotic or test labels go to molecule matching; 7 technical and comment fields stay outside it, kept for separate handling | `3e48bdf:README:57-58`; `3e48bdf:prepare:47-53` | the site adapter maps local signals into `blse` and `carbapenemase` (`docs/methods/06-donnees-resistance.md:111-112`); comment fields are not named | silent |
 | P7 | Context words (`MENINGITE`, `CYSTITE`, `AUTRES CONTEXTES`) and formulation words (`IV`, `TROMETAMOL`, `VO`) are qualifiers kept beside the molecule, never a sample type or a diagnosis | `3e48bdf:README:58-60`; `3e48bdf:prepare:15-16`, `:20-36` | "Declare the antibiotic counting identities" (`docs/methods/00-audit-qualite.md:595-597`); the legacy map gives these labels separate identities (`ref/rouen/atb_regex_map.csv:5`, `:59-60`) | open on `main`; contradicts the legacy map |
 | P8 | High-level gentamicin (`GENTAMICINE FORTE`) is kept apart from gentamicin; AMR's `GEH` is the candidate, pending local confirmation | `0ebeb94:README:40-43`; `prototype/amr-classification@f209fd7:README:87-90`; `3e48bdf:prepare:27-28` | the legacy map folds it into gentamicin (`ref/rouen/atb_regex_map.csv:44`) | silent on `main`; contradicts the legacy map |
-| P9 | `CLOXA 250/500` → cloxacillin (`CLO`), as a draft; the user finds this fair (2026-11-12) | `3e48bdf:prepare:37-38`; project thread | `ref/rouen/atb_regex_map.csv:21` (→ `oxacilline`); input of decision 08.3, see K4 | contradicts the legacy map; open for 08.3 |
+| P9 | `CLOXA 250/500` → cloxacillin (`CLO`), as a draft; the user finds this fair (2026-11-12) | `3e48bdf:prepare:37-38`; project thread | `ref/rouen/atb_regex_map.csv:21` (→ `oxacilline`); input of decision 08.3, see K4 | contradicts the legacy map |
+| P18 | Cloxacillin is **not** a SARM fallback: only a true oxacilline result counts when cefoxitine is missing. Settled by the user, 2026-11-12 | project thread (no branch) | decision 08.3 and its witness (`docs/methods/08-indicateurs.md:142`, `:170-171`); TW-08.1 baseline (`docs/methods/tripwire-register.md:121-124`), both computed from v2 data where `CLOXA` became oxacilline | rule agrees; witness counts need re-checking (K4) |
 | P10 | Sample-type mapping is local and separate from antibiotic labels | `3e48bdf:README:43-45` | decision 06.7 (`docs/methods/06-donnees-resistance.md:155`) | agrees |
 | P11 | Direct R, not the Python wrapper | `6307a86:README:96-98`; issue #26, 2026-10-27 | not in the methods; issue #1 plans R modules | silent |
 | P12 | Pin AMR 3.1.0 and stop on any other version | `6307a86:run.R:14-17`, `:23` | outputs must state the mapping versions used (`docs/methods/00-audit-qualite.md:338-341`) | silent on the version |
@@ -819,9 +830,10 @@ No answer is proposed.
 
 1. Record the K1 decision on `main`? Today 06.8 and ADR-0003 still say
    "previous ORCHIDEE mappings" (K1).
-2. The user finds `CLOXA` → cloxacillin fair (2026-11-12). Which source
-   labels feed the oxacilline fallback of decision 08.3 once `CLOXA` no longer
-   maps to oxacilline, and should cloxacillin count as a SARM marker (K4)?
+2. Settled 2026-11-12: `CLOXA` is cloxacillin, and cloxacillin is not a SARM
+   fallback (K4, P18). Still open: how many of the 1 093 v2 "oxacilline"
+   results were `CLOXA`, and what decision 08.3 and TW-08.1 measure once they
+   are removed. Needs the raw data.
 3. Is `GENTAMICINE FORTE` the high-level gentamicin test `GEH`
    (`prepare-antibiotic-review.R:27-28`; `f209fd7:.../README.md:89-90`)?
 4. Molecule + qualifier or separate identity for context and formulation labels
