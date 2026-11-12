@@ -42,12 +42,13 @@ committed table.
 | Acceptance recorded | branch `prototype/amr-label-review`, commit `3e48bdf`, `docs/worked-examples/amr-r-prototype/README.md:35-41`; also issue #26, comment of 2026-10-31 ("Accepted direction from the user: AMR will replace the DIY bacterial mapping, with local corrections") |
 | Mapping code first written in direct R | branch `prototype/amr-r`, commit `6307a86`, `docs/worked-examples/amr-r-prototype/run.R:43-53` |
 | Most complete branch (contains everything) | branch `prototype/amr-demo-ergonomics`, commit `83eafc0`; its `run.R` is identical to `f209fd7` and its `prepare-antibiotic-review.R` is identical to `3e48bdf` (empty `git diff`) |
-| The mapped table itself | not in Git. `run.R` writes `outputs/amr-classification-prototype/organism-mapping.csv` (`prototype/amr-classification@f209fd7:docs/worked-examples/amr-r-prototype/run.R:9` and the `write.csv` call further down), and `/outputs/` is ignored (`.gitignore:5`) |
+| Run output (not the mapping) | `run.R` writes a snapshot, `outputs/amr-classification-prototype/organism-mapping.csv` (`prototype/amr-classification@f209fd7:docs/worked-examples/amr-r-prototype/run.R:9` and the `write.csv` call further down). `/outputs/` is ignored (`.gitignore:5`) |
+| Status of the user's own mapping file | On 2026-11-12, in the project thread, the user wrote that AMR maps bacteria well and that their own `organism-mapping.csv` is now obsolete. Not yet recorded anywhere in the repository |
 
 **[I]** So the branch to name is `prototype/amr-label-review` for the
 decision, and `prototype/amr-demo-ergonomics` for the latest code. The
-actual list of label-to-organism pairs exists only on the machine that ran the
-prototype.
+mapping is the call to `as.mo()` plus the local corrections. It is not a file
+to maintain, and any CSV of its results is only a snapshot of one run.
 
 ### Where is the antibiotics mapping ("good but needs work")?
 
@@ -401,12 +402,30 @@ evidence. "Better supported" is my judgement **[I]**, with the reason given.
 - `main` **[F]**: SARM uses oxacilline as fallback, with a Rouen witness of
   1 093 *S. aureus* tested for oxacilline
   (`docs/methods/08-indicateurs.md:142`, `:171`).
-- **Assessment [I].** Unresolved and important. If Rouen's oxacilline column
-  comes from `CLOXA` labels (likely, from the regex), then moving them to `CLO`
-  would remove the input of decision 08.3 and TW-08.1. Neither source settles
-  which identity the laboratory test represents. The branch is better
-  supported on chemistry (cloxacillin is the named molecule); `main` is better
-  supported on the indicator's current input. Needs a local decision.
+- User **[F]**: on 2026-11-12, in the project thread, the user said reading
+  `CLOXA` as cloxacillin "seems totally fair" and did not recognise a SARM rule
+  that uses `CLOXA`.
+
+Where each piece comes from **[F]**:
+
+| Piece | Where it is written | Origin |
+|---|---|---|
+| Cefoxitine and oxacilline are both SARM markers; cefoxitine wins on discordance | SPF p. 3: the table row for *S. aureus*, methicillin (SARM), lists cefoxitine and oxacilline, and footnote 2 gives the precedence. Quoted at `docs/methods/08-indicateurs.md:34-35` | SPF's own rule (SPF p. 3, footnote 2) |
+| Oxacilline is used as a **fallback when cefoxitine is untested** | `docs/methods/08-indicateurs.md:142` (decision 08.3), `:170-171`; `docs/methods/tripwire-register.md:103-124` (TW-08.1); `docs/worked-examples/indicators.md:102-105`; `CLAUDE.md`, invariant 4 | An ORCHIDEE reading of the SPF rule (SPF p. 3), not an SPF sentence. Commits `25f936d` (2026-09-21, "correct SARM ground truth") and `f31c694` (2026-09-28), both under the repository owner's GitHub account. The commits do not say whether a person or an agent wrote the text |
+| The 1 093 "oxacilline" results | `docs/methods/08-indicateurs.md:171`, computed by `docs/worked-examples/indicators_witness.R:139-142` from the column `oxacilline` of `sir_wide.rds` (`docs/worked-examples/deduplication_witness_helpers.R:20-22`) | A v2 bundle built with v2 mappings (`docs/findings.md:287-292`) |
+| `CLOXA nnn` → `oxacilline` | `ref/rouen/atb_regex_map.csv:21` (and `meticilline` → `oxacilline` at `:20`) | Copied into this repository on 2026-10-09 by commit `7ca1f8c` ("Vendor ref/rouen/atb_regex_map.csv"); it is the older ORCHIDEE (v2) antibiotic dictionary |
+
+- **[I]** No document in the repository says that `CLOXA` labels feed the SARM
+  rule. That link is this dossier's inference: the v2 dictionary maps `CLOXA`
+  to `oxacilline`, and the SARM witness reads the `oxacilline` column of a v2
+  bundle. Which source labels actually produced the 1 093 results was not
+  checked; it needs the local raw data.
+- **Assessment [I].** The SARM rule itself (cefoxitine first) is SPF's
+  (SPF p. 3, footnote 2) and is well supported. The fallback to oxacilline is an ORCHIDEE choice. The
+  `CLOXA` → oxacilline step is inherited from the v2 dictionary, not a v3
+  decision. Moving `CLOXA` to cloxacillin (`CLO`), which the user finds fair,
+  would leave the fallback with no input if `CLOXA` was its only source. That
+  consequence is what needs a decision, not the chemistry.
 
 ### K5. `GENTAMICINE FORTE`: one identity (legacy, AMR default) vs high-level assay `GEH` (branch)
 
@@ -497,6 +516,54 @@ evidence. "Better supported" is my judgement **[I]**, with the reason given.
   denominators (`docs/findings.md:45-52`).
 
 ---
+
+## 5A. Prototype decisions not yet written into `main`
+
+**[F]** `main` contains no mention of the AMR package, the prototype
+branches or issue #26: a search of `*.md` and `*.R` files on `main` for
+`as.mo`, `as.ab`, `as.sir`, "AMR package" and `amr-for-r` finds nothing, and
+`docs/findings.md` has no entry about the prototypes.
+
+The table lists each choice the branches (or the user, later) recorded as a
+decision or rule. Trial-only selections (the 5 species, 7 labels and 19 pairs
+of the small resistance table) are left out: the branches call them "trial
+selections, not a protocol manifest"
+(`prototype/amr-python@0ebeb94:docs/worked-examples/amr-python-prototype/README.md:44-46`).
+
+Column "Main today": **contradicts** = `main` says something else;
+**silent** = `main` says nothing; **open** = `main` lists it as undecided;
+**agrees** = already consistent, listed for completeness.
+
+Short paths: `README` and `run.R` are under
+`docs/worked-examples/amr-r-prototype/` (or `amr-python-prototype/` for
+`0ebeb94`); `prepare` is
+`docs/worked-examples/amr-r-prototype/prepare-antibiotic-review.R`.
+
+| # | Decision as recorded | Where (branch@commit:file:line) | Text on `main` it meets | Main today |
+|---|---|---|---|---|
+| P1 | AMR replaces the DIY bacterial mapping, with a small set of local corrections | `prototype/amr-label-review@3e48bdf:README:37-38`; issue #26, 2026-10-31 | "starts from the previous ORCHIDEE bacterial and antibiotic mappings and improves them" (`docs/methods/06-donnees-resistance.md:130-133`); decision 06.8 (`:156`); Open (`:185-188`); `docs/adr/0003-portable-contract-is-the-product.md:31-35`; "Improve the previous mappings" (`docs/methods/00-audit-qualite.md:597-598`) | contradicts |
+| P2 | Antibiotic mapping also builds on AMR, corrected by a finite local label review | `3e48bdf:README:40-41`; issue #26, 2026-10-31 | same lines as P1 | contradicts |
+| P3 | The user's own `organism-mapping.csv` is obsolete; AMR's mapping replaces it | project thread, 2026-11-12 (no branch) | same lines as P1 | contradicts |
+| P4 | The legacy `ref/rouen/atb_regex_map.csv` is a comparator, not the mapping | `prototype/amr-r@6307a86:README:48-50` | `ref/README.md:3-5` ("reference facts consumed by ORCHIDEE"); ADR-0003 line 31 ("foundation") | contradicts |
+| P5 | Map every distinct organism label, with no frequency cut-off; AMR's `UNKNOWN` counts as unmapped; missing identifications are counted apart | `6307a86:README:35-47`; `6307a86:run.R:43-50` | unassigned taxa stay visible (`docs/methods/00-audit-qualite.md:359-360`) | silent on coverage; agrees on visibility |
+| P6 | Only antibiotic or test labels go to molecule matching; 7 technical and comment fields stay outside it, kept for separate handling | `3e48bdf:README:57-58`; `3e48bdf:prepare:47-53` | the site adapter maps local signals into `blse` and `carbapenemase` (`docs/methods/06-donnees-resistance.md:111-112`); comment fields are not named | silent |
+| P7 | Context words (`MENINGITE`, `CYSTITE`, `AUTRES CONTEXTES`) and formulation words (`IV`, `TROMETAMOL`, `VO`) are qualifiers kept beside the molecule, never a sample type or a diagnosis | `3e48bdf:README:58-60`; `3e48bdf:prepare:15-16`, `:20-36` | "Declare the antibiotic counting identities" (`docs/methods/00-audit-qualite.md:595-597`); the legacy map gives these labels separate identities (`ref/rouen/atb_regex_map.csv:5`, `:59-60`) | open on `main`; contradicts the legacy map |
+| P8 | High-level gentamicin (`GENTAMICINE FORTE`) is kept apart from gentamicin; AMR's `GEH` is the candidate, pending local confirmation | `0ebeb94:README:40-43`; `prototype/amr-classification@f209fd7:README:87-90`; `3e48bdf:prepare:27-28` | the legacy map folds it into gentamicin (`ref/rouen/atb_regex_map.csv:44`) | silent on `main`; contradicts the legacy map |
+| P9 | `CLOXA 250/500` → cloxacillin (`CLO`), as a draft; the user finds this fair (2026-11-12) | `3e48bdf:prepare:37-38`; project thread | `ref/rouen/atb_regex_map.csv:21` (→ `oxacilline`); input of decision 08.3, see K4 | contradicts the legacy map; open for 08.3 |
+| P10 | Sample-type mapping is local and separate from antibiotic labels | `3e48bdf:README:43-45` | decision 06.7 (`docs/methods/06-donnees-resistance.md:155`) | agrees |
+| P11 | Direct R, not the Python wrapper | `6307a86:README:96-98`; issue #26, 2026-10-27 | not in the methods; issue #1 plans R modules | silent |
+| P12 | Pin AMR 3.1.0 and stop on any other version | `6307a86:run.R:14-17`, `:23` | outputs must state the mapping versions used (`docs/methods/00-audit-qualite.md:338-341`) | silent on the version |
+| P13 | `SFP` and `ZIT` are passed to AMR as `I`, with `guideline = "EUCAST"` | `6307a86:run.R:100`; `6307a86:README:66-70` | alphabet `S`, `SFP`, `R`; `I` and `ZIT` read as `SFP` (`docs/methods/06-donnees-resistance.md:80-98`), see K2 | contradicts the naming, same arithmetic |
+| P14 | `resistance(minimum = 0)`: small counts stay visible | `6307a86:run.R:114` | decision 08.7 (`docs/methods/08-indicateurs.md:146`) | agrees |
+| P15 | AMR classes (taxonomy, drug group, ATC, class selectors) enrich a candidate identity; they do not validate the mapping | `f209fd7:README:152-156`; `f209fd7:README:93-94` | nothing | silent |
+| P16 | The antibiotic "mapping status" only says whether AMR returned a candidate; it is not a confidence score or an approval | `prototype/amr-demo-ergonomics@83eafc0:README:45-46` | nothing | silent (demo wording) |
+| P17 | A proposed site reference keeps `Enterobacter complexe cloacae` as the complex; demonstrated, not applied | `0ebeb94:README:47-50`; `6307a86:README:72-74` | species/complex treatment is open (`docs/methods/06-donnees-resistance.md:138-141`, `:185-188`) | open on both sides |
+
+**[F]** Other unmerged branches exist (`codex/22-shared-input-audit`,
+`codex/chapter-00-audit-progress`, `codex/recover-reviewed-audit`,
+`codex/suite-6-input-profiles`, `review/audit-checkpoint-0e5902b`). They are
+not prototype branches and were not reviewed for this list. The first,
+third and fourth are the heads of the merged pull requests #23, #24 and #25.
 
 ## 6. AMR 3.1.0: functions used or relevant
 
@@ -752,9 +819,9 @@ No answer is proposed.
 
 1. Record the K1 decision on `main`? Today 06.8 and ADR-0003 still say
    "previous ORCHIDEE mappings" (K1).
-2. Which identity does `CLOXA 250/500` represent, and what feeds the
-   oxacilline fallback of 08.3 (K4;
-   `prepare-antibiotic-review.R:37-38`)?
+2. The user finds `CLOXA` → cloxacillin fair (2026-11-12). Which source
+   labels feed the oxacilline fallback of decision 08.3 once `CLOXA` no longer
+   maps to oxacilline, and should cloxacillin count as a SARM marker (K4)?
 3. Is `GENTAMICINE FORTE` the high-level gentamicin test `GEH`
    (`prepare-antibiotic-review.R:27-28`; `f209fd7:.../README.md:89-90`)?
 4. Molecule + qualifier or separate identity for context and formulation labels
