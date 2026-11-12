@@ -861,8 +861,7 @@ No answer is proposed.
 2. Settled 2026-11-12: `CLOXA` is cloxacillin, and cloxacillin is not a SARM
    fallback (K4, P18). The raw-data check found no `CLOXA` result on
    *S. aureus* in 2022-2024. Still open: what the `CLOXA 250/500` test means
-   on Gram-negative species (an AmpC test is the likely reading, unconfirmed),
-   and whether `GEH`-style test identities apply to it.
+   on Gram-negative species (an AmpC test is the likely reading, unconfirmed).
 3. Is `GENTAMICINE FORTE` the high-level gentamicin test `GEH`
    (`prepare-antibiotic-review.R:27-28`; `f209fd7:.../README.md:89-90`)?
 4. Molecule + qualifier or separate identity for context and formulation labels
