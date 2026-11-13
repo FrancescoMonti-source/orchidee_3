@@ -87,7 +87,7 @@ Section 00 Pre-Flight Audit
     ├── Test 6.1: Row counts and complete-key entity counts
     ├── Test 6.2: Isolates of each species for each patient, and antibiotic results
     ├── Test 6.3: Detail by species within the same population
-    └── Test 6.4: Samples containing at least two target species
+    └── Test 6.4: Distributions of isolates and distinct species per sample, stay and patient
 ```
 
 ---
@@ -337,9 +337,32 @@ selection and deduplication. Correct local preparation is an input assumption.
 
 For every output, identify the site, input version and dataset coverage, the
 applicable mapping versions, period and specimen scope, and the population and
-counting unit. Every percentage carries its numerator and denominator. State
-the taxon definitions and antibiotic identities used by the relevant profile.
-The [Open](#open) section distinguishes proposed conventions from agreed rules.
+counting unit. Every percentage carries its numerator and denominator; when a
+denominator is zero, display `"percentage not calculable"` and retain both the
+numerator (`0`) and denominator (`0`). State the mapped taxon definitions
+(`bact_norm`) and antibiotic identities (`atb_norm`) used by the profile.
+
+Across all Suite 6 profiles, retain the available data and use only unambiguous
+attributions scoped to their entity keys:
+
+- Within an **isolate** `(PATID, ELTID, isolate_id)`, the mapped taxon
+  (`bact_norm`) must be unambiguous across its rows (multiple isolates within
+  the same sample, stay or patient legitimately carry different species).
+- Within a **sample** `(PATID, ELTID)` (and across rows of any isolate in that
+  sample), the sampling calendar year/month, specimen type and stay (`EVTID`)
+  must be unambiguous (an unambiguous year still supports an annual profile when
+  only the month is missing, and different samples within the same stay or
+  patient legitimately carry different dates and specimen types).
+
+Where multiple rows for the same entity carry conflicting values for that
+entity's attribute or required attribution fields are missing, do not guess or
+silently drop records: report the affected calculation as **not assessable**
+(except in `6.2`–`6.4` specimen-type breakdowns, where missing and
+unclassifiable specimen types are displayed in the combined category specified
+below, while conflicting specimen types remain **not assessable**). Count
+affected isolates when the complete isolate key `(PATID, ELTID, isolate_id)` is
+available and affected rows when isolate identity cannot be established. This
+reporting does not exclude records from surveillance or change eligibility.
 
 #### 6.1 How much data was received?
 
@@ -357,8 +380,7 @@ isolate identifier, as explained in Suite 1 and Decision 06.3.
 For each entity key, separately report rows with a missing or incomplete key.
 State **rows** as the unit; these are not a count of unidentified patients,
 samples or isolates. Keep identifiable isolates without an assignable taxon
-visible in the inventory. The treatment of incomplete or conflicting information
-in affected calculations is proposed under Open.
+visible in the inventory.
 
 Preserve the omission of movements from this comparative volume table. The
 inventory does not restrict hospitalisation activity to microbiology patients.
@@ -370,17 +392,20 @@ species for each patient. Show how many patients have one, two, three… isolate
 of that species. Consider each patient separately for every species present.
 
 **Population and reporting groups.** Use complete-key input isolates with an
-assignable patient, mapped taxon and reporting period. Count each isolate once,
-irrespective of its number of antibiotic-result rows. Separately account for
-data that cannot be assigned to these groups, using isolates where their keys
-are complete and rows where isolate identity cannot be established. Unassigned
-taxa do not form an invented common “unknown species”.
+unambiguous assignable patient, mapped taxon (`bact_norm`) and reporting period.
+Count each isolate once, irrespective of its number of antibiotic-result rows.
+Separately report records that cannot be assigned to these groups as not
+assessable, counting isolates where their keys are complete and rows where
+isolate identity cannot be established. Unassigned taxa remain visible in the
+inventory and do not form an invented common “unknown species”.
 
 Produce profiles by sampling calendar year and calendar year-month, overall
 and by mapped specimen type. A known year can support an annual profile when
 the month is unknown. Stay dates do not replace sampling dates. Keep isolates
 with a missing or unclassifiable specimen type in the overall profile when
-the other required information is usable; account for them explicitly.
+the other required information is usable; in the specimen-type breakdown,
+display missing and unclassifiable specimen types in a **combined** category
+while keeping their separate meanings and counts visible.
 
 Recompute patient and species counts within each period and specimen group.
 Annual distinct-patient counts are not sums of monthly counts. A species
@@ -390,8 +415,8 @@ isolate to each specimen-specific profile and two to the overall profile.
 **Counts.** Report total isolates, distinct patients and the total number of
 species counted separately for each patient. The glossary calls the latter
 the **patient–species pair count**: E. coli in two patients contributes twice.
-Use the declared taxon mapping for species and complexes, without guessing
-equivalences between overlapping labels.
+Group directly on the mapped taxon (`bact_norm`) supplied in the handoff,
+without guessing additional equivalences in the common audit.
 
 For every observed exact isolate count, report how many patient–species
 combinations have that count and how many isolates they contain. Retain each
@@ -437,24 +462,26 @@ and 3/5**. These are explanatory examples, not hospital measurements.
 
 Within each species, period and specimen group, report:
 
-- The distribution of distinct mapped antibiotics with a recorded result per
-  isolate. Each included isolate contributes one count, including zero if none
-  of its supplied results meets the declared counting rule.
-- For each antibiotic, isolates with a recorded result divided by **all
-  included isolates in that group**, with both counts and the percentage.
-  An isolate contributes at most once to that antibiotic's numerator.
+- The distribution of distinct mapped antibiotics (`atb_norm`) with a recorded
+  result per isolate. Each included isolate contributes one count, including
+  zero if none of its supplied rows carries a countable result.
+- For each mapped antibiotic (`atb_norm`), isolates with a recorded result
+  divided by **all included isolates in that group**, with both counts and the
+  percentage. An isolate contributes at most once to that antibiotic's
+  numerator.
 
-These outputs describe the available antibiotic results. An individual `NA`
-does not remove an isolate from the denominator or reopen its antibiogram
-eligibility. The proposed definition of a countable result is under Open;
-local interpretation of source information stays local (chapter 06).
+Countable results are recorded `S`, `SFP` and `R` categories (including
+historical `I` and `ZIT` mapped locally to `SFP`; chapter 06). Untested `NA`
+placeholders do not count as results. An individual `NA` does not remove an
+isolate from the denominator or reopen its antibiogram eligibility.
 
-Use all supplied mapped antibiotics rather than an indicator-only panel.
-Repeated rows do not increase isolate or antibiotic counts. Phenotype
-attributes are not antibiotic results. Document the antibiotic counting key
-and its relationship to the key used to resolve several results for one
-isolate and antibiotic during preparation. This profile does not choose a
-new result-resolution rule or infer tests absent from the handoff.
+Use all supplied mapped antibiotics (`atb_norm`) rather than an indicator-only
+panel; each mapped antibiotic code counts as one antibiotic identity after
+local resolution of any repeated rows for the same isolate and antibiotic.
+Grouping several antibiotics into composite indicator families (for example
+third-generation cephalosporins) belongs to indicator construction in
+[chapter 08](08-indicateurs.md), not to this input profile. Phenotype
+attributes (`blse`, `carbapenemase`) are not antibiotic results.
 
 #### 6.3 Detail by species
 
@@ -471,25 +498,45 @@ sum to the patient–species count. Their sum can exceed the distinct-patient
 total because one patient may have several species. Unassigned taxa remain
 visible in the inventory.
 
-#### 6.4 Samples containing at least two target species
+#### 6.4 Distributions of isolates and distinct species per sample, stay and patient
 
-Use samples represented by the supplied diagnostic antibiogram isolates,
-before shared hospital perimeter selection and deduplication. Count complete
-sample keys `(PATID, ELTID)` and distinct mapped target species represented
-by the supplied isolates. Two isolates of one species contribute one species.
+Using the supplied diagnostic antibiogram population before shared hospital
+perimeter selection and deduplication, within each declared period and specimen
+group (using the same period and specimen-type grouping rules as `6.2`), report
+the exact count distributions (`1, 2, 3…`) for both **isolates** and **distinct
+mapped species (`bact_norm`)** across all three entity levels:
 
-**Proposal awaiting confirmation:** within one declared period and specimen
-scope, report samples with at least two target species, samples with at least
-one target species, and their percentage:
+1. **Per sample `(PATID, ELTID)`**:
+   - distribution of the number of isolates `(PATID, ELTID, isolate_id)` per sample (`1, 2, 3…`),
+   - distribution of the number of distinct mapped species per sample (`1, 2, 3…`).
+2. **Per stay `(PATID, EVTID)`**:
+   - distribution of the number of isolates per stay (`1, 2, 3…`),
+   - distribution of the number of distinct mapped species per stay (`1, 2, 3…`),
+   reporting isolates with a missing or conflicting `EVTID` separately as not assessable at the stay level.
+3. **Per patient `PATID`**:
+   - distribution of the number of isolates per patient (`1, 2, 3…`),
+   - distribution of the number of distinct mapped species per patient (`1, 2, 3…`).
 
-> Samples with at least two target species / samples with at least one target species.
+For every observed exact count `1, 2, 3…` at each entity level, report:
 
-The denominator, exact target list and reporting detail remain open. The
-restriction to samples represented by the supplied antibiogram population is
-agreed. Several identification labels are not automatically distinct taxa;
-use the declared species/complex mapping. Keep unassigned taxa distinguishable
-from confirmed absence of another target species. Incomplete or conflicting
-sample information follows the explicit proposals under Open.
+- the number of entities (samples, stays or patients) with that exact count,
+- the percentage among assessable entities at that level (with numerator and denominator), and
+- the total isolates (for the isolate distribution) or entity–species pairs (for the distinct-species distribution) they contain.
+
+All supplied mapped species (`bact_norm`) are included; no separate
+target-species list is used. Two isolates of the same mapped species within one
+sample, stay or patient contribute two to its isolate count and one to its
+distinct-species count.
+
+Isolates with an unassigned or conflicting taxon are excluded from the
+distinct-species counts and reported separately as **not assessable** for the
+distinct-species distributions. An entity (sample, stay or patient) that
+contains at least one isolate with an unambiguous mapped taxon remains in
+**assessable entities** at that level and contributes its count (`1, 2, 3…`) of
+distinct known mapped species, even if that entity also contains other isolates
+with an unassigned or conflicting taxon; entities whose isolates all have
+unassigned or conflicting taxa are excluded from `assessable entities` for the
+distinct-species distribution.
 
 The profiles describe the supplied input. They do not identify infection
 episodes, biological strains or actual deduplication removals. The latter are
@@ -529,7 +576,7 @@ denominators specified in their own suites above.
 | 00.5 | Recorded UF structure matches | Compare recorded PMSI and laboratory ordering UFs to the structure file; report matched/unmatched codes, affected records and missing UF counts; no audit exclusion or coverage threshold | Check all structure UFs against the data or enforce a minimum match percentage | Admin 362/362 (100 %); lab 272/278 recorded UFs found in structure (6 unmatched UFs, 68 raw records) |
 | 00.6 | Susceptible results against natural resistance reference | Count and document S results against uppercase R rules in CA-SFM 2025 V1.1, Section 2, pp. 33-39, respecting exceptions; retain reported results | Infer an error or alter results from the reference comparison alone | In 2024 raw extract, 1 *K. pneumoniae* reported S to ampicillin (outpatient ELTID 376198529); 604/604 results R in the eligible hospitalisation perimeter |
 | 00.7 | Positive phenotype marker summaries | By species, phenotype and year, report positive flags without recorded S/SFP/R marker results and those with all recorded marker results S, using explicit audit panels and denominators; retain values | Infer mechanism validity from susceptibility categories or routinely list every positive isolate | Definitions specified in Test 5.2; measured counts for these two summaries are not documented here |
-| 00.8 | Descriptive profiles of the supplied input | Report rows and complete-key entities, isolates of each species for each patient, antibiotic results and target species per sample; show populations and denominators and keep unresolved definitions explicit | Omit descriptive profiles or interpret repeat counts as actual deduplication removals | Constructed examples in 6.2; no new hospital measurement or executable-audit validation; proposals remain under Open |
+| 00.8 | Descriptive profiles of the supplied input | Report rows and complete-key entities, isolates of each species for each patient, `S`/`SFP`/`R` antibiotic result coverage across mapped `atb_norm` identities, and exact distributions of isolates and distinct species per sample `(PATID, ELTID)`, stay `(PATID, EVTID)` and patient `PATID` (keeping mixed-taxon entities assessable on their known mapped species); scope conflict checks by entity key and report incomplete or conflicting attributions as not assessable, combine missing/unclassifiable specimen types in breakdowns, and display `"percentage not calculable"` on zero denominators | Omit descriptive profiles, guess conflicting attributions, or interpret repeat counts as actual deduplication removals | Constructed examples in 6.2; executable common audit not yet implemented or remeasured on hospital data |
 
 The historical examples illustrate the available observations; they do not establish implementation or validation of every check defined here.
 
@@ -564,9 +611,10 @@ those repeated-species counts, including the first. These percentages describe
 the input before shared population selection. Deduplication removals depend on
 the selected analysis and its rules in chapter 07.
 
-Species-specific repeat counts do not establish chronic colonisation, acute
-infection or a reason for repeated sampling. Several target species in a
-sample do not establish polymicrobial infection.
+Species-specific repeat counts and the distributions of isolates and distinct
+species per sample, stay and patient in 6.4 do not establish chronic
+colonisation, acute infection, a clinical reason for repeated sampling, or
+polymicrobial infection.
 
 The former Rouen tables, figures and interpretations remain preserved in the
 [pre-revision chapter](https://github.com/FrancescoMonti-source/orchidee_3/blob/d5fd57a4a5032c266a753cbe6e61132e9299243c/docs/methods/00-audit-qualite.md#6-descriptive-profiling-and-deduplication-redundancy-statistics).
@@ -583,32 +631,6 @@ do not determine the new profiles' populations or denominators.
 - **Common input fields.** Bind the reviewed concepts to the portable fields and
   available metadata without changing their populations, counting units or
   denominators. Unavailable inputs remain not assessable.
-
-The following Suite 6 choices remain proposals or unresolved definitions;
-this revision does not turn them into approved defaults:
-
-- **Antibiotic result counts.** Proposed: count available `S`, `SFP` and `R`
-  results, using the existing `I` and `ZIT` mappings. Untested `NA` placeholders
-  do not count as results. Where the prepared input distinguishes a test
-  without a usable result, keep that information separate. This does not
-  change an isolate's inclusion in the supplied antibiogram population.
-- **Mapping details.** Declare the antibiotic counting identities, their
-  relationship to result-resolution identities, species/complex equivalences
-  and the target list. Improve the previous mappings without assuming every
-  existing entry is correct. No dictionaries are changed by this revision.
-- **Incomplete or conflicting information.** Proposed: retain the available
-  data, use only unambiguous year/month, specimen and taxon attribution, and
-  report an affected calculation as not assessable where attribution or
-  identity cannot be established. Report affected isolates when identifiable
-  and affected rows when isolate counting is impossible. This does not
-  exclude records from surveillance or change eligibility.
-- **Empty denominators.** Proposed: display “percentage not calculable” and
-  retain the numerator and denominator.
-- **Missing classifications.** Decide the separate or combined display of
-  missing and unclassifiable specimen types, and the presentation of
-  unassigned taxa. Keep their different meanings and affected counts visible.
-- **Samples with several target species.** Confirm the proposed 6.4
-  denominator, target list and reporting detail.
 
 Local diagnostic selection, retention of isolates with an antibiogram and
 the position of the common audit are agreed input assumptions.
