@@ -135,7 +135,7 @@ missing).
 | M2 | Unassigned taxa stay visible (N6) | Code `UNKNOWN` | **Direct** | [D] `AMR v3.1.0:R/mo.R:72`; the prototype reads `UNKNOWN` as unmapped (`83eafc0:run.R:50`). |
 | M3 | Do not guess between overlapping labels (N7) | `mo_uncertainties()` | **Direct**, as a review aid | [D] It lists every guessed label with a score, for the last call only (dossier §6.2). [D] In A8 every wrong guess was flagged. A flag is a signal, not an approval (P16). |
 | M4 | A taxon identity that stays readable across years | Renames to the current name by default (`keep_synonyms = FALSE`) | **Adapt** | [D] 35 of 347 thesaurus names change name; 6 pairs merge (A10). [D] `keep_synonyms = TRUE` keeps `Enterobacter aerogenes` under its own code (A8). [D] "MO codes might change between package versions" (`AMR v3.1.0:R/mo.R:214`); a registry of codes exists since 3.1.0 (`AMR v3.1.0:NEWS.md:57`). |
-| M5 | Species and complex treatment (N4, N7) | `microorganisms.groups` (33 groups), rank "species group" | **Adapt** | [D] AMR's *E. cloacae* complex matches the SPF list at species level (SPF p. 2). The list in CA-SFM 2025 V1.1 (p. 34, note 3) is longer: it adds *E. roggenkampii* and three others (A8). Membership has to be declared by ORCHIDEE. |
+| M5 | Species and complex treatment (N4, N7) | `microorganisms.groups` (33 groups), rank "species group" | **Adapt** | [D] AMR's *E. cloacae* complex matches the SPF list at species level (SPF p. 2). The list in CA-SFM 2025 V1.1 (p. 34, note 3) is longer: it adds *E. roggenkampii* and three others (A8). Membership has to be declared by ORCHIDEE. Decided 2026-11-13 (Francesco): the complex follows the six-species list of SPF p. 2 (Q8). |
 | M6 | "Toutes Enterobacterales" (N15) | `mo_order()` | **Adapt** | [D] 57 thesaurus names, 18 genera (A10). Project reading (Francesco, 2026-11-13): the indicator on SPF p. 4 means this whole taxonomic order, as far as he is aware. So *Salmonella*, *Shigella*, *Yersinia* and *Plesiomonas* count in it. [I] `mo_order()` then gives the first draft of the membership table that the core owns (Decision 5). [D] The list of target organisms writes "Entérobacterales toutes espèces" (SPF p. 2), which supports this reading. |
 | M7 | Descriptive classification (Gram stain, family, genus) | `mo_*()` helpers | **Direct**, descriptive only | [D] The properties describe the suggested taxon, not the label (P15). |
 | M8 | Map antibiotic and test labels to identities (N1, N2) | `as.ab()` | **Adapt**: suggestion only | [D] A1, A2, A3. [D] There is no table of uncertain matches for drugs (dossier §6.6). [D] `CLAVENTIN` → `AMC` repeats the error measured in `docs/findings.md:45-52`. |
@@ -523,6 +523,11 @@ SPF molecule should read.
 
 **Recommendation: A.**
 
+**Already settled (Francesco, 2026-11-13).** The content of two groups: the
+whole taxonomic order for "toutes Enterobacterales" (M6), and the six-species
+list of SPF p. 2 for the *E. cloacae* complex (Q8). Who owns the tables, A, B
+or C, is still open.
+
 **Examples.** *E. roggenkampii*: in the complex for CA-SFM 2025 V1.1 (p. 34,
 note 3), outside it for the SPF list (SPF p. 2) and for AMR (A8). Under B the
 answer is AMR's and can change with an upgrade. Under C two sites can differ.
@@ -588,7 +593,7 @@ than a month apart (A9).
 | Q5 | What do `PIPERA TAZO` (next to `PIPERACILLINE+TAZOBACTAM`), `NORFLO DEPIST RCC FQUINOLONES`, `NITROFURANES`, the two `ASSO …` labels and `CEFINASE` mean? Is `AUTRES CONTEXTES` one reading or several? | bio | Decisions 3, 6 |
 | Q6 | Which comment fields carry a BLSE, carbapenemase, SARM or ERG signal? | bio, data | Section 4.5; N13 |
 | Q7 | Which context should each SPF molecule read (amoxicillin/clavulanic acid, fosfomycin)? | bio, ext | Decision 4 |
-| Q8 | Are the species that CA-SFM 2025 V1.1 adds to the *E. cloacae* complex (p. 34, note 3: *E. roggenkampii* and three others) inside the indicator? The SPF list (SPF p. 2) has six species and does not name them. [I] Proposed: the core table follows that six-species list (SPF p. 2), because the same document defines the indicator. Answered on 2026-11-13: "toutes Enterobacterales" means the whole taxonomic order (M6). | bio, ext | Decision 5 |
+| Q8 | **Closed on 2026-11-13 by Francesco.** "Toutes Enterobacterales" means the whole taxonomic order (M6). The *E. cloacae* complex follows the six-species list of SPF p. 2. The species that only CA-SFM 2025 V1.1 adds (p. 34, note 3: *E. roggenkampii* and three others) stay outside for now. The choice is easy to change later. | none | Nothing |
 | Q9 | Does the label `Staphylococcus argenteus / schweitzeri (ex S. aureus)` count as *S. aureus* for SARM? | bio | Decision 5 |
 | Q10 | Which identities count as cefoxitine and oxacilline for SARM at a site that reports screening tests (`FOX-S`, `OXA-S`)? Rouen reports only `OXACILLINE` (dossier §5, K4). | bio | Other sites |
 | Q11 | Licence of ORCHIDEE, and of adapter tooling that loads AMR. | legal | Decision 2 |
