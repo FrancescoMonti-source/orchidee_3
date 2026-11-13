@@ -33,7 +33,7 @@ Citations:
   `AMR dev` is its `main` branch at `49a0f37` (version 3.1.0.9021, 2026-11-09).
 - `dossier §n` is a section of the dossier at `f9e18fc`. `N`, `K` and `P`
   numbers are the dossier's needs, conflicts and prototype decisions.
-- `A1` to `A10` are the checks of section 1.
+- `A1` to `A11` are the checks of section 1.
 
 Words used:
 
@@ -98,7 +98,8 @@ Fixed inputs, not reopened here:
 built from source and run on 2026-11-13: R 4.3.3, UTF-8 locale, AMR 3.1.0 from
 tag `v3.1.0` and AMR 3.1.0.9021 from `main`. The inputs were label strings
 already published in the repository (the prototype's review script) and the
-species names of SPARES Annexe 5 (pp. 28-30). **No hospital data was read.**
+species names of SPARES Annexe 5 (pp. 28-30). A11 uses two invented rows.
+**No hospital data was read.**
 The script is in the appendix. Both AMR versions give the same output except
 for A9.
 
@@ -114,6 +115,7 @@ for A9.
 | A8 | `as.mo()` on labels from the repository | `Enterobacter complexe cloacae` → subspecies *E. cloacae cloacae*, flagged uncertain. `Staphylococcus argenteus / schweitzeri (ex S. aureus)` → `UNKNOWN`. AMR's *Enterobacter cloacae* complex has 6 species; *E. roggenkampii* is not one of them. Two invented non-organism labels, `Levures` and `Flore polymorphe`, come back as a *Salmonella* serovar and a *Fusobacterium* subspecies, both flagged uncertain. A taxon added with `add_custom_microorganisms()` gets a code made for the session (`CUSTOM1_…`). |
 | A9 | `mo_is_intrinsic_resistant()` | *E. cloacae* complex with amoxicillin/clavulanic acid: `FALSE` in 3.1.0, `TRUE` in `AMR dev`. |
 | A10 | `as.mo()` on the 347 names of SPARES Annexe 5 (pp. 28-30) | 0 unknown, 1 flagged uncertain. 35 come back under another name, mostly renamed taxa. 6 pairs of thesaurus names share one AMR code (`Raoultella spp` and `Klebsiella spp`). 57 names fall in AMR's order Enterobacterales, in 18 genera, with *Salmonella*, *Shigella*, *Yersinia* and *Plesiomonas* among them. |
+| A11 | `first_isolate()` with `testcodes_exclude`, on two invented rows: one patient, one species, a row with test code `screen` on day 1 and a row with test code `diag` on day 5 | Both rows come back `FALSE`. The screening row is dropped after it has taken the place of first isolate, so the diagnostic row is not counted. |
 
 **[D]** A1 agrees with the prototype's own run on the user's machine. The notes
 of the review script name the same wrong suggestions for 8 labels: a
@@ -154,6 +156,7 @@ missing).
 | M21 | Every output states its mapping versions (N8) | `packageVersion()`, checksums in `data-raw/*.md5` | **Adapt** | [I] Needs the manifest of section 5. |
 | M22 | R modules for the core and the Rouen adapter (N21) | R package with no required dependency | **Direct** | [D] `AMR v3.1.0:DESCRIPTION:39-40`. R, not the Python wrapper (K10). |
 | M23 | A licence position for ORCHIDEE | GPL-2 | **Adapt** | Section 3.3. |
+| M24 | Keep screening samples out before deduplication (`ADR-0004`) | `first_isolate()` arguments `col_testcode`, `testcodes_exclude`, `col_specimen`, `specimen_group`; `as.sir(include_screening = )` | **Incompatible** | [D] AMR holds no list of screening samples. The caller supplies the test codes to drop (`AMR v3.1.0:R/first_isolate.R:37`, `:42`). [D] The drop runs after the first-isolate step (`AMR v3.1.0:R/first_isolate.R:514`), so a diagnostic isolate can be lost behind a screening one (A11). That is the reverse of "selection precedes deduplication". [D] `include_screening` is about screening breakpoints of a laboratory test, not about why a sample was taken (`AMR v3.1.0:R/sir.R:68`, `:1587-1590`). [D] `as.sir()` guesses urine samples by matching "urin" in a specimen column (`AMR v3.1.0:R/sir.R:850-853`): a text heuristic that `ADR-0003` keeps out of the core. The site classifies its samples (`CONTEXT.md:314-326`). |
 
 **Reading the matrix [I].** AMR fits three jobs: recognising organisms, giving
 every site the same codes, and describing taxa and drugs. It does not fit
@@ -651,7 +654,7 @@ The Annexe 5 names were taken from the SPARES PDF with `pdftotext -layout`
 (pages 28-30), joining names broken over two lines.
 
 <details>
-<summary>check.R (85 lines)</summary>
+<summary>check.R (90 lines)</summary>
 
 ```r
 args <- commandArgs(trailingOnly = TRUE)
@@ -739,6 +742,11 @@ if (length(args) >= 2) {
   cat("A10 Annexe 5 names sharing one AMR code:", length(dup), "codes:", paste(vapply(dup, paste, "", collapse = " + "), collapse = " | "), "\n")
   cat("A10 Enterobacterales genera:", paste(sort(unique(q(mo_genus(m[ord == "Enterobacterales"])))), collapse = ", "), "\n")
 }
+
+# A11: test-code exclusion in first_isolate(), on two invented rows
+d <- data.frame(patient = c("P1", "P1"), date = as.Date(c("2024-01-01", "2024-01-05")), mo = mo(c("Escherichia coli", "Escherichia coli")), testcode = c("screen", "diag"))
+r <- q(first_isolate(d, col_date = "date", col_patient_id = "patient", col_mo = "mo", col_testcode = "testcode", testcodes_exclude = "screen", method = "episode-based", info = FALSE))
+cat("A11 first_isolate() with testcodes_exclude = 'screen':", paste(d$testcode, r, collapse = " | "), "\n")
 ```
 
 </details>
