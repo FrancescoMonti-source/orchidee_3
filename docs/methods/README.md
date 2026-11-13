@@ -24,7 +24,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | Activités incluses / exclues | [03](03-activites.md) | **settled** |
 | Données d'activité | [04](04-donnees-activite.md) | **settled** |
 | Structure de l'établissement | [05](05-structure.md) | **settled** |
-| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **reviewed audit reporting retained; input boundary clarified; mapping details open** |
+| Données de résistance bactérienne | [06](06-donnees-resistance.md) | **reviewed audit reporting retained; input boundary clarified; mapping dictionary entries open** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |
 | Construction des indicateurs | [08](08-indicateurs.md) | **settled** |
 | Analyse et diffusion | [09](09-diffusion.md) | **settled** |

@@ -1,8 +1,8 @@
 # 06 - Bacterial resistance data
 
 Status: **reviewed audit reporting retained; shared input boundary clarified**.
-Mapping details remain open. This recovery implements no executable audit or
-automatic response and remeasures no historical witnesses.
+Mapping dictionary entries remain open. This recovery implements no executable
+audit or automatic response and remeasures no historical witnesses.
 
 ## What SPARES says
 
@@ -134,8 +134,8 @@ implemented by this revision.
 Local organism descriptions are translated on the site side; the common audit
 consumes prepared identities rather than interpreting those descriptions.
 Isolates without an assignable mapped taxon remain visible in the inventory.
-Exact antibiotic equivalences, species/complex groupings and target lists remain
-mapping decisions where not already settled. A source species list (SPARES
+Exact antibiotic equivalences and species/complex groupings remain mapping
+dictionary decisions where not already settled. A source species list (SPARES
 Annexe 5, pp. 28–30)
 does not itself decide those ORCHIDEE mappings.
 

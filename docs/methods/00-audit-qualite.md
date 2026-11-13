@@ -343,14 +343,26 @@ numerator (`0`) and denominator (`0`). State the mapped taxon definitions
 (`bact_norm`) and antibiotic identities (`atb_norm`) used by the profile.
 
 Across all Suite 6 profiles, retain the available data and use only unambiguous
-year/month, specimen-type, stay and taxon attributions. Where multiple rows for
-the same entity carry conflicting values (for example two different species,
-sampling dates or specimen types on the same isolate or sample) or required
-attribution fields are missing, do not guess or silently drop records: report
-the affected calculation as **not assessable**, counting affected isolates when
-the complete isolate key `(PATID, ELTID, isolate_id)` is available and affected
-rows when isolate identity cannot be established. This reporting does not
-exclude records from surveillance or change eligibility.
+attributions scoped to their entity keys:
+
+- Within an **isolate** `(PATID, ELTID, isolate_id)`, the mapped taxon
+  (`bact_norm`) must be unambiguous across its rows (multiple isolates within
+  the same sample, stay or patient legitimately carry different species).
+- Within a **sample** `(PATID, ELTID)` (and across rows of any isolate in that
+  sample), the sampling calendar year/month, specimen type and stay (`EVTID`)
+  must be unambiguous (an unambiguous year still supports an annual profile when
+  only the month is missing, and different samples within the same stay or
+  patient legitimately carry different dates and specimen types).
+
+Where multiple rows for the same entity carry conflicting values for that
+entity's attribute or required attribution fields are missing, do not guess or
+silently drop records: report the affected calculation as **not assessable**
+(except in `6.2`–`6.4` specimen-type breakdowns, where missing and
+unclassifiable specimen types are displayed in the combined category specified
+below, while conflicting specimen types remain **not assessable**). Count
+affected isolates when the complete isolate key `(PATID, ELTID, isolate_id)` is
+available and affected rows when isolate identity cannot be established. This
+reporting does not exclude records from surveillance or change eligibility.
 
 #### 6.1 How much data was received?
 
@@ -490,8 +502,9 @@ visible in the inventory.
 
 Using the supplied diagnostic antibiogram population before shared hospital
 perimeter selection and deduplication, within each declared period and specimen
-group, report the exact count distributions (`1, 2, 3…`) for both **isolates**
-and **distinct mapped species (`bact_norm`)** across all three entity levels:
+group (using the same period and specimen-type grouping rules as `6.2`), report
+the exact count distributions (`1, 2, 3…`) for both **isolates** and **distinct
+mapped species (`bact_norm`)** across all three entity levels:
 
 1. **Per sample `(PATID, ELTID)`**:
    - distribution of the number of isolates `(PATID, ELTID, isolate_id)` per sample (`1, 2, 3…`),
@@ -499,7 +512,7 @@ and **distinct mapped species (`bact_norm`)** across all three entity levels:
 2. **Per stay `(PATID, EVTID)`**:
    - distribution of the number of isolates per stay (`1, 2, 3…`),
    - distribution of the number of distinct mapped species per stay (`1, 2, 3…`),
-   reporting isolates without a linked `EVTID` separately as not assessable at the stay level.
+   reporting isolates with a missing or conflicting `EVTID` separately as not assessable at the stay level.
 3. **Per patient `PATID`**:
    - distribution of the number of isolates per patient (`1, 2, 3…`),
    - distribution of the number of distinct mapped species per patient (`1, 2, 3…`).
@@ -513,8 +526,17 @@ For every observed exact count `1, 2, 3…` at each entity level, report:
 All supplied mapped species (`bact_norm`) are included; no separate
 target-species list is used. Two isolates of the same mapped species within one
 sample, stay or patient contribute two to its isolate count and one to its
-distinct-species count. Isolates with an unassigned or conflicting taxon are
-reported separately as not assessable for the distinct-species distributions.
+distinct-species count.
+
+Isolates with an unassigned or conflicting taxon are excluded from the
+distinct-species counts and reported separately as **not assessable** for the
+distinct-species distributions. An entity (sample, stay or patient) that
+contains at least one isolate with an unambiguous mapped taxon remains in
+**assessable entities** at that level and contributes its count (`1, 2, 3…`) of
+distinct known mapped species, even if that entity also contains other isolates
+with an unassigned or conflicting taxon; entities whose isolates all have
+unassigned or conflicting taxa are excluded from `assessable entities` for the
+distinct-species distribution.
 
 The profiles describe the supplied input. They do not identify infection
 episodes, biological strains or actual deduplication removals. The latter are
@@ -554,7 +576,7 @@ denominators specified in their own suites above.
 | 00.5 | Recorded UF structure matches | Compare recorded PMSI and laboratory ordering UFs to the structure file; report matched/unmatched codes, affected records and missing UF counts; no audit exclusion or coverage threshold | Check all structure UFs against the data or enforce a minimum match percentage | Admin 362/362 (100 %); lab 272/278 recorded UFs found in structure (6 unmatched UFs, 68 raw records) |
 | 00.6 | Susceptible results against natural resistance reference | Count and document S results against uppercase R rules in CA-SFM 2025 V1.1, Section 2, pp. 33-39, respecting exceptions; retain reported results | Infer an error or alter results from the reference comparison alone | In 2024 raw extract, 1 *K. pneumoniae* reported S to ampicillin (outpatient ELTID 376198529); 604/604 results R in the eligible hospitalisation perimeter |
 | 00.7 | Positive phenotype marker summaries | By species, phenotype and year, report positive flags without recorded S/SFP/R marker results and those with all recorded marker results S, using explicit audit panels and denominators; retain values | Infer mechanism validity from susceptibility categories or routinely list every positive isolate | Definitions specified in Test 5.2; measured counts for these two summaries are not documented here |
-| 00.8 | Descriptive profiles of the supplied input | Report rows and complete-key entities, isolates of each species for each patient, `S`/`SFP`/`R` antibiotic result coverage across mapped `atb_norm` identities, and exact distributions of isolates and distinct species per sample `(PATID, ELTID)`, stay `(PATID, EVTID)` and patient `PATID`; report incomplete or conflicting attributions as not assessable, combine missing/unclassifiable specimen types in breakdowns, and display `"percentage not calculable"` on zero denominators | Omit descriptive profiles, guess conflicting attributions, or interpret repeat counts as actual deduplication removals | Constructed examples in 6.2; executable common audit not yet implemented or remeasured on hospital data |
+| 00.8 | Descriptive profiles of the supplied input | Report rows and complete-key entities, isolates of each species for each patient, `S`/`SFP`/`R` antibiotic result coverage across mapped `atb_norm` identities, and exact distributions of isolates and distinct species per sample `(PATID, ELTID)`, stay `(PATID, EVTID)` and patient `PATID` (keeping mixed-taxon entities assessable on their known mapped species); scope conflict checks by entity key and report incomplete or conflicting attributions as not assessable, combine missing/unclassifiable specimen types in breakdowns, and display `"percentage not calculable"` on zero denominators | Omit descriptive profiles, guess conflicting attributions, or interpret repeat counts as actual deduplication removals | Constructed examples in 6.2; executable common audit not yet implemented or remeasured on hospital data |
 
 The historical examples illustrate the available observations; they do not establish implementation or validation of every check defined here.
 

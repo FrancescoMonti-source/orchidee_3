@@ -31,8 +31,8 @@ references.
 - The previous ORCHIDEE antibiotic and bacterial mappings are the foundation
   for improvement, not a declaration that every existing entry is correct.
   The common audit consumes prepared identities rather than interpreting
-  local labels; unresolved equivalences, species/complex groupings and target
-  lists remain mapping decisions. No dictionary changes are implemented here.
+  local labels; unresolved equivalences and species/complex groupings remain
+  mapping dictionary decisions. No dictionary changes are implemented here.
 - Hospital perimeter selection remains shared and follows the common audit.
   Local diagnostic and antibiogram selection does not authorise additional
   local perimeter exclusions. Analysis-specific specimen selection precedes
