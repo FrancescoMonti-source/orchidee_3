@@ -116,7 +116,7 @@ for A9.
 | A9 | `mo_is_intrinsic_resistant()` | *E. cloacae* complex with amoxicillin/clavulanic acid: `FALSE` in 3.1.0, `TRUE` in `AMR dev`. |
 | A10 | `as.mo()` on the 347 names of SPARES Annexe 5 (pp. 28-30) | 0 unknown, 1 flagged uncertain. 35 come back under another name, mostly renamed taxa. 6 pairs of thesaurus names share one AMR code (`Raoultella spp` and `Klebsiella spp`). 57 names fall in AMR's order Enterobacterales, in 18 genera, with *Salmonella*, *Shigella*, *Yersinia* and *Plesiomonas* among them. |
 | A11 | `first_isolate()` with `testcodes_exclude`, on two invented rows: one patient, one species, a row with test code `screen` on day 1 and a row with test code `diag` on day 5 | Both rows come back `FALSE`. The screening row is dropped after it has taken the place of first isolate, so the diagnostic row is not counted. |
-| A12 | `first_isolate()` on invented pairs of isolates: one patient, *E. coli*, day 1 and day 5 | One `S`/`R` difference on one molecule: the second isolate is a duplicate by default and with `type = "keyantimicrobials"`; it is counted with `points_threshold = 1`. Two `S`/`I` differences and no `S`/`R` difference: the second isolate is counted with `points_threshold = 1`. Same results, more molecules tested on the second isolate: the first one is kept. |
+| A12 | `first_isolate()` on invented pairs of isolates: one patient, *E. coli*, day 1 and day 5 | One `S`/`R` difference on one molecule: the second isolate is a duplicate by default and with `type = "keyantimicrobials"`; it is counted with `points_threshold = 1`. Two `S`/`I` differences and no `S`/`R` difference: the second isolate is counted with `points_threshold = 1`, and is a duplicate once every `I` is read as `S` before the call. Same results, more molecules tested on the second isolate: the first one is kept. |
 
 **[D]** A1 agrees with the prototype's own run on the user's machine. The notes
 of the review script name the same wrong suggestions for 8 labels: a
@@ -158,7 +158,7 @@ missing).
 | M22 | R modules for the core and the Rouen adapter (N21) | R package with no required dependency | **Direct** | [D] `AMR v3.1.0:DESCRIPTION:39-40`. R, not the Python wrapper (K10). |
 | M23 | A licence position for ORCHIDEE | GPL-2 | **Adapt** | Section 3.3. |
 | M24 | Keep screening samples out before deduplication (`ADR-0004`) | `first_isolate()` arguments `col_testcode`, `testcodes_exclude`, `col_specimen`, `specimen_group`; `as.sir(include_screening = )` | **Incompatible** | [D] AMR holds no list of screening samples. The caller supplies the test codes to drop (`AMR v3.1.0:R/first_isolate.R:37`, `:42`). [D] The drop runs after the first-isolate step (`AMR v3.1.0:R/first_isolate.R:514`), so a diagnostic isolate can be lost behind a screening one (A11). That is the reverse of "selection precedes deduplication". [D] `include_screening` is about screening breakpoints of a laboratory test, not about why a sample was taken (`AMR v3.1.0:R/sir.R:68`, `:1587-1590`). [D] `as.sir()` guesses urine samples by matching "urin" in a specimen column (`AMR v3.1.0:R/sir.R:850-853`): a text heuristic that `ADR-0003` keeps out of the core. The site classifies its samples (`CONTEXT.md:314-326`). |
-| M25 | Deduplication by the rule of chapter 07 | `first_isolate()` | **Incompatible** | [D] By default one major discrepancy does not separate two isolates; the rule of `docs/methods/07-dedoublonnage.md:14-17` says it does (A12). [D] With `points_threshold = 1` it does, but two minor differences then separate them too, which the same lines forbid (A12). [D] AMR keeps the oldest isolate; the rule keeps the one with the most molecules tested (`docs/methods/07-dedoublonnage.md:23-24`; A12). [D] AMR's window is a number of days after the first isolate, 365 by default (`AMR v3.1.0:R/first_isolate.R:41`, `:132`); chapter 07 uses calendar windows (`docs/methods/07-dedoublonnage.md:56`). [I] The BLSE and carbapenemase flags are not drugs, so AMR does not compare them (M18). [I] Recoding `SFP` as `S` before the call could repair the second point only. Deduplication stays ORCHIDEE code in the core (decision 2). |
+| M25 | Deduplication by the rule of chapter 07 | `first_isolate()` | **Incompatible** | [D] By default one major discrepancy does not separate two isolates; the rule of `docs/methods/07-dedoublonnage.md:14-17` says it does (A12). [D] With `points_threshold = 1`, and every `SFP` read as `S` before the call, AMR gives the answers of that rule on these pairs (A12). Francesco, 2026-11-14: the project reads `I` as `S` for this comparison. `main` has the same effect: `S`/`SFP` is a minor difference (`docs/methods/07-dedoublonnage.md:58`) and `I` is read as `SFP` (`docs/methods/06-donnees-resistance.md:97`). Without that reading, two minor differences separate two isolates (A12). [D] AMR keeps the oldest isolate; the rule keeps the one with the most molecules tested (`docs/methods/07-dedoublonnage.md:23-24`; A12). [D] AMR's window is a number of days after the first isolate, 365 by default (`AMR v3.1.0:R/first_isolate.R:41`, `:132`); chapter 07 uses calendar windows (`docs/methods/07-dedoublonnage.md:56`). [I] The BLSE and carbapenemase flags are not drugs, so AMR does not compare them (M18). These three differences remain, with the one of M24, so deduplication stays ORCHIDEE code in the core (decision 2). |
 
 **Reading the matrix [I].** AMR fits three jobs: recognising organisms, giving
 every site the same codes, and describing taxa and drugs. It does not fit
@@ -656,7 +656,7 @@ The Annexe 5 names were taken from the SPARES PDF with `pdftotext -layout`
 (pages 28-30), joining names broken over two lines.
 
 <details>
-<summary>check.R (99 lines)</summary>
+<summary>check.R (101 lines)</summary>
 
 ```r
 args <- commandArgs(trailingOnly = TRUE)
@@ -758,6 +758,8 @@ d2 <- mk(AMX = c("S", "I"), CIP = c("S", "I"), GEN = c("S", "S"))
 d3 <- mk(AMX = c("S", "S"), CIP = c(NA, "S"), GEN = c(NA, "S"))
 cat("A12 one S->R: default", fi(d1), "| points_threshold = 1:", fi(d1, points_threshold = 1), "| keyantimicrobials:", fi(d1, type = "keyantimicrobials"), "\n")
 cat("A12 two S->I, points_threshold = 1:", fi(d2, points_threshold = 1), "| same results, second isolate has more molecules tested:", fi(d3), "\n")
+d2s <- mk(AMX = c("S", "S"), CIP = c("S", "S"), GEN = c("S", "S"))  # d2 with every I read as S
+cat("A12 two S->I read as S, points_threshold = 1:", fi(d2s, points_threshold = 1), "\n")
 ```
 
 </details>
