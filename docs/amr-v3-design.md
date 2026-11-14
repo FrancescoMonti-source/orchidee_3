@@ -439,6 +439,17 @@ recommendation, and an example where the alternatives give different results.
 
 **Recommendation: C.**
 
+**Procedure proposed by Francesco (2026-11-14), not yet decided.** Three passes
+for every label, organism or antibiotic. First AMR returns its suggestion.
+Then an assistant pass proposes an identity with a reason, and marks the lines
+where it disagrees with AMR or cannot tell. Last, a microbiologist approves
+every line. **[I]** This is option A with a prepared review. It is stricter
+than C, and Rouen then needs no `auto` status. It holds on three conditions.
+The three answers stay in three separate columns. The microbiologist sees the
+source label and the species it is tested on, not only the proposal. The lines
+are sorted by number of results, disagreements first. **[V:data]** Its cost
+depends on the number of distinct labels (Q1).
+
 **Example.** `TEICOPLANINE`: under B it becomes avoparcin with no warning, and
 the glycopeptide group of the enterococci loses one of its two molecules
 (SPF p. 3). Under A or C it waits until someone approves `TEC`. `CLAVENTIN`:
