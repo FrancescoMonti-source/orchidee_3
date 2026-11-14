@@ -1,9 +1,9 @@
 # Pass 1 of the mapping review: what AMR suggests for every source label.
 #
-#   Rscript --vanilla tools/label-review/pass1-amr.R [inventory_dir]
+#   Rscript --vanilla tools/label-review/pass1-amr.R [labels_dir]
 #
-# Reads the aggregate tables written by inventory.R and adds AMR's suggestion
-# to each line. A suggestion is recognition, not approval: nothing here is a
+# Reads the label lists written by list-labels.R and adds AMR's suggestion to
+# each line. A suggestion is recognition, not approval: nothing here is a
 # mapping. Needs AMR 3.1.0 exactly, so that the suggestion column can be
 # reproduced. Reads no patient data.
 suppressPackageStartupMessages({library(data.table); library(AMR)})
@@ -52,10 +52,6 @@ antibiotics[, legacy_v2 := vapply(source_label, function(label) {
   if (length(hit)) legacy$atb_norm[hit[1L]] else NA_character_
 }, character(1))]
 write_out(antibiotics, "antibiotic-pass1.csv")
-# Names of every AMR drug code, so that later steps can spell out a proposed code.
-codes <- as.character(AMR::antimicrobials$ab)
-write_out(data.table(code = codes, name_en = ab_name(codes, language = "en"),
-                     name_fr = ab_name(codes, language = "fr")), "amr-antimicrobial-names.csv")
 
 cat("Organism labels: ", nrow(organisms), " (", paste0(names(table(organisms$amr_status)), " ",
     table(organisms$amr_status), collapse = ", "), ")\n", sep = "")
