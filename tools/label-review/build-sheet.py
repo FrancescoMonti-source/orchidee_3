@@ -3,15 +3,17 @@
 
     python3 tools/label-review/build-sheet.py [inventory_dir]
 
-Reads the pass-1 tables written by pass1-amr.R and the assistant proposals kept
-next to this script. Writes `revue-libelles.xlsx` and two CSV registers into the
-inventory directory. The three answers stay in three separate column groups and
+Reads the pass-1 tables written by pass1-amr.R and the assistant proposals
+(`claude-pass-*.csv`), taken from the inventory directory when they are there and
+from next to this script otherwise. Writes `revue-libelles.xlsx` and three CSV
+registers into the inventory directory. The three answers stay in three separate column groups and
 the approval columns are always written empty.
 
 The build stops when a label has no assistant proposal: every line must carry a
 best guess before it reaches the reviewer.
 """
 import csv
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -24,6 +26,11 @@ from openpyxl.worksheet.datavalidation import DataValidation
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "outputs" / "label-review"
+
+
+def proposal_file(name):
+    """Proposals written from hospital labels stay with the inventory; the versioned ones are examples."""
+    return DIR / name if (DIR / name).exists() else HERE / name
 
 ROW_KIND_FR = {
     "antibiotic_result": "résultat d'antibiotique",
@@ -41,7 +48,8 @@ TEST_FR = {
     "combination": "association",
 }
 FORMULATION_FR = {"iv": "IV", "oral": "voie orale", "trometamol": "trométamol"}
-CONTEXT_FR = {"meningitis": "méningite", "cystitis": "cystite", "other_contexts": "autres contextes"}
+CONTEXT_FR = {"meningitis": "méningite", "cystitis": "cystite", "pneumonia": "pneumonie",
+              "other_contexts": "autres contextes"}
 CONFIDENCE_FR = {"high": "élevée", "medium": "moyenne", "low": "faible"}
 # AMR folds some (molecule, test) pairs into one code. Same identity, two spellings.
 AMR_TEST_CODES = {
@@ -59,8 +67,20 @@ def read_csv(path):
         return list(csv.DictReader(handle))
 
 
-def as_int(value):
-    return int(value) if value not in ("", None) else None
+def count(value):
+    """A count as written by the inventory: a number, or a masked string such as "<10"."""
+    if value in ("", None):
+        return None
+    return int(value) if value.isdigit() else value
+
+
+def size(value):
+    """Sort key for a count that may be masked: "<10" sorts below every shown count."""
+    return value if isinstance(value, int) else 5 if value else 0
+
+
+def years(src):
+    return " / ".join(src.get(k, "") for k in ("n_2022", "n_2023", "n_2024"))
 
 
 def norm(text):
@@ -68,7 +88,7 @@ def norm(text):
 
 
 def sort_rows(rows):
-    rows.sort(key=lambda r: (AGREEMENT_ORDER.index(r["agreement"]), -(r["n_results"] or 0), r["source_label"]))
+    rows.sort(key=lambda r: (AGREEMENT_ORDER.index(r["agreement"]), -size(r["n_results"]), r["source_label"]))
     for i, row in enumerate(rows, 1):
         row["rank"] = i
     return rows
@@ -76,10 +96,12 @@ def sort_rows(rows):
 
 def antibiotic_rows():
     names = {r["code"]: r for r in read_csv(DIR / "amr-antimicrobial-names.csv")}
-    proposals = {r["source_label"]: r for r in read_csv(HERE / "claude-pass-antibiotics.csv")}
+    proposals = {r["source_label"]: r for r in read_csv(proposal_file("claude-pass-antibiotics.csv"))}
     rows, missing = [], []
     for src in read_csv(DIR / "antibiotic-pass1.csv"):
         label = src["source_label"]
+        if src["n_results"] == "0":   # no S/SFP/I/R/ZIT result: see other_field_rows()
+            continue
         mine = proposals.get(label)
         if mine is None:
             missing.append(label)
@@ -108,12 +130,12 @@ def antibiotic_rows():
         legacy = src.get("legacy_v2", "")
         rows.append({
             "source_label": label,
-            "n_results": as_int(src["n_results"]), "n_isolates": as_int(src["n_isolates"]),
-            "n_diag": as_int(src["n_diag"]),
+            "n_results": count(src["n_results"]), "n_isolates": count(src["n_isolates"]),
+            "n_diag": count(src["n_diag"]), "years": years(src),
             "sir": " / ".join(src[k] for k in ("n_S", "n_SFP", "n_I", "n_R", "n_ZIT")),
             "tested_on": src["tested_on"],
             "other": (src["n_other_rows"] + (" : " + src["other_values"] if src["other_values"] else ""))
-                     if as_int(src["n_other_rows"]) else "",
+                     if src["n_other_rows"] not in ("", "0") else "",
             "amr": f"{amr} · {src['amr_name']}" if amr else "(aucune)",
             "legacy": "(hors molécule)" if legacy == "NA" else legacy,
             "kind": ROW_KIND_FR[kind],
@@ -128,7 +150,7 @@ def antibiotic_rows():
 
 
 def organism_rows():
-    proposals = {r["source_label"]: r for r in read_csv(HERE / "claude-pass-organisms.csv")}
+    proposals = {r["source_label"]: r for r in read_csv(proposal_file("claude-pass-organisms.csv"))}
     rows, missing = [], []
     for src in read_csv(DIR / "organism-pass1.csv"):
         label = src["source_label"]
@@ -158,8 +180,8 @@ def organism_rows():
             agreement = "accord"
         rows.append({
             "source_label": label,
-            "n_results": as_int(src["n_results"]), "n_isolates": as_int(src["n_isolates"]),
-            "n_diag": as_int(src["n_diag"]), "natures": src["sample_natures"],
+            "n_results": count(src["n_results"]), "n_isolates": count(src["n_isolates"]),
+            "n_diag": count(src["n_diag"]), "years": years(src),
             "amr": f"{src['amr_code']} · {amr_name}" if src["amr_code"] else "(aucune)",
             "amr_rank": src["amr_rank"], "amr_status": {"recognised": "reconnu", "uncertain": "incertain",
                                                          "unmapped": "non reconnu"}[status],
@@ -177,6 +199,32 @@ def organism_rows():
     return sort_rows(rows), missing
 
 
+def other_field_rows():
+    """Labels of the antibiotic field that never carry an S/SFP/I/R/ZIT result.
+
+    Only those with a written proposal are shown: the fields that may carry a
+    resistance signal. The others are other laboratory analyses.
+    """
+    path = proposal_file("claude-pass-other-fields.csv")
+    proposals = {r["source_label"]: r for r in read_csv(path)} if path.exists() else {}
+    rows = []
+    for src in read_csv(DIR / "antibiotic-pass1.csv"):
+        mine = proposals.get(src["source_label"])
+        if src["n_results"] != "0" or mine is None:
+            continue
+        assert mine["confidence"] in CONFIDENCE_FR and mine["rationale"], src["source_label"]
+        rows.append({
+            "source_label": src["source_label"], "n_results": count(src["n_other_rows"]),
+            "values": src["other_values"], "kind": ROW_KIND_FR[mine["row_kind"]],
+            "confidence": CONFIDENCE_FR[mine["confidence"]], "rationale": mine["rationale"], "agreement": "",
+            "csv": {**mine, "n_other_rows": src["n_other_rows"]},
+        })
+    rows.sort(key=lambda r: (-size(r["n_results"]), r["source_label"]))
+    for i, row in enumerate(rows, 1):
+        row["rank"] = i
+    return rows
+
+
 GROUPS = {  # fill colour per column group
     "Source": "E7E6E6", "Passe 1 · AMR": "DDEBF7", "Passe 2 · Claude": "FFF2CC",
     "Comparaison": "F2F2F2", "Passe 3 · Microbiologiste": "E2EFDA",
@@ -186,7 +234,8 @@ REVIEW = [("Décision", None, 14), ("Identité validée (si correction)", None, 
 ANTIBIOTIC_COLUMNS = [
     ("Source", [("N°", "rank", 5), ("Libellé source (LBLANA)", "source_label", 30),
                 ("Résultats S/SFP/I/R/ZIT", "n_results", 11), ("dont diagnostiques", "n_diag", 11),
-                ("Isolats", "n_isolates", 9), ("Détail S / SFP / I / R / ZIT", "sir", 22),
+                ("Isolats", "n_isolates", 9), ("2022 / 2023 / 2024", "years", 20),
+                ("Détail S / SFP / I / R / ZIT", "sir", 22),
                 ("Testé sur (libellés d'espèce les plus fréquents, nombre de résultats)", "tested_on", 60),
                 ("Autres valeurs de résultat", "other", 22)]),
     ("Passe 1 · AMR", [("Suggestion AMR 3.1.0", "amr", 30), ("Dictionnaire v2 (ancien)", "legacy", 24)]),
@@ -201,14 +250,20 @@ ANTIBIOTIC_COLUMNS = [
 ORGANISM_COLUMNS = [
     ("Source", [("N°", "rank", 5), ("Libellé source (IDENTIFICATION)", "source_label", 40),
                 ("Résultats S/SFP/I/R/ZIT", "n_results", 11), ("dont diagnostiques", "n_diag", 11),
-                ("Isolats", "n_isolates", 9),
-                ("Natures de prélèvement les plus fréquentes", "natures", 40)]),
+                ("Isolats", "n_isolates", 9), ("2022 / 2023 / 2024", "years", 20)]),
     ("Passe 1 · AMR", [("Suggestion AMR 3.1.0", "amr", 44), ("Rang", "amr_rank", 11),
                        ("Statut", "amr_status", 11), ("Gram · ordre · famille", "amr_taxonomy", 40)]),
     ("Passe 2 · Claude", [("Type de ligne", "kind", 18), ("Identité proposée", "proposed", 36),
                            ("Code AMR", "proposed_code", 20), ("Rang", "proposed_rank", 13),
                            ("Confiance", "confidence", 10), ("Justification", "rationale", 70)]),
     ("Comparaison", [("AMR / Claude", "agreement", 18)]),
+    ("Passe 3 · Microbiologiste", REVIEW),
+]
+OTHER_COLUMNS = [
+    ("Source", [("N°", "rank", 5), ("Libellé source (LBLANA)", "source_label", 44),
+                ("Lignes", "n_results", 10), ("Valeurs les plus fréquentes (nombre de lignes)", "values", 70)]),
+    ("Passe 2 · Claude", [("Type de ligne", "kind", 24), ("Confiance", "confidence", 10),
+                           ("Justification", "rationale", 80)]),
     ("Passe 3 · Microbiologiste", REVIEW),
 ]
 THIN = Side(style="thin", color="BFBFBF")
@@ -234,6 +289,8 @@ def write_sheet(ws, columns, rows):
                 cell.alignment = Alignment(vertical="top", wrap_text=True)
                 if group == "Passe 3 · Microbiologiste":
                     cell.fill = PatternFill("solid", fgColor="F4FAF0")
+                elif key in ("n_results", "n_diag", "n_isolates"):
+                    cell.alignment = Alignment(vertical="top", horizontal="right")
                 elif key == "agreement" and row["agreement"] in ("désaccord", "AMR sans suggestion", "AMR incertain"):
                     cell.fill = PatternFill("solid", fgColor="F8CBAD" if row["agreement"] == "désaccord" else "FCE4D6")
                 elif key == "confidence" and row["confidence"] != "élevée":
@@ -251,13 +308,15 @@ def write_sheet(ws, columns, rows):
     ws.auto_filter.ref = f"A2:{get_column_letter(col - 1)}{len(rows) + 2}"
 
 
-def write_readme(ws, antibiotics, organisms):
+def write_readme(ws, antibiotics, organisms, others):
     meta = (DIR / "inventory-meta.txt").read_text(encoding="utf-8").splitlines()
 
     def tally(rows):
         return ", ".join(f"{sum(r['agreement'] == a for r in rows)} « {a} »"
                          for a in AGREEMENT_ORDER if any(r["agreement"] == a for r in rows))
 
+    found = re.search(r"without any such result: (\d+)", "\n".join(meta))
+    not_shown = f" sur {found.group(1)}" if found else ""
     lines = [
         ("Revue des libellés de micro-organismes et d'antibiotiques · ORCHIDEE v3 · CHU de Rouen", "title"),
         (f"Document de travail généré le {date.today().isoformat()}. Aucune ligne n'est validée.", None),
@@ -277,13 +336,29 @@ def write_readme(ws, antibiotics, organisms):
          "Les premières lignes sont donc celles où votre avis compte le plus.", None),
         ("Pour les antibiotiques, une identité a plusieurs parties : la molécule, le test (antibiogramme usuel, "
          "haut niveau, dépistage, inhibition, association), la forme (IV, orale, trométamol) et le contexte de "
-         "lecture (méningite, cystite, autres contextes). Merci de vérifier chaque partie.", None),
+         "lecture (méningite, cystite, pneumonie, autres contextes). Merci de vérifier chaque partie.", None),
+        ("", None),
+        ("Les questions qui comptent le plus", "head"),
+        ("1. COMMENTAIRE BLSE et COMMENTAIRE CARBA sont codés en S ou R. R veut-il bien dire « présence » ? "
+         "Ce sont les sources proposées pour les indicateurs BLSE et carbapénémase.", None),
+        ("2. Klebsiella pneumoniae/variicola (libellé apparu en 2024) : ces isolats comptent-ils avec K. pneumoniae ? "
+         "Même question pour le complexe A. baumannii et pour S. argenteus / schweitzeri avec S. aureus.", None),
+        ("3. OXACILLINE est rendue sur les staphylocoques et sur le pneumocoque, PENICILLINE G sur Haemophilus : "
+         "sur ces espèces, est-ce bien un disque de dépistage et non un résultat thérapeutique ?", None),
+        ("4. PIPERA TAZO et RIFAMPICINE. (avec un point) : est-ce bien le panel des anaérobies ? "
+         "Un isolat peut-il porter aussi PIPERACILLINE+TAZOBACTAM ou RIFAMPICINE ?", None),
+        ("5. CLOXA 250 et CLOXA 500 : que signifient S et R pour ce test d'inhibition ?", None),
+        ("6. « Antibiogramme direct effectué à partir du prélèvement » est rangé parmi les micro-organismes : "
+         "ces résultats peuvent-ils être rattachés à une espèce ?", None),
         ("", None),
         ("Colonnes", "head"),
         ("Résultats : nombre de lignes de résultat S, SFP, I, R ou ZIT portant ce libellé, 2022-2024, tous prélèvements. "
          "Ce ne sont pas des nombres d'isolats dédoublonnés.", None),
-        ("dont diagnostiques : les mêmes lignes, limitées aux prélèvements classés diagnostiques par le site "
-         "(vide si ce classement n'était pas disponible).", None),
+        ("dont diagnostiques : les mêmes lignes, limitées aux prélèvements marqués diagnostiques dans un ancien jeu de "
+         "données du site. Valeur indicative et sous-estimée : une partie des lignes n'a pas de marque.", None),
+        ("Petits effectifs : un nombre de 1 à 9 est écrit « <10 ». Pour un libellé porté par moins de 10 patients, "
+         "le détail est écrit « masked ». Un nombre précédé de « ~ » est arrondi à la dizaine. "
+         "Aucun identifiant de patient ou de prélèvement ne figure dans ce classeur.", None),
         ("Testé sur : les libellés d'espèce sur lesquels le libellé d'antibiotique est rendu, avec le nombre de résultats.", None),
         ("Confiance : élevée (sens du libellé sans ambiguïté), moyenne (sens probable, à confirmer), "
          "faible (hypothèse la plus plausible parmi plusieurs).", None),
@@ -291,6 +366,9 @@ def write_readme(ws, antibiotics, organisms):
         ("Contenu", "head"),
         (f"Antibiotiques et tests : {len(antibiotics)} libellés. {tally(antibiotics)}.", None),
         (f"Micro-organismes : {len(organisms)} libellés. {tally(organisms)}.", None),
+        (f"Autres champs : {len(others)} libellés{not_shown} du même champ que les antibiotiques, qui ne portent jamais "
+         "de résultat S/I/R. Seuls ceux qui touchent à la résistance (commentaires, recherches de BMR, PCR de gènes) "
+         "sont repris ; les autres sont d'autres analyses du laboratoire (cytologie, sérologie, parasitologie…).", None),
         ("", None),
         ("Extraction", "head"),
     ] + [(line, None) for line in meta]
@@ -305,7 +383,7 @@ def write_readme(ws, antibiotics, organisms):
 
 
 def write_register(path, rows):
-    counts = ["n_results", "n_isolates", "n_diag"]
+    counts = [k for k in ("n_results", "n_isolates", "n_diag") if k in rows[0]]
     fields = list(rows[0]["csv"]) + counts + ["agreement", "approved_identity", "approved_by", "approved_on", "basis"]
     with open(path, "w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
@@ -322,14 +400,17 @@ def main():
             for label in labels:
                 print(f"NO PROPOSAL ({kind}): {label}")
         sys.exit(f"{len(missing_ab)} antibiotic and {len(missing_mo)} organism labels have no assistant proposal.")
+    others = other_field_rows()
     wb = Workbook()
-    write_readme(wb.active, antibiotics, organisms)
+    write_readme(wb.active, antibiotics, organisms, others)
     wb.active.title = "Lisez-moi"
     write_sheet(wb.create_sheet("Antibiotiques"), ANTIBIOTIC_COLUMNS, antibiotics)
     write_sheet(wb.create_sheet("Micro-organismes"), ORGANISM_COLUMNS, organisms)
+    write_sheet(wb.create_sheet("Autres champs"), OTHER_COLUMNS, others)
     wb.save(DIR / "revue-libelles.xlsx")
     write_register(DIR / "review-antibiotics.csv", antibiotics)
     write_register(DIR / "review-organisms.csv", organisms)
+    write_register(DIR / "review-other-fields.csv", others)
     for name, rows in (("Antibiotic/test", antibiotics), ("Organism", organisms)):
         print(f"{name} labels: {len(rows)}; " + ", ".join(
             f"{a}: {sum(r['agreement'] == a for r in rows)}" for a in AGREEMENT_ORDER))
