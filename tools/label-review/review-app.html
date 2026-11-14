@@ -98,10 +98,23 @@ const FILTERS = [
 ];
 const id = it => it.t + "|" + it.l;
 
+// A decision holds the proposal it was made on. When the proposal of a line
+// has changed since, the decision is dropped and the line is to review again.
+const PROPOSAL = Object.fromEntries(ITEMS.map(it => [id(it), it.p]));
+function keepCurrent(decisions) {
+  let dropped = 0;
+  for (const [k, d] of Object.entries(decisions)) {
+    if (!(k in PROPOSAL) || d.p !== PROPOSAL[k]) { delete decisions[k]; dropped++; }
+  }
+  return dropped;
+}
 function load() {
-  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.decisions) return s; } catch (e) {}
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.decisions) { s.dropped = keepCurrent(s.decisions); return s; }
+  } catch (e) {}
   const decisions = {};
-  for (const it of ITEMS) if (it.d) decisions[id(it)] = { d: it.d, c: it.c, by: "", at: "" };
+  for (const it of ITEMS) if (it.d) decisions[id(it)] = { d: it.d, c: it.c, p: it.p, by: "", at: "" };
   return { reviewer: "", decisions };
 }
 const state = load();
@@ -170,7 +183,7 @@ function render(focusIndex) {
   shown = visible();
   $("#list").innerHTML = shown.length ? shown.map(itemHtml).join("")
     : `<div class="empty">${view.filter === "todo" ? "Tout est fait dans cet onglet. Pensez à exporter vos décisions." : "Aucune ligne."}</div>`;
-  const plain = view.filter === "plain" ? shown.length : 0;
+  const plain = view.filter === "plain" ? shown.filter(it => matches(it, "plain")).length : 0;
   $("#bulk").className = "bulk" + (plain ? " show" : "");
   $("#bulk").innerHTML = plain ? `Ces ${plain} lignes n'ont pas de remarque : la proposition reprend le libellé.
     Parcourez-les, puis <button id="bulk-ok">Accepter ces ${plain} lignes</button>` : "";
@@ -184,7 +197,7 @@ function decide(i, d, keepPlace) {
   const it = shown[i]; if (!it) return;
   const k = id(it), cur = state.decisions[k];
   if (!d || (cur && cur.d === d && !keepPlace)) delete state.decisions[k];
-  else state.decisions[k] = { d, c: cur ? cur.c : "", by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
+  else state.decisions[k] = { d, c: cur ? cur.c : "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
   save();
   if (d === "fix" || d === "unsure") sticky.add(k); else sticky.delete(k);
   const leaves = !matches(it, view.filter) && !sticky.has(k);
@@ -199,8 +212,9 @@ document.addEventListener("click", e => {
   if (t.dataset.act) { decide(+t.closest(".item").dataset.i, t.dataset.act); return; }
   if (t.id === "bulk-ok") {
     const today = new Date().toISOString().slice(0, 10);
-    for (const it of shown) state.decisions[id(it)] = { d: "ok", c: "", by: state.reviewer, at: today };
-    save(); toast(`${shown.length} lignes acceptées.`); render(0); return;
+    const pending = shown.filter(it => matches(it, "plain"));
+    for (const it of pending) state.decisions[id(it)] = { d: "ok", c: "", p: it.p, by: state.reviewer, at: today };
+    save(); toast(`${pending.length} lignes acceptées.`); render(0); return;
   }
   if (t.id === "export") exportCsv();
   if (t.id === "import") $("#file").click();
@@ -208,12 +222,13 @@ document.addEventListener("click", e => {
 document.addEventListener("input", e => {
   if (e.target.matches(".comment textarea")) {
     const it = shown[+e.target.closest(".item").dataset.i], k = id(it);
-    if (!state.decisions[k]) state.decisions[k] = { d: "unsure", c: "", by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
+    if (!state.decisions[k]) state.decisions[k] = { d: "unsure", c: "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
     state.decisions[k].c = e.target.value; save();
   } else if (e.target.id === "reviewer") { state.reviewer = e.target.value.trim(); save(); }
   else if (e.target.id === "search") { view.q = e.target.value; render(); }
 });
 document.addEventListener("keydown", e => {
+  if (e.target.matches("button")) return;
   if (e.target.matches("textarea, input")) {
     if (e.key === "Escape") { const it = e.target.closest(".item"); (it || document.body).focus(); }
     return;
@@ -265,21 +280,27 @@ $("#file").addEventListener("change", async e => {
   const rows = parseCsv(await f.text()), head = rows.shift() || [];
   const col = n => head.indexOf(n), back = { Accepter: "ok", Corriger: "fix", Incertain: "unsure" };
   const tabOf = Object.fromEntries(Object.entries(TABS).map(([k, v]) => [v, k]));
-  let n = 0, unknown = 0;
+  let n = 0, unknown = 0, changed = 0;
   for (const r of rows) {
-    const t = tabOf[r[col("onglet")]], d = back[r[col("decision")]];
+    const t = tabOf[r[col("onglet")]], d = back[r[col("decision")]], k = t + "|" + r[col("libelle")];
     if (!t || !d) continue;
-    if (!ITEMS.some(it => it.t === t && it.l === r[col("libelle")])) { unknown++; continue; }
-    state.decisions[t + "|" + r[col("libelle")]] = { d, c: r[col("correction_commentaire")] || "", by: r[col("relecteur")] || "", at: r[col("date")] || "" };
+    if (!(k in PROPOSAL)) { unknown++; continue; }
+    if (r[col("proposition")] !== PROPOSAL[k]) { changed++; continue; }
+    state.decisions[k] = { d, c: r[col("correction_commentaire")] || "", p: PROPOSAL[k], by: r[col("relecteur")] || "", at: r[col("date")] || "" };
     n++;
   }
   save(); e.target.value = ""; render(0);
-  toast(`${n} décisions importées${unknown ? `, ${unknown} libellés inconnus ignorés` : ""}.`);
+  toast(`${n} décisions importées` + (unknown ? `, ${unknown} libellés inconnus ignorés` : "") +
+        (changed ? `, ${changed} lignes dont la proposition a changé, à revoir` : "") + ".");
 });
 
 $("#reviewer").value = state.reviewer;
 $("#search").value = view.q;
 render(0);
+if (state.dropped) {
+  toast(`${state.dropped} décisions retirées : la proposition a changé depuis. Ces lignes sont à revoir.`);
+  delete state.dropped; save();
+}
 </script>
 </body>
 </html>
