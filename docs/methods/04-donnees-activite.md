@@ -42,6 +42,35 @@ from an administrative declaration. The canonical measure is **occupancy hours,
 expressed in days**; `midnight_presence` is computed in parallel from the same
 intervals so that a SPARES-comparable series still exists.
 
+Unlike PMSI billing (which assigns an entire stay to the calendar year of final
+discharge `max(DATSORT)`), epidemiological surveillance operates on **real
+calendar time**:
+- **Samples** always belong to their actual collection timestamp (`DATEPRELEV`),
+  never to the discharge year of the linked stay.
+- **Movement intervals** enter a surveillance period $[T_{\text{start}}, T_{\text{end}})$
+  by **interval overlap** (`DATENT < T_end` and `DATSORT > T_start` with
+  `DATENT < DATSORT`) and are **clipped (chopped)** to the period boundaries
+  ($s = \max(\text{DATENT}, T_{\text{start}})$,
+  $e = \min(\text{DATSORT}, T_{\text{end}})$, retaining intervals with $s < e$)
+  before unioning and computing exposure days ($JH$). A stay beginning in
+  September 2024 and ending in January 2025 contributes its 2024 days to 2024
+  and its January 2025 days to 2025.
+- **Boundary between the site adapter and the core on `DATSORT = NA`**:
+  - **The core never invents a synthetic end date for `DATSORT = NA`.** Any row
+    supplied to the core with `DATSORT = NA` is excluded from interval
+    attribution and exposure duration calculation and counted in Test `3.1` of
+    `00-audit-qualite.md`. In Rouen's historical extract, over 87 % of the
+    24 437 rows with `DATSORT = NA` (`PMSISTATUT = "E"`) are unclosed
+    administrative records in outpatient consultations (such as CeGIDD, see also
+    Note `03.5` in `03-activites.md` on `TA 07`) or emergency visits from prior
+    years.
+  - **The site adapter** (which knows the extraction timestamp and local stay
+    status) caps genuinely ongoing inpatient stays in `CODE_TA ∈ {03, 20}`
+    (such as long-stay USLD/SSR residents still in bed or active inpatient stays
+    at month/year close) at $\min(T_{\text{end}}, T_{\text{extraction}})$ when
+    preparing the site handoff, while leaving unclosed outpatient/administrative
+    anomalies as `NA`.
+
 One **perimeter object** is resolved once and handed to both the numerator and
 the denominator. The exposure table is keyed
 `(unit, period, profile, exposure_value, exposure_unit, perimeter_flags)` and
@@ -207,10 +236,6 @@ shared repository needs an owner and a release process before it needs code.
 
 ## Open
 
-- **The TA 07 anomaly.** `CONSULTATIONS_EXTERNES` units carry 123 319 nights
-  across 17 738 episodes in 2024 — an average of 7 nights per outpatient
-  consultation. Something is attached to those UFs that is not a consultation.
-  Outside the perimeter today, inside it the moment the perimeter widens.
 - **The exposure table is annual today.** The monthly grain of 04.6 is a
   decision, not an implementation: the current `site_inputs` table is keyed
   `calendar_year` and physically cannot produce a month. The intervals can.

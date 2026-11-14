@@ -57,9 +57,36 @@ and the conflict rule. See
 **The hospital perimeter is one named, versioned set of eligible units.**
 Resolve it once for the declared establishment and surveillance period, then
 use the same set for the microbiology numerator and hospitalisation exposure
-denominator. Record its version with every published number; see 04.7 and
-`docs/evidence/2024_consores_rouen_denominator.md` for the consequence of
-resolving unit eligibility independently for numerator and denominator.
+denominator. Record its version (`perimeter_version`) with every published
+number; see 04.7 and `docs/evidence/2024_consores_rouen_denominator.md` for the
+consequence of resolving unit eligibility independently for numerator and
+denominator.
+
+To reconcile comparability with the SPARES perimeter (SPARES pp. 9-10) and
+complete emergency department surveillance without post-deduplication filtering,
+ORCHIDEE defines three named perimeters (each evaluated as an input before
+deduplication and recorded in `perimeter_version`):
+1. **`spares_strict`**: inpatient hospitalisation (`CODE_TA ∈ {03, 20}` across
+   eligible `CODE_DE` domains) restricted strictly to samples collected during
+   an active inpatient movement interval; publishes both `%R` and incidence
+   density (`DI` per 1 000 $JH$).
+2. **`spares_ed24h`**: the same eligible inpatient unit set and $JH$
+   denominator (`CODE_TA ∈ {03, 20}` across eligible `CODE_DE` domains), plus
+   diagnostic samples from the Emergency Department (`TA 10`) outside an active
+   inpatient interval when followed within `(sample_datetime, sample_datetime + 24h]`
+   by an eligible inpatient movement, attributed to the earliest such movement
+   (`min(DATENT)`, `ADR-0009`); publishes both `%R` and `DI` per 1 000 $JH$.
+3. **`emergency_ta10`**: a standalone Emergency Department perimeter (`TA 10`)
+   retaining all diagnostic samples from `TA 10` (identified when outside an
+   active eligible `TA 03/20` movement by a laboratory ordering UF in `TA 10`
+   or a `TA 10` movement, whether subsequently admitted or discharged home) and
+   deduplicating them strictly within `TA 10`. Because `TA 10` consists of
+   short emergency passages rather than inpatient bed-days, `emergency_ta10`
+   publishes **resistance proportions (`%R`) and isolate counts only** (no
+   patient-day `DI`). Because pre-admission `TA 10` samples followed by
+   hospitalisation within 24 hours enter both `spares_ed24h` and
+   `emergency_ta10`, the two perimeters are not disjoint and must never be
+   summed together.
 
 Record the period, completed local diagnostic and antibiogram selection,
 analysis-specific specimen scope and deduplication inputs separately in the
@@ -124,23 +151,25 @@ fully classified and deliberately excluded. Only 6 are open.
 The real loss sits elsewhere. **3 650 isolates carry no `SEJUF` at all** — 7.5 %
 of the bundle, 1 173 of them in 2024. That is not an unmapped unit; it is a
 sample that could not be attributed to a hospitalisation unit, and no amount of
-`TA`/`DE` mapping reaches it. See `05-structure.md`.
+`TA`/`DE` mapping reaches it. Outpatient and emergency isolates are governed by
+Decision `05.1` and the three named perimeters in `05-structure.md`, while the
+long-stay USLD/SSR extraction boundary is addressed in the site adapter
+(`05-structure.md`).
+
+### 03.5 note — why `TA 07` carries 123 319 nights in the Rouen movement table
+
+In Rouen's movement table, `TA 07` (`CONSULTATIONS_EXTERNES`) carries 123 319
+nights across 17 738 episodes in 2024. Inspection of Rouen's source database
+(CORA `TB_SEJOUR`) shows that these are outpatient consultation venues
+(`TYPE_SEJOUR = 'EXT'`) left administratively open across multiple days or weeks
+rather than inpatient stays. Because the inpatient perimeters (`spares_strict`
+and `spares_ed24h`) are defined positively on `CODE_TA ∈ {03, 20}`, these open
+external venues are excluded by construction.
 
 ## Open
 
-- **The intensive-care reassignment rule.** SPARES requires specialised
-  intensive-care and continuous-monitoring units to be assigned to medicine,
-  surgery or paediatrics (SPARES p. 10). This is a mapping decision and the document does not
-  say who applies it. If the site applies it, two sites will differ; if ORCHIDEE
-  applies it, it needs a rule over local unit labels it cannot read.
-- **The 3 650 unit-less isolates.** Whether they are excluded, counted as an
-  unknown stratum, or attributed by a documented fallback is undecided. It is
-  the largest single population question left in the document.
-- **The `TA 07` anomaly.** Consultation-externe units carrying 123 319 nights
-  across 17 738 episodes in 2024. Outside the perimeter today. See
-  `04-donnees-activite.md`.
 - **Locally-followed sectors.** SPARES allows dialysis and ambulatory surgery to
-  be collected with their own denominators (séances, séjours). Under 04.4 these
+  be collected with their own denominators (séances, séjours; SPARES p. 10). Under 04.4 these
   cannot be aggregated with patient-day indicators. Whether ORCHIDEE produces
   them at all is undecided.
 - **EHPAD attached to the establishment.** Still SPF's open question. See
