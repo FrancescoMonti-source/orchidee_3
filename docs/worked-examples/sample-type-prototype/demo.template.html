@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rouen NATUREPVT Mapping Explorer — Site-Adapter Prototype (ADR-0003)</title>
+<style>
+  :root {
+    --bg: #f4f7f5;
+    --surface: #ffffff;
+    --ink: #17312c;
+    --muted: #53665c;
+    --accent: #1f6b53;
+    --accent-soft: #edf3ef;
+    --border: #d7e3dc;
+    --border-strong: #b5cbbf;
+    --warn-bg: #fff9ee;
+    --warn-border: #ad7621;
+    --warn-ink: #715014;
+    --pill-diag-bg: #e4f3ec;
+    --pill-diag-ink: #14543f;
+    --pill-scr-bg: #fce8e6;
+    --pill-scr-ink: #8c231c;
+    --pill-ctx-bg: #fff1cc;
+    --pill-ctx-ink: #715014;
+    --pill-uncl-bg: #eceff1;
+    --pill-uncl-ink: #455a64;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    max-width: 1280px;
+    margin: 28px auto;
+    padding: 0 20px 48px;
+  }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 0; }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 10px; max-width: 100ch; }
+  code { background: #edf3ef; padding: 1px 5px; border-radius: 4px; font-size: 13px; overflow-wrap: anywhere; }
+  .tag { color: var(--accent); font-size: 12px; letter-spacing: .07em; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+  section, .guide-panel, .run-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 18px;
+    margin: 14px 0;
+  }
+  .notice {
+    border-left: 4px solid var(--warn-border);
+    background: var(--warn-bg);
+    padding: 10px 14px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+  }
+  .kpi-card {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 12px 14px;
+  }
+  .kpi-card strong { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .kpi-val { font-size: 22px; font-weight: 700; color: var(--ink); margin: 2px 0; }
+  .kpi-sub { font-size: 13px; color: var(--muted); }
+  .coverage-wrap { margin: 10px 0 4px; }
+  .coverage-track {
+    position: relative;
+    height: 14px;
+    background: #e2ebe5;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .coverage-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width .2s ease;
+  }
+  .milestones { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  button, select, input {
+    font: inherit;
+    padding: 7px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: white;
+    color: var(--ink);
+  }
+  button { cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--accent); color: white; border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .filter-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .filter-grid select, .filter-grid input { width: 100%; min-width: 0; font-weight: 400; }
+  @media (max-width: 980px) { .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 580px) { .filter-grid { grid-template-columns: 1fr; } }
+  .guide-panel { padding: 14px 18px; }
+  .guide-panel summary, .run-panel summary { cursor: pointer; font-weight: 650; }
+  .guide-panel[open] > summary, .run-panel[open] > summary { margin-bottom: 12px; }
+  .story-box { background: var(--accent-soft); border-radius: 6px; padding: 12px 14px; margin: 10px 0; font-size: 14px; }
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .b-diag { background: var(--pill-diag-bg); color: var(--pill-diag-ink); }
+  .b-scr { background: var(--pill-scr-bg); color: var(--pill-scr-ink); }
+  .b-ctx { background: var(--pill-ctx-bg); color: var(--pill-ctx-ink); }
+  .b-uncl { background: var(--pill-uncl-bg); color: var(--pill-uncl-ink); }
+  .b-high { background: #e8f5e9; color: #1b5e20; }
+  .b-med { background: #e3f2fd; color: #0d47a1; }
+  .b-ambig { background: #fff1cc; color: #715014; }
+  .b-target { background: #1f6b53; color: #ffffff; }
+  .b-ov { background: #ede7f6; color: #4527a0; }
+  .scroll { overflow: auto; max-height: 490px; border: 1px solid var(--border); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6eee9; vertical-align: top; }
+  th { position: sticky; top: 0; background: var(--accent-soft); z-index: 1; font-weight: 650; }
+  tr.selected-row { background: #e4f3ec; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pick-btn { text-align: left; padding: 3px 7px; font-size: 13px; border-color: var(--border); }
+  .pick-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .sort-btn { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 650; color: inherit; cursor: pointer; }
+  .sort-btn:hover { text-decoration: underline; }
+  .inspector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 10px 0; }
+  .inspector-box { background: #f8fbf9; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .inspector-box strong { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  .small { font-size: 13px; color: var(--muted); }
+  .theme-card { border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; background: #fbfdfb; }
+  [hidden] { display: none !important; }
+</style>
+
+<div class="tag">THROWAWAY PROTOTYPE · LOCAL ROUEN SITE ADAPTER (ADR-0003) · ZERO IDENTIFIERS EXPORTED · NO NETWORK REQUESTS</div>
+<h1>Explorateur de mappage <code>NATUREPVT</code> (CHU de Rouen)</h1>
+<p id="subtitle"></p>
+
+<div class="notice">
+  <strong>Frontière architecturale (<code>ADR-0003</code>)</strong> : cette classification s'exécute uniquement dans l'adaptateur de site local avant le contrat portable et l'audit d'entrée commun (Chapitre 00). Les indicateurs SPARES actuels ne consomment que <code>hemoculture</code> et <code>urines</code> ; ce prototype cartographie l'ensemble des 17 catégories ONERBA/SPARES et sépare les sites de portage, les batteries <code>_R</code>, <code>BGSTA_R + BGCULTAE</code> et les prélèvements chirurgicaux/diagnostiques.
+</div>
+
+<section id="kpi-section">
+  <div class="kpi-grid" id="kpi-cards"></div>
+  <div class="coverage-wrap">
+    <div class="row" style="justify-content:space-between;">
+      <strong class="small" id="coverage-label"></strong>
+      <span class="small" id="coverage-pct"></span>
+    </div>
+    <div class="coverage-track"><div class="coverage-fill" id="coverage-fill" style="width:0%"></div></div>
+    <div class="milestones" id="milestones"></div>
+  </div>
+</section>
+
+<details id="walkthrough-panel" class="guide-panel" open>
+  <summary>Parcours guidés (5 cas d'usage cliniques et méthodologiques)</summary>
+  <div id="scenario-buttons" class="row"></div>
+  <div id="story-container" class="story-box"></div>
+  <div id="step-buttons" class="row"></div>
+</details>
+
+<section id="explore-panel">
+  <div class="section-heading">
+    <h2>Exploration libre</h2>
+    <div class="row">
+      <button id="clear-filters" type="button">Effacer les filtres</button>
+      <button id="reset-demo" type="button">Réinitialiser</button>
+    </div>
+  </div>
+
+  <div id="view-buttons" class="row" style="margin-bottom:10px;"></div>
+
+  <div id="filter-controls" class="filter-grid">
+    <label>Catégorie cible (<code>naturepvt_norm</code>)
+      <select id="f-cat"></select>
+    </label>
+    <label>Rôle diagnostique vs dépistage
+      <select id="f-role"></select>
+    </label>
+    <label>Confiance
+      <select id="f-conf"></select>
+    </label>
+    <label>Co-occurrence ordonnances dépistage
+      <select id="f-scr"></select>
+    </label>
+    <label>Recherche (libellé, famille, GLIMS, espèce, justification)
+      <input id="f-query" type="search" placeholder="Ex: MARGE ANALE, CIP, PBDP, BGSTRB, X...">
+    </label>
+  </div>
+
+  <p class="small" id="selection-summary"></p>
+
+  <div id="table-container"></div>
+  <div id="pagination-bar" class="row" style="margin-top:10px; justify-content:space-between;" hidden></div>
+</section>
+
+<section id="inspector-section" hidden>
+  <div class="section-heading">
+    <h2 id="inspector-title">Détail de la sélection</h2>
+    <div class="row">
+      <button id="prev-item" type="button">Précédent</button>
+      <button id="next-item" type="button">Suivant</button>
+    </div>
+  </div>
+  <div id="inspector-body"></div>
+</section>
+
+<details id="run-panel" class="run-panel">
+  <summary>Métadonnées du run et traçabilité méthodologique</summary>
+  <div id="run-meta"></div>
+</details>
+
+<script>
+const PAYLOAD = /*PROTOTYPE_DATA*/null;
+
+/* === PURE LOGIC MODULE === */
+const Logic = (() => {
+  const VIEWS = [
+    { id: "families", label: "1. Familles anatomiques (396)" },
+    { id: "labels", label: "2. Libellés bruts NATUREPVT (8 462)" },
+    { id: "queue", label: "3. File de révision humaine" },
+    { id: "matrix", label: "4. Matrice ONERBA / SPARES" },
+    { id: "non_ab", label: "5. Audit hors-antibiogramme & _R" }
+  ];
+
+  const ROLE_LABELS = {
+    all: "Tous les rôles",
+    diagnostic: "Diagnostique (diagnostic)",
+    screening_site: "Site de dépistage (screening_site)",
+    context_dependent: "Dépendant du contexte (context_dependent)",
+    unclassifiable: "Non classable (unclassifiable)"
+  };
+
+  const CONF_LABELS = {
+    all: "Tous les niveaux",
+    high: "Confiance élevée (high)",
+    medium: "Confiance moyenne (medium)",
+    ambiguous_needs_human_review: "Ambigu — révision humaine"
+  };
+
+  const SCR_LABELS = {
+    all: "Toutes co-occurrences dépistage",
+    has_any: "Avec ordonnance dépistage (> 0 %)",
+    ge_50: "Dépistage majoritaire (>= 50 %)",
+    mixed_bgsta: "Co-prescription BGSTA_R + BGCULTAE",
+    zero: "0 % dépistage observé"
+  };
+
+  const SCENARIOS = [
+    {
+      name: "1. Cibles SPARES (hemoculture & urines)",
+      text: "Inspecte comment les variantes GLIMS d'hémocultures (périphériques, sur KT, sur CIP, avec délai) convergent vers `hemoculture`, tandis que les embouts de cathéters (`Cathéter`, `PICC`, `CIP`) vont dans `dispositif_intravasculaire`. Compare avec `urines` (milieu de jet, sonde vésicale, Bricker, néphrostomie).",
+      steps: [
+        { label: "Toutes les hémocultures", action: { view: "families", cat: "hemoculture", role: "all", conf: "all", scr: "all", query: "", selectedFamilyId: "FAM_002" } },
+        { label: "Vs. dispositifs IV retirés (KT / CIP)", action: { view: "families", cat: "dispositif_intravasculaire", role: "all", conf: "all", scr: "all", query: "", selectedFamilyId: "FAM_008" } },
+        { label: "Toutes les urines (jet, sonde, Bricker)", action: { view: "families", cat: "urines", role: "all", conf: "all", scr: "all", query: "", selectedFamilyId: "FAM_001" } },
+        { label: "Matériel urinaire hors urine", action: { view: "labels", cat: "autre_prelevement", role: "all", conf: "all", scr: "all", query: "Sonde", selectedLabel: null } }
+      ]
+    },
+    {
+      name: "2. Modèle dépistage à 3 niveaux",
+      text: "Les 7 batteries BMR/BHRe (`BGBLSE_R`, `BGCARBA_R`, `BGERV_R`, `BGSAMR_R`...) ont 100 % de `NATUREPVT` vide (7 086 ELTIDs sans libellé dans les antibiogrammes). Sur les libellés non vides, le prototype repère le portage (`NEZ`, `AISSELLE`, `AINE`), `BGSTRB` prénatal (97,6 % sur `Ecouvillon vaginal`), et `BGSTA_R + BGCULTAE`.",
+      steps: [
+        { label: "Audit _R & hors-antibiogramme", action: { view: "non_ab", cat: "all", role: "all", conf: "all", scr: "all", query: "" } },
+        { label: "Sites dépistage portage (ONERBA p. 44)", action: { view: "families", cat: "depistage_portage", role: "all", conf: "all", scr: "all", query: "" } },
+        { label: "Ecouvillon vaginal & BGSTRB (96,6 %)", action: { view: "families", cat: "prelevement_genital", role: "context_dependent", conf: "all", scr: "all", query: "", selectedFamilyId: "FAM_022" } },
+        { label: "Libellés avec BGSTA_R + BGCULTAE", action: { view: "labels", cat: "all", role: "all", conf: "all", scr: "mixed_bgsta", query: "" } }
+      ]
+    },
+    {
+      name: "3. Le piège péri-anal / rectal",
+      text: "Une heuristique textuelle sur `rectal` / `anus` supprimerait à tort des collections suppurées chirurgicales. Le regroupement sépare les écouvillons superficiels de portage (`ANUS`, `RECTAL`) des `Abcès marge anale` et `Fistule anale` (0 % de `_R`, strictement `diagnostic`).",
+      steps: [
+        { label: "Familles péri-anales & rectales", action: { view: "families", cat: "all", role: "all", conf: "all", scr: "all", query: "PERIANAL_RECTAL" } },
+        { label: "Abcès marge anale (FAM_057, diagnostic)", action: { view: "families", cat: "all", role: "diagnostic", conf: "all", scr: "all", query: "MARGE ANALE", selectedFamilyId: "FAM_057" } },
+        { label: "Écouvillons anaux/rectaux nus", action: { view: "families", cat: "depistage_portage", role: "all", conf: "all", scr: "all", query: "RECT" } }
+      ]
+    },
+    {
+      name: "4. Profond vs superficiel (SPARES Annexe 4)",
+      text: "SPARES (Annexe 4 p. 27) distingue les liquides stériles dédiés (`LCR`, `liquide_pleural`, `liquide_articulaire`, `liquide_ascite`), les prélèvements profonds (`Liquide péritonéal`, `Bile`, `os`, `valves`, `abces profonds`), les `pus_superficiel` et `autre_prelevement` (drains/Redons).",
+      steps: [
+        { label: "Matrice des 17 catégories ONERBA", action: { view: "matrix", cat: "all", role: "all", conf: "all", scr: "all", query: "" } },
+        { label: "Prélèvements profonds (FAM_005, FAM_007...)", action: { view: "families", cat: "prelevement_profond", role: "all", conf: "all", scr: "all", query: "" } },
+        { label: "Respiratoire protégé (LBA, PBDP)", action: { view: "families", cat: "respiratoire_protege", role: "all", conf: "all", scr: "all", query: "", selectedFamilyId: "FAM_009" } },
+        { label: "Mucovisidose respiratoire non protégé", action: { view: "families", cat: "respiratoire_non_protege", role: "all", conf: "all", scr: "all", query: "Mucovisidose", selectedFamilyId: "FAM_006" } }
+      ]
+    },
+    {
+      name: "5. File de révision humaine & codes ambigus",
+      text: "Inspecte les familles marquées `ambiguous_needs_human_review` ou `context_dependent` lors du cross-check : codes GLIMS nus (`X`, `SANS`, `PAUME`), hétérogénéité interne (`HeartMate` orifice vs canule/pacemaker, `Bourse` scrotum vs genou) et libellés reclassifiés individuellement.",
+      steps: [
+        { label: "File de révision & thèmes prioritaires", action: { view: "queue", cat: "all", role: "all", conf: "all", scr: "all", query: "" } },
+        { label: "Assistance cardiaque / HeartMate (FAM_035)", action: { view: "families", cat: "all", role: "all", conf: "all", scr: "all", query: "HEART MATE", selectedFamilyId: "FAM_035" } },
+        { label: "Non classables (X, SANS, DROITE, GAUCHE)", action: { view: "families", cat: "unclassifiable", role: "all", conf: "all", scr: "all", query: "" } },
+        { label: "Libellés surchargés individuellement", action: { view: "labels", cat: "all", role: "all", conf: "all", scr: "all", query: "OVERRIDE_ONLY" } }
+      ]
+    }
+  ];
+
+  function initial(payload) {
+    const firstFam = payload && payload.families && payload.families.length ? payload.families[0].family_id : null;
+    return {
+      view: "families",
+      cat: "all",
+      role: "all",
+      conf: "all",
+      scr: "all",
+      query: "",
+      sortBy: "n_samples",
+      sortDir: "desc",
+      page: 0,
+      pageSize: 100,
+      selectedFamilyId: firstFam,
+      selectedLabel: null,
+      scenario: 0,
+      step: -1
+    };
+  }
+
+  function matchesScreening(row, scr, isFamily) {
+    if (!scr || scr === "all") return true;
+    const pscr = Number(isFamily ? row.pct_any_screening_order : row.pscr) || 0;
+    const bgstaCult = Number(isFamily ? row.n_samp_bgsta_cultae : row.sc) || 0;
+    if (scr === "has_any") return pscr > 0 || bgstaCult > 0;
+    if (scr === "ge_50") return pscr >= 50;
+    if (scr === "mixed_bgsta") return bgstaCult > 0;
+    if (scr === "zero") return pscr === 0 && bgstaCult === 0;
+    return true;
+  }
+
+  function filterFamilies(state, payload) {
+    const q = state.query.trim().toLocaleLowerCase();
+    const targets = new Set(payload.metadata.current_spares_targets || ["hemoculture", "urines"]);
+    return (payload.families || []).filter(f => {
+      if (state.cat === "__spares_targets__") {
+        if (!targets.has(f.naturepvt_norm)) return false;
+      } else if (state.cat !== "all" && f.naturepvt_norm !== state.cat) {
+        return false;
+      }
+      if (state.role !== "all" && f.diagnostic_vs_screening_role !== state.role) return false;
+      if (state.conf !== "all" && f.confidence !== state.conf) return false;
+      if (!matchesScreening(f, state.scr, true)) return false;
+      if (q) {
+        const hay = [
+          f.family_id, f.family_key, f.specimen_prefix, f.anatomical_site,
+          f.naturepvt_norm, f.onerba_label_fr, f.top_glims_codes, f.rep_labels, f.rationale
+        ].filter(Boolean).join(" ").toLocaleLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function filterLabels(state, payload) {
+    const rawQ = state.query.trim();
+    const overrideOnly = rawQ === "OVERRIDE_ONLY";
+    const q = overrideOnly ? "" : rawQ.toLocaleLowerCase();
+    const targets = new Set(payload.metadata.current_spares_targets || ["hemoculture", "urines"]);
+    return (payload.labels || []).filter(l => {
+      if (overrideOnly && l.src !== "crosscheck_label_override") return false;
+      if (state.cat === "__spares_targets__") {
+        if (!targets.has(l.cat)) return false;
+      } else if (state.cat !== "all" && l.cat !== state.cat) {
+        return false;
+      }
+      if (state.role !== "all" && l.role !== state.role) return false;
+      if (state.conf !== "all" && l.conf !== state.conf) return false;
+      if (!matchesScreening(l, state.scr, false)) return false;
+      if (q) {
+        const hay = [l.lbl, l.fid, l.cat, l.gc, l.sp, l.ta, l.rat].filter(Boolean).join(" ").toLocaleLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function filterQueue(state, payload) {
+    return filterFamilies(state, payload).filter(f =>
+      f.diagnostic_vs_screening_role === "context_dependent" ||
+      f.diagnostic_vs_screening_role === "unclassifiable" ||
+      f.confidence === "ambiguous_needs_human_review" ||
+      f.n_label_overrides_inside > 0
+    );
+  }
+
+  function sortRows(rows, sortBy, sortDir, isFamily) {
+    const dir = sortDir === "asc" ? 1 : -1;
+    const keyMap = isFamily ? {
+      name: "family_id",
+      cat: "naturepvt_norm",
+      role: "diagnostic_vs_screening_role",
+      conf: "confidence",
+      n_samples: "n_samples",
+      n_labels: "n_labels",
+      n_isolates: "n_isolates",
+      pct_scr: "pct_any_screening_order"
+    } : {
+      name: "lbl",
+      cat: "cat",
+      role: "role",
+      conf: "conf",
+      n_samples: "ns",
+      n_labels: "r",
+      n_isolates: "ni",
+      pct_scr: "pscr"
+    };
+    const k = keyMap[sortBy] || (isFamily ? "n_samples" : "ns");
+    return [...rows].sort((a, b) => {
+      const av = a[k];
+      const bv = b[k];
+      let cmp = 0;
+      if (typeof av === "number" && typeof bv === "number") cmp = av - bv;
+      else cmp = String(av ?? "").localeCompare(String(bv ?? ""));
+      if (cmp !== 0) return cmp * dir;
+      const sa = isFamily ? a.n_samples : a.ns;
+      const sb = isFamily ? b.n_samples : b.ns;
+      return sb - sa;
+    });
+  }
+
+  function computeCoverage(rows, metadata, isFamily) {
+    let samples = 0, isolates = 0, labels = 0;
+    for (const r of rows) {
+      samples += isFamily ? r.n_samples : r.ns;
+      isolates += isFamily ? r.n_isolates : r.ni;
+      labels += isFamily ? r.n_labels : 1;
+    }
+    const totSamp = metadata.total_nv_samples || 1;
+    const totIso = metadata.total_nv_isolates || 1;
+    return {
+      nRows: rows.length,
+      nLabels: labels,
+      nSamples: samples,
+      pctSamples: Math.round(10000 * samples / totSamp) / 100,
+      nIsolates: isolates,
+      pctIsolates: Math.round(10000 * isolates / totIso) / 100
+    };
+  }
+
+  function transition(state, action, payload) {
+    if (action.reset) return initial(payload);
+    if (action.clearFilters) {
+      return {
+        ...state,
+        cat: "all", role: "all", conf: "all", scr: "all", query: "", page: 0, step: -1
+      };
+    }
+    const next = { ...state, ...action };
+    if (action.cat !== undefined || action.role !== undefined || action.conf !== undefined ||
+        action.scr !== undefined || action.query !== undefined || action.view !== undefined) {
+      next.page = 0;
+    }
+    if (next.view === "families" || next.view === "queue") {
+      const list = next.view === "queue" ? filterQueue(next, payload) : filterFamilies(next, payload);
+      if (!list.some(f => f.family_id === next.selectedFamilyId)) {
+        next.selectedFamilyId = list.length ? list[0].family_id : null;
+      }
+    } else if (next.view === "labels") {
+      const list = filterLabels(next, payload);
+      if (!list.some(l => l.lbl === next.selectedLabel)) {
+        next.selectedLabel = list.length ? list[0].lbl : null;
+      }
+    }
+    return next;
+  }
+
+  return {
+    VIEWS, ROLE_LABELS, CONF_LABELS, SCR_LABELS, SCENARIOS,
+    initial, transition, filterFamilies, filterLabels, filterQueue, sortRows, computeCoverage
+  };
+})();
+
+/* === DOM SHELL === */
+(() => {
+  const esc = s => String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  const fmtInt = n => Number(n || 0).toLocaleString("fr-FR");
+  const fmtPct = n => `${Number(n || 0).toFixed(2).replace(".", ",")} %`;
+
+  if (!PAYLOAD || !PAYLOAD.metadata) {
+    document.body.innerHTML = "<section><h1>Aucune donnée injectée</h1><p>Exécutez <code>build_deliverables.R</code> pour générer <code>outputs/sample-type-prototype/demo.html</code>.</p></section>";
+    return;
+  }
+
+  const meta = PAYLOAD.metadata;
+  const labelsByFamily = new Map();
+  for (const l of PAYLOAD.labels) {
+    if (!labelsByFamily.has(l.fid)) labelsByFamily.set(l.fid, []);
+    labelsByFamily.get(l.fid).push(l);
+  }
+  const famById = new Map(PAYLOAD.families.map(f => [f.family_id, f]));
+
+  document.getElementById("subtitle").innerHTML =
+    `Catalogage exhaustif des <strong>${fmtInt(meta.ab_distinct_labels)}</strong> libellés <code>NATUREPVT</code> non vides sur les échantillons avec antibiogramme (sur <strong>${fmtInt(meta.total_distinct_naturepvt_incl_empty)}</strong> valeurs distinctes dans <code>data/bact22_24</code>), regroupés en <strong>${fmtInt(meta.n_families)}</strong> familles anatomiques et classés par workflow parallèle + cross-check.`;
+
+  const roleBadge = role => {
+    const cls = role === "diagnostic" ? "b-diag"
+      : role === "screening_site" ? "b-scr"
+      : role === "context_dependent" ? "b-ctx" : "b-uncl";
+    return `<span class="badge ${cls}">${esc(role)}</span>`;
+  };
+  const confBadge = conf => {
+    const cls = conf === "high" ? "b-high" : conf === "medium" ? "b-med" : "b-ambig";
+    const lbl = conf === "ambiguous_needs_human_review" ? "ambiguous_review" : conf;
+    return `<span class="badge ${cls}">${esc(lbl)}</span>`;
+  };
+
+  let state = Logic.initial(PAYLOAD);
+
+  function populateSelects() {
+    const catSel = document.getElementById("f-cat");
+    const catOpts = [
+      `<option value="all">Toutes les 17 catégories ONERBA/SPARES</option>`,
+      `<option value="__spares_targets__">Cibles SPARES actuelles (hemoculture + urines)</option>`
+    ];
+    for (const o of PAYLOAD.onerba_summary) {
+      catOpts.push(`<option value="${esc(o.naturepvt_norm)}">${esc(o.naturepvt_norm)} (${fmtInt(o.n_samples)} éch. · ${fmtInt(o.n_labels)} lib.)</option>`);
+    }
+    catSel.innerHTML = catOpts.join("");
+
+    document.getElementById("f-role").innerHTML = Object.entries(Logic.ROLE_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-conf").innerHTML = Object.entries(Logic.CONF_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-scr").innerHTML = Object.entries(Logic.SCR_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+  }
+
+  function renderRunMeta() {
+    document.getElementById("run-meta").innerHTML = `
+      <div class="inspector-grid">
+        <div class="inspector-box"><strong>Source brute locale</strong>${esc(meta.input_name)} (${fmtInt(meta.rows_raw)} lignes, ${fmtInt(meta.total_distinct_eltid)} ELTIDs)</div>
+        <div class="inspector-box"><strong>Échantillons avec antibiogramme</strong>${fmtInt(meta.total_ab_samples)} ELTIDs (${fmtInt(meta.total_nv_samples)} avec NATUREPVT non vide + ${fmtInt(meta.n_ab_missing_nv)} vides)</div>
+        <div class="inspector-box"><strong>Couverture Top 50 / Top 200</strong>${fmtPct(meta.top50_cum_pct_samples)} éch. (${fmtPct(meta.top50_cum_pct_isolates)} isolats) / ${fmtPct(meta.top200_cum_pct_samples)} éch.</div>
+        <div class="inspector-box"><strong>Cross-check Phase 2</strong>${fmtInt(meta.n_crosscheck_audited)} familles auditées, ${fmtInt(meta.n_family_updates)} ajustements, ${fmtInt(meta.n_label_overrides_applied)} surcharges unitaires</div>
+        <div class="inspector-box"><strong>Horodatage (UTC)</strong>${esc(meta.run_utc)}</div>
+      </div>`;
+  }
+
+  function renderKPIs(cov, contextNote) {
+    const targetsRows = PAYLOAD.onerba_summary.filter(o => o.is_current_spares_target);
+    const targetsSamples = targetsRows.reduce((acc, o) => acc + Number(o.n_samples || 0), 0);
+    const queueCount = PAYLOAD.families.filter(f =>
+      f.diagnostic_vs_screening_role === "context_dependent" ||
+      f.diagnostic_vs_screening_role === "unclassifiable" ||
+      f.confidence === "ambiguous_needs_human_review"
+    ).length;
+
+    document.getElementById("kpi-cards").innerHTML = `
+      <div class="kpi-card"><strong>Échantillons sélectionnés</strong><div class="kpi-val">${fmtInt(cov.nSamples)}</div><div class="kpi-sub">${fmtPct(cov.pctSamples)} des ${fmtInt(meta.total_nv_samples)} éch. étiquetés</div></div>
+      <div class="kpi-card"><strong>Isolats (PATID, ELTID, DLVL)</strong><div class="kpi-val">${fmtInt(cov.nIsolates)}</div><div class="kpi-sub">${fmtPct(cov.pctIsolates)} des ${fmtInt(meta.total_nv_isolates)} isolats</div></div>
+      <div class="kpi-card"><strong>Libellés NATUREPVT couverts</strong><div class="kpi-val">${fmtInt(cov.nLabels)}</div><div class="kpi-sub">${esc(contextNote)}</div></div>
+      <div class="kpi-card"><strong>Cibles SPARES (hémoc + urines)</strong><div class="kpi-val">${fmtPct(100 * targetsSamples / meta.total_nv_samples)}</div><div class="kpi-sub">${fmtInt(targetsSamples)} échantillons actuels</div></div>
+      <div class="kpi-card"><strong>File révision humaine</strong><div class="kpi-val">${fmtInt(queueCount)}</div><div class="kpi-sub">familles contextuelles / ambiguës</div></div>`;
+
+    document.getElementById("coverage-label").textContent = `Couverture cumulative de la vue filtrée (${fmtInt(cov.nLabels)} / ${fmtInt(meta.ab_distinct_labels)} libellés)`;
+    document.getElementById("coverage-pct").textContent = `${fmtPct(cov.pctSamples)} des échantillons (${fmtInt(cov.nSamples)})`;
+    document.getElementById("coverage-fill").style.width = `${Math.min(100, cov.pctSamples)}%`;
+
+    const ms = (PAYLOAD.coverage_curve || []).map(c =>
+      `<span>Top <strong>${fmtInt(c.top_k)}</strong> : ${fmtPct(c.cum_pct_samples)} éch. (${fmtPct(c.cum_pct_isolates)} isolats)</span>`
+    );
+    document.getElementById("milestones").innerHTML = ms.join("");
+  }
+
+  function renderWalkthroughs() {
+    const scen = Logic.SCENARIOS[state.scenario] || Logic.SCENARIOS[0];
+    document.getElementById("scenario-buttons").innerHTML = Logic.SCENARIOS.map((s, idx) =>
+      `<button type="button" data-scen="${idx}" aria-pressed="${state.scenario === idx}">${esc(s.name)}</button>`
+    ).join("");
+    document.getElementById("story-container").innerHTML = `<p style="margin:0;">${esc(scen.text)}</p>`;
+    document.getElementById("step-buttons").innerHTML = scen.steps.map((st, idx) =>
+      `<button type="button" data-step="${idx}" aria-pressed="${state.step === idx}">${idx + 1}. ${esc(st.label)}</button>`
+    ).join("");
+  }
+
+  function sortHeading(key, label) {
+    const arrow = state.sortBy === key ? (state.sortDir === "asc" ? " ▲" : " ▼") : "";
+    return `<button type="button" class="sort-btn" data-sort="${esc(key)}">${esc(label)}${arrow}</button>`;
+  }
+
+  function renderTable() {
+    const tc = document.getElementById("table-container");
+    const pagBar = document.getElementById("pagination-bar");
+    const filterBox = document.getElementById("filter-controls");
+    filterBox.hidden = (state.view === "matrix" || state.view === "non_ab");
+
+    if (state.view === "families" || state.view === "queue") {
+      const rawRows = state.view === "queue" ? Logic.filterQueue(state, PAYLOAD) : Logic.filterFamilies(state, PAYLOAD);
+      const rows = Logic.sortRows(rawRows, state.sortBy, state.sortDir, true);
+      const cov = Logic.computeCoverage(rows, meta, true);
+      renderKPIs(cov, `${fmtInt(rows.length)} familles affichées`);
+      document.getElementById("selection-summary").textContent =
+        `${fmtInt(rows.length)} familles correspondantes (${fmtInt(cov.nLabels)} libellés bruts, ${fmtInt(cov.nSamples)} échantillons). Cliquez sur une famille pour inspecter ses libellés membres.`;
+
+      pagBar.hidden = true;
+      tc.innerHTML = `<div class="scroll"><table>
+        <thead><tr>
+          <th>${sortHeading("name", "Famille / Motif GLIMS")}</th>
+          <th>${sortHeading("cat", "naturepvt_norm")}</th>
+          <th>${sortHeading("role", "Rôle")}</th>
+          <th>${sortHeading("conf", "Confiance")}</th>
+          <th class="num">${sortHeading("n_labels", "Libellés")}</th>
+          <th class="num">${sortHeading("n_samples", "Échantillons")}</th>
+          <th class="num">${sortHeading("n_isolates", "Isolats")}</th>
+          <th class="num">${sortHeading("pct_scr", "% Dép.")}</th>
+          <th>Principaux libellés bruts</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(f => {
+            const sel = f.family_id === state.selectedFamilyId ? "selected-row" : "";
+            const tgtBadge = f.is_current_spares_target ? `<span class="badge b-target">SPARES</span> ` : "";
+            const ovBadge = f.n_label_overrides_inside > 0 ? ` <span class="badge b-ov">${f.n_label_overrides_inside} surcharge(s)</span>` : "";
+            return `<tr class="${sel}">
+              <td><button type="button" class="pick-btn" data-fam="${esc(f.family_id)}"><strong>${esc(f.family_id)}</strong></button><div class="small">${esc(f.specimen_prefix)}<br>${esc(f.anatomical_site)}</div></td>
+              <td>${tgtBadge}<code>${esc(f.naturepvt_norm)}</code>${ovBadge}</td>
+              <td>${roleBadge(f.diagnostic_vs_screening_role)}</td>
+              <td>${confBadge(f.confidence)}</td>
+              <td class="num">${fmtInt(f.n_labels)}</td>
+              <td class="num">${fmtInt(f.n_samples)}</td>
+              <td class="num">${fmtInt(f.n_isolates)}</td>
+              <td class="num">${f.pct_any_screening_order.toFixed(1)}%</td>
+              <td class="small">${esc(f.rep_labels)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table></div>`;
+
+      renderInspector(rows, true);
+      return;
+    }
+
+    if (state.view === "labels") {
+      const rawRows = Logic.filterLabels(state, PAYLOAD);
+      const rows = Logic.sortRows(rawRows, state.sortBy, state.sortDir, false);
+      const cov = Logic.computeCoverage(rows, meta, false);
+      renderKPIs(cov, `sur ${fmtInt(meta.ab_distinct_labels)} libellés bruts`);
+
+      const totalPages = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      const curPage = Math.min(state.page, totalPages - 1);
+      const slice = rows.slice(curPage * state.pageSize, (curPage + 1) * state.pageSize);
+
+      document.getElementById("selection-summary").textContent =
+        `${fmtInt(rows.length)} libellés NATUREPVT filtrés (${fmtInt(cov.nSamples)} échantillons, ${fmtPct(cov.pctSamples)}). Affichage ${curPage * state.pageSize + 1}–${curPage * state.pageSize + slice.length}.`;
+
+      pagBar.hidden = rows.length <= state.pageSize;
+      pagBar.innerHTML = `
+        <span class="small">Page ${curPage + 1} / ${totalPages} (${fmtInt(rows.length)} libellés)</span>
+        <div class="row">
+          <button type="button" data-page="${curPage - 1}" ${curPage <= 0 ? "disabled" : ""}>Page précédente</button>
+          <button type="button" data-page="${curPage + 1}" ${curPage >= totalPages - 1 ? "disabled" : ""}>Page suivante</button>
+        </div>`;
+
+      tc.innerHTML = `<div class="scroll"><table>
+        <thead><tr>
+          <th class="num">#</th>
+          <th>${sortHeading("name", "Libellé NATUREPVT brut")}</th>
+          <th>Famille</th>
+          <th>${sortHeading("cat", "naturepvt_norm")}</th>
+          <th>${sortHeading("role", "Rôle")}</th>
+          <th>${sortHeading("conf", "Confiance")}</th>
+          <th class="num">${sortHeading("n_samples", "Échantillons")}</th>
+          <th class="num">${sortHeading("n_isolates", "Isolats")}</th>
+          <th class="num">${sortHeading("pct_scr", "% Dép.")}</th>
+          <th>Top espèces / analyses</th>
+        </tr></thead>
+        <tbody>
+          ${slice.map(l => {
+            const sel = l.lbl === state.selectedLabel ? "selected-row" : "";
+            const ov = l.src === "crosscheck_label_override" ? ` <span class="badge b-ov">override</span>` : "";
+            return `<tr class="${sel}">
+              <td class="num">${l.r}</td>
+              <td><button type="button" class="pick-btn" data-lbl="${esc(l.lbl)}">${esc(l.lbl)}</button>${ov}</td>
+              <td><button type="button" class="pick-btn" data-jump-fam="${esc(l.fid)}">${esc(l.fid)}</button></td>
+              <td><code>${esc(l.cat)}</code></td>
+              <td>${roleBadge(l.role)}</td>
+              <td>${confBadge(l.conf)}</td>
+              <td class="num">${fmtInt(l.ns)}</td>
+              <td class="num">${fmtInt(l.ni)}</td>
+              <td class="num">${Number(l.pscr || 0).toFixed(1)}%</td>
+              <td class="small">${esc(l.sp || "")}${l.ta ? `<br><span style="color:#6c7d74">${esc(l.ta)}</span>` : ""}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table></div>`;
+
+      renderInspector(rows, false);
+      return;
+    }
+
+    if (state.view === "matrix") {
+      pagBar.hidden = true;
+      renderKPIs({ nSamples: meta.total_nv_samples, pctSamples: 100, nIsolates: meta.total_nv_isolates, pctIsolates: 100, nLabels: meta.ab_distinct_labels }, "17 catégories ONERBA/SPARES");
+      document.getElementById("selection-summary").textContent = "Répartition complète des 8 462 libellés (post-surcharges cross-check) par catégorie cible ONERBA / SPARES. Cliquez sur une catégorie pour filtrer ses familles.";
+      tc.innerHTML = `<div class="scroll"><table>
+        <thead><tr>
+          <th>Catégorie (<code>naturepvt_norm</code>)</th>
+          <th>Libellé ONERBA / SPARES</th>
+          <th>Source méthodologique</th>
+          <th class="num">Familles</th>
+          <th class="num">Libellés</th>
+          <th class="num">Échantillons</th>
+          <th class="num">% Éch.</th>
+          <th class="num">Isolats</th>
+          <th class="num">Éch. Ambigus</th>
+        </tr></thead>
+        <tbody>
+          ${PAYLOAD.onerba_summary.map(o => `<tr>
+            <td><button type="button" class="pick-btn" data-cat-jump="${esc(o.naturepvt_norm)}"><code>${esc(o.naturepvt_norm)}</code></button>${o.is_current_spares_target ? ` <span class="badge b-target">SPARES</span>` : ""}</td>
+            <td>${esc(o.onerba_label_fr)}</td>
+            <td class="small">${esc(o.spares_reference)}</td>
+            <td class="num">${fmtInt(o.n_families)}</td>
+            <td class="num">${fmtInt(o.n_labels)}</td>
+            <td class="num">${fmtInt(o.n_samples)}</td>
+            <td class="num">${fmtPct(o.pct_samples)}</td>
+            <td class="num">${fmtInt(o.n_isolates)}</td>
+            <td class="num">${fmtInt(o.n_samp_ambig)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>`;
+      document.getElementById("inspector-section").hidden = false;
+      document.getElementById("inspector-title").textContent = "Thèmes de révision issus du cross-check (Phase 2)";
+      document.getElementById("inspector-body").innerHTML = renderThemesHtml();
+      return;
+    }
+
+    if (state.view === "non_ab") {
+      pagBar.hidden = true;
+      renderKPIs({ nSamples: meta.total_nv_samples, pctSamples: 100, nIsolates: meta.total_nv_isolates, pctIsolates: 100, nLabels: meta.ab_distinct_labels }, "Audit des codes _R & libellés sans antibiogramme");
+      const nab = meta.non_ab_stats || {};
+      document.getElementById("selection-summary").textContent =
+        `${fmtInt(nab.total_non_ab_samples)} échantillons sans antibiogramme (${fmtInt(nab.non_ab_only_distinct_labels)} libellés exclusifs), et ${fmtInt(meta.n_ab_missing_nv)} ELTIDs avec antibiogramme mais NATUREPVT vide (liés notamment aux bilans _R).`;
+      tc.innerHTML = `
+        <h3>1. Diagnostics des codes d'analyse dépistage / culture sur échantillons AVEC antibiogramme (${fmtInt(meta.total_ab_samples)} ELTIDs)</h3>
+        <div class="scroll" style="max-height:260px; margin-bottom:14px;"><table>
+          <thead><tr><th>Préfixe TYPEANA</th><th>Libellé GLIMS (LBLANA)</th><th class="num">ELTIDs</th><th class="num">Lignes totales</th><th class="num">Lignes SIR</th></tr></thead>
+          <tbody>
+            ${(PAYLOAD.screening_diagnostics || []).map(d => `<tr>
+              <td><code>${esc(d.typeana_prefix)}</code></td>
+              <td>${esc(d.sample_lblana)}</td>
+              <td class="num">${fmtInt(d.n_samples)}</td>
+              <td class="num">${fmtInt(d.n_rows)}</td>
+              <td class="num">${fmtInt(d.n_sir_rows)}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table></div>
+        <h3>2. Top libellés NATUREPVT exclusifs aux échantillons SANS antibiogramme (extrait top 200 sur ${fmtInt(nab.non_ab_only_distinct_labels)})</h3>
+        <div class="scroll" style="max-height:280px;"><table>
+          <thead><tr><th>NATUREPVT brut</th><th class="num">ELTIDs</th><th class="num">Lignes</th><th>Top TYPEANA</th><th>LBLANA exemple</th></tr></thead>
+          <tbody>
+            ${(PAYLOAD.non_ab_labels || []).map(r => `<tr>
+              <td>${esc(r.NATUREPVT)}</td>
+              <td class="num">${fmtInt(r.n_samples)}</td>
+              <td class="num">${fmtInt(r.n_rows)}</td>
+              <td class="small">${esc(r.top_typeana)}</td>
+              <td class="small">${esc(r.top_lblana)}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table></div>`;
+      document.getElementById("inspector-section").hidden = false;
+      document.getElementById("inspector-title").textContent = "Top 60 TYPEANA sur échantillons SANS antibiogramme";
+      document.getElementById("inspector-body").innerHTML = `<div class="scroll" style="max-height:320px;"><table>
+        <thead><tr><th>Préfixe TYPEANA</th><th class="num">ELTIDs</th><th class="num">% NATUREPVT manquant</th><th>LBLANA</th></tr></thead>
+        <tbody>
+          ${(PAYLOAD.non_ab_typeana || []).map(t => `<tr>
+            <td><code>${esc(t.typeana_prefix)}</code></td>
+            <td class="num">${fmtInt(t.n_samples)}</td>
+            <td class="num">${Number(t.pct_missing_naturepvt || 0).toFixed(1)}%</td>
+            <td class="small">${esc(t.sample_lblana)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>`;
+    }
+  }
+
+  function renderThemesHtml() {
+    return (PAYLOAD.review_themes || []).map(th => `
+      <div class="theme-card">
+        <h3>${esc(th.theme_id)} — ${esc(th.title)}</h3>
+        <p class="small"><strong>Impact volume :</strong> ${esc(th.impact_summary)}</p>
+        <p><strong>Question clinique :</strong> ${esc(th.clinical_question)}</p>
+        <p><strong>Règle site adapter recommandée :</strong> ${esc(th.recommended_site_adapter_rule)}</p>
+        <p class="small"><strong>Exemples :</strong> ${(th.example_labels || []).map(x => `<code>${esc(x)}</code>`).join(" ")}</p>
+      </div>`).join("");
+  }
+
+  function renderInspector(rows, isFamily) {
+    const sec = document.getElementById("inspector-section");
+    const prevBtn = document.getElementById("prev-item");
+    const nextBtn = document.getElementById("next-item");
+    if (!rows.length) {
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+
+    if (isFamily) {
+      const idx = rows.findIndex(r => r.family_id === state.selectedFamilyId);
+      const cur = idx >= 0 ? rows[idx] : rows[0];
+      prevBtn.disabled = idx <= 0;
+      nextBtn.disabled = idx < 0 || idx >= rows.length - 1;
+      prevBtn.onclick = () => idx > 0 && update({ selectedFamilyId: rows[idx - 1].family_id });
+      nextBtn.onclick = () => idx < rows.length - 1 && update({ selectedFamilyId: rows[idx + 1].family_id });
+
+      const members = labelsByFamily.get(cur.family_id) || [];
+      document.getElementById("inspector-title").textContent = `${cur.family_id} — ${cur.specimen_prefix} · ${cur.anatomical_site}`;
+      document.getElementById("inspector-body").innerHTML = `
+        <div class="inspector-grid">
+          <div class="inspector-box"><strong>Catégorie cible ONERBA/SPARES</strong><code>${esc(cur.naturepvt_norm)}</code><div class="small">${esc(cur.onerba_label_fr)}</div></div>
+          <div class="inspector-box"><strong>Rôle &amp; Confiance</strong>${roleBadge(cur.diagnostic_vs_screening_role)} ${confBadge(cur.confidence)}${cur.n_label_overrides_inside ? ` <span class="badge b-ov">${cur.n_label_overrides_inside} surcharge(s)</span>` : ""}</div>
+          <div class="inspector-box"><strong>Volumes (2022–2024)</strong>${fmtInt(cur.n_labels)} libellés · ${fmtInt(cur.n_samples)} éch. (${fmtPct(cur.pct_samples)}) · ${fmtInt(cur.n_isolates)} isolats</div>
+          <div class="inspector-box"><strong>Contexte d'analyses (ELTID)</strong>Standard diag: ${fmtInt(cur.n_samp_standard_diag)} · _R sys: ${fmtInt(cur.n_samp_sys_R)} · BGSTA_R+BGCULTAE: ${fmtInt(cur.n_samp_bgsta_cultae)} · BGSTRB: ${fmtInt(cur.n_samp_bgstrb)}</div>
+        </div>
+        <p><strong>Justification clinique / lexicale :</strong> ${esc(cur.rationale)}</p>
+        ${state.view === "queue" ? `<details style="margin:10px 0;"><summary><strong>Thèmes transversaux du cross-check (${(PAYLOAD.review_themes || []).length})</strong></summary><div style="margin-top:10px;">${renderThemesHtml()}</div></details>` : ""}
+        <h3 style="margin-top:14px;">Libellés bruts <code>NATUREPVT</code> membres (${fmtInt(members.length)})</h3>
+        <div class="scroll" style="max-height:360px;"><table>
+          <thead><tr><th class="num">Rang</th><th>Libellé brut NATUREPVT</th><th>Catégorie finale</th><th>Rôle</th><th class="num">Échantillons</th><th class="num">Isolats</th><th class="num">% Dép.</th><th>Top espèces / analyses</th></tr></thead>
+          <tbody>
+            ${members.slice(0, 250).map(m => `<tr>
+              <td class="num">${m.r}</td>
+              <td>${esc(m.lbl)}${m.src === "crosscheck_label_override" ? ` <span class="badge b-ov">override</span>` : ""}</td>
+              <td><code>${esc(m.cat)}</code></td>
+              <td>${roleBadge(m.role)}</td>
+              <td class="num">${fmtInt(m.ns)}</td>
+              <td class="num">${fmtInt(m.ni)}</td>
+              <td class="num">${Number(m.pscr || 0).toFixed(1)}%</td>
+              <td class="small">${esc(m.sp || "")}</td>
+            </tr>`).join("")}
+            ${members.length > 250 ? `<tr><td colspan="8" class="small">Affichage limité aux 250 premiers libellés sur ${fmtInt(members.length)} (utilisez l'onglet 2 ou les CSV pour tout inspecter).</td></tr>` : ""}
+          </tbody>
+        </table></div>`;
+    } else {
+      const idx = rows.findIndex(r => r.lbl === state.selectedLabel);
+      const cur = idx >= 0 ? rows[idx] : rows[0];
+      const fam = famById.get(cur.fid);
+      prevBtn.disabled = idx <= 0;
+      nextBtn.disabled = idx < 0 || idx >= rows.length - 1;
+      prevBtn.onclick = () => idx > 0 && update({ selectedLabel: rows[idx - 1].lbl });
+      nextBtn.onclick = () => idx < rows.length - 1 && update({ selectedLabel: rows[idx + 1].lbl });
+
+      document.getElementById("inspector-title").textContent = `Libellé #${cur.r} : ${cur.lbl}`;
+      document.getElementById("inspector-body").innerHTML = `
+        <div class="inspector-grid">
+          <div class="inspector-box"><strong>Famille parente</strong><button type="button" class="pick-btn" data-jump-fam="${esc(cur.fid)}">${esc(cur.fid)}</button><div class="small">${fam ? esc(fam.family_key) : ""}</div></div>
+          <div class="inspector-box"><strong>Catégorie cible ONERBA</strong><code>${esc(cur.cat)}</code>${cur.src === "crosscheck_label_override" ? ` <span class="badge b-ov">override unitaire</span>` : ""}</div>
+          <div class="inspector-box"><strong>Rôle &amp; Confiance</strong>${roleBadge(cur.role)} ${confBadge(cur.conf)}</div>
+          <div class="inspector-box"><strong>Volume &amp; Couverture</strong>${fmtInt(cur.ns)} éch. · ${fmtInt(cur.ni)} isolats · Cumul ${fmtPct(cur.cum)}</div>
+        </div>
+        <p><strong>Justification :</strong> ${esc(cur.rat)}</p>
+        <p class="small"><strong>Top espèces :</strong> ${esc(cur.sp || "—")} &nbsp;|&nbsp; <strong>Top TYPEANA :</strong> ${esc(cur.ta || "—")} &nbsp;|&nbsp; <strong>Codes GLIMS :</strong> ${esc(cur.gc || "—")}</p>`;
+    }
+  }
+
+  function renderViews() {
+    document.getElementById("view-buttons").innerHTML = Logic.VIEWS.map(v =>
+      `<button type="button" data-view="${esc(v.id)}" aria-pressed="${state.view === v.id}">${esc(v.label)}</button>`
+    ).join("");
+  }
+
+  function syncControls() {
+    document.getElementById("f-cat").value = state.cat;
+    document.getElementById("f-role").value = state.role;
+    document.getElementById("f-conf").value = state.conf;
+    document.getElementById("f-scr").value = state.scr;
+    document.getElementById("f-query").value = state.query;
+  }
+
+  function update(action) {
+    state = Logic.transition(state, action, PAYLOAD);
+    renderViews();
+    renderWalkthroughs();
+    syncControls();
+    renderTable();
+  }
+
+  populateSelects();
+  renderRunMeta();
+  update({});
+
+  document.getElementById("view-buttons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-view]");
+    if (btn) update({ view: btn.dataset.view, step: -1 });
+  });
+  document.getElementById("scenario-buttons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-scen]");
+    if (btn) {
+      const idx = Number(btn.dataset.scen);
+      const firstAction = Logic.SCENARIOS[idx].steps[0]?.action || {};
+      update({ ...firstAction, scenario: idx, step: 0 });
+    }
+  });
+  document.getElementById("step-buttons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-step]");
+    if (btn) {
+      const sidx = Number(btn.dataset.step);
+      const act = Logic.SCENARIOS[state.scenario]?.steps[sidx]?.action || {};
+      update({ ...act, step: sidx });
+    }
+  });
+  document.getElementById("f-cat").addEventListener("change", e => update({ cat: e.target.value, step: -1 }));
+  document.getElementById("f-role").addEventListener("change", e => update({ role: e.target.value, step: -1 }));
+  document.getElementById("f-conf").addEventListener("change", e => update({ conf: e.target.value, step: -1 }));
+  document.getElementById("f-scr").addEventListener("change", e => update({ scr: e.target.value, step: -1 }));
+  document.getElementById("f-query").addEventListener("input", e => update({ query: e.target.value, step: -1 }));
+  document.getElementById("clear-filters").addEventListener("click", () => update({ clearFilters: true }));
+  document.getElementById("reset-demo").addEventListener("click", () => update({ reset: true }));
+
+  document.addEventListener("click", e => {
+    const famBtn = e.target.closest("button[data-fam]");
+    if (famBtn) { update({ selectedFamilyId: famBtn.dataset.fam }); return; }
+    const jumpFamBtn = e.target.closest("button[data-jump-fam]");
+    if (jumpFamBtn) { update({ view: "families", cat: "all", role: "all", conf: "all", scr: "all", query: "", selectedFamilyId: jumpFamBtn.dataset.jumpFam, step: -1 }); return; }
+    const lblBtn = e.target.closest("button[data-lbl]");
+    if (lblBtn) { update({ selectedLabel: lblBtn.dataset.lbl }); return; }
+    const catJumpBtn = e.target.closest("button[data-cat-jump]");
+    if (catJumpBtn) { update({ view: "families", cat: catJumpBtn.dataset.catJump, role: "all", conf: "all", scr: "all", query: "", step: -1 }); return; }
+    const pageBtn = e.target.closest("button[data-page]");
+    if (pageBtn && !pageBtn.disabled) { update({ page: Number(pageBtn.dataset.page) }); return; }
+    const sortBtn = e.target.closest("button[data-sort]");
+    if (sortBtn) {
+      const k = sortBtn.dataset.sort;
+      const dir = state.sortBy === k && state.sortDir === "desc" ? "asc" : "desc";
+      update({ sortBy: k, sortDir: dir });
+    }
+  });
+})();
+</script>
+</html>
