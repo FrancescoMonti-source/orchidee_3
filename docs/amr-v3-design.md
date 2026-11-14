@@ -314,17 +314,18 @@ apart, with a small table that links them to AMR's codes. So the contract does
 not depend on AMR having a code for every test.
 
 Examples, with labels from `3e48bdf:prepare:17-56`. Every proposed identity is a
-draft; none is approved.
+draft; none is approved. The second column shows what AMR returns, errors
+included. The third column is the identity this file proposes instead.
 
-| Labels | AMR suggestion [D] (A1) | Proposed identity | What a merge would break |
+| Labels | What AMR returns [D] (A1) | Proposed identity | What a merge would break |
 |---|---|---|---|
 | `PENI G MENINGITE`, `PENI G AUTRES CONTEXTES` | Penimepicycline; nothing | `PEN` with context `meningitis`; `PEN` with context `other_contexts` | One isolate can hold two different results for one molecule. |
 | `AUGMENTIN CYSTITE`, `AUGMENTIN AUTRES CONTEXTES` | Calcium aminosalicylate; nothing | `AMC` with context `cystitis`; `AMC` with context `other_contexts` | The same. The legacy map kept the cystitis reading apart (`ref/rouen/atb_regex_map.csv:5`). |
 | `FOSFOMYCINE IV`, `FOSFOMYCINE TROMETAMOL` | Fosfomycin; vancomycin-macromethod | `FOS` with formulation `iv`; `FOS` with formulation `trometamol` | Two different tests of one molecule (`ref/rouen/atb_regex_map.csv:59-60`). |
 | `GENTAMICINE`, `GENTAMICINE FORTE` | Gentamicin for both | `GEN`; `GEN` with test `high_level` [V:bio] | High-level results would enter the gentamicin %R (K5). |
 | `CLOXA 250`, `CLOXA 500` | Cloxacillin | `CLO`, test `inhibition` [V:bio], qualifier `250` or `500` | It is likely not a treatment result. It is not a SARM marker (fixed input 3). |
-| `CLAVENTIN` | Amoxicillin/clavulanic acid | `TCC` | The measured error of `docs/findings.md:45-52`. |
-| `TEICOPLANINE` | Avoparcin | `TEC` | Teicoplanin is one of the two glycopeptides of the group (SPF p. 3). |
+| `CLAVENTIN` | Amoxicillin/clavulanic acid (wrong) | `TCC`, ticarcillin/clavulanic acid | AMR repeats the measured error of `docs/findings.md:45-52`. |
+| `TEICOPLANINE` | Avoparcin (wrong) | `TEC`, teicoplanin | Teicoplanin is one of the two glycopeptides of the group (SPF p. 3). |
 | `AMOXICILLINE / AMPICILLINE` | Amoxicillin/sulbactam | A joint identity "amoxicillin or ampicillin" (decision 6) | The enterococci group lists both molecules (SPF p. 3). |
 | `COMMENTAIRE BLSE` | Cefuroxime/metronidazole | Not a result: `phenotype_signal` or `comment` [V:bio] | A comment would become an antibiotic result. |
 
