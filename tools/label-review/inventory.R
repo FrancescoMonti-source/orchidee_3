@@ -63,6 +63,13 @@ mask_split <- function(n) {
   }
   out
 }
+# One part of a total that is shown: rounded when the rest, which is not
+# written, is small enough to be masked and would be given back by subtraction.
+mask_part <- function(inside, total) {
+  outside <- total - inside
+  fifelse(outside > 0L & outside < SMALL & inside >= SMALL,
+          paste0("~", as.integer(round(inside, -1L))), mask(inside))
+}
 # Masks the columns `cols` of `x` as one split per line; "masked" where `hide`.
 mask_columns <- function(x, cols, hide) {
   values <- t(apply(as.matrix(x[, ..cols]), 1L, mask_split))
@@ -125,10 +132,7 @@ count_table <- function(x, by) {
 mask_table <- function(x, splits) {
   rare <- !is.na(x$patients) & x$patients < SMALL
   if (has_diag) {
-    outside <- x$n_results - x$n_diag   # not written, but total minus diagnostic gives it
-    diag <- fifelse(outside > 0L & outside < SMALL & x$n_diag >= SMALL,
-                    paste0("~", as.integer(round(x$n_diag, -1L))), mask(x$n_diag))
-    set(x, j = "n_diag", value = fifelse(rare, "masked", diag))
+    set(x, j = "n_diag", value = fifelse(rare, "masked", mask_part(x$n_diag, x$n_results)))
   } else set(x, j = "n_diag", value = NA_character_)
   for (cols in splits) mask_columns(x, cols, rare)
   for (col in c("n_results", "n_isolates")) set(x, j = col, value = mask(x[[col]]))
@@ -211,9 +215,9 @@ meta <- c(
   paste0("run_utc: ", format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")),
   paste0("input: ", basename(input), "; rows: ", rows_raw),
   paste0("raw columns: ", paste(raw_columns, collapse = ", ")),
-  paste0("rows by sampling year: ", paste0(rows_by_year$year, "=", mask(rows_by_year$N), collapse = ", ")),
+  paste0("rows by sampling year: ", paste0(rows_by_year$year, "=", mask_split(rows_by_year$N), collapse = ", ")),
   paste0("years kept: ", paste(range(YEARS), collapse = "-"), "; rows kept: ", nrow(d)),
-  paste0("result alphabet: ", paste0(alphabet$result, "=", mask(alphabet$N), collapse = ", ")),
+  paste0("result alphabet: ", paste0(alphabet$result, "=", mask_split(alphabet$N), collapse = ", ")),
   paste0("rows with S/SFP/I/R/ZIT: ", nrow(res), "; missing organism label among them: ",
          mask(sum(is.na(res$IDENTIFICATION))), "; incomplete isolate key: ", mask(sum(is.na(res$isolate)))),
   paste0("distinct antibiotic/test labels with a result: ", labels_with_result),
@@ -222,7 +226,8 @@ meta <- c(
   paste0("distinct organism labels without any result: ", nrow(no_ast)),
   diag_note,
   if (!is.null(matched)) paste0("diagnostic join, year ", matched$year, ": result rows ", mask(matched$result_rows),
-                                ", with a flag ", mask(matched$with_flag), ", diagnostic ", mask(matched$diagnostic)),
+                                ", with a flag ", mask_part(matched$with_flag, matched$result_rows),
+                                ", diagnostic ", mask_part(matched$diagnostic, matched$with_flag)),
   if (!is.null(matched)) paste0("labels with a diagnostic result: antibiotic ", antibiotics_diag,
                                 ", organism ", organisms_diag),
   paste0("masking: counts of 1 to ", SMALL - 1L, " are written \"", below, "\"; a label carried by fewer than ", SMALL,

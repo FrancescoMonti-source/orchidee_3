@@ -383,6 +383,9 @@ def write_readme(ws, antibiotics, organisms, others):
 
 
 def write_register(path, rows):
+    if not rows:   # nothing to review in this group: leave no register, and no stale one
+        path.unlink(missing_ok=True)
+        return
     counts = [k for k in ("n_results", "n_isolates", "n_diag") if k in rows[0]]
     fields = list(rows[0]["csv"]) + counts + ["agreement", "approved_identity", "approved_by", "approved_on", "basis"]
     with open(path, "w", encoding="utf-8-sig", newline="") as handle:
