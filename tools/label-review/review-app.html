@@ -108,8 +108,9 @@ function keepCurrent(decisions) {
   }
   return dropped;
 }
-// Decisions saved in this browser come first; decisions written in the
-// workbook fill the lines the browser has no decision for.
+// Decisions saved in this browser come first, including a decision the
+// reader cleared (kept with an empty d); decisions written in the workbook
+// fill only the lines the browser has never touched.
 function load() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
@@ -152,7 +153,7 @@ function visible() {
 function renderBars() {
   const tabItems = ITEMS.filter(it => it.t === view.tab);
   $("#tabs").innerHTML = Object.entries(TABS).map(([k, name]) => {
-    const all = ITEMS.filter(it => it.t === k), done = all.filter(it => state.decisions[id(it)]).length;
+    const all = ITEMS.filter(it => it.t === k), done = all.filter(it => (state.decisions[id(it)] || {}).d).length;
     return `<button data-tab="${k}" aria-pressed="${k === view.tab}">${name} <span class="count">${done}/${all.length}</span></button>`;
   }).join("");
   $("#filters").innerHTML = FILTERS.map(([k, name]) =>
@@ -199,7 +200,7 @@ function render(focusIndex) {
 function decide(i, d, keepPlace) {
   const it = shown[i]; if (!it) return;
   const k = id(it), cur = state.decisions[k];
-  if (!d || (cur && cur.d === d && !keepPlace)) delete state.decisions[k];
+  if (!d || (cur && cur.d === d && !keepPlace)) state.decisions[k] = { d: "", c: "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
   else state.decisions[k] = { d, c: cur ? cur.c : "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
   save();
   if (d === "fix" || d === "unsure") sticky.add(k); else sticky.delete(k);
@@ -225,13 +226,14 @@ document.addEventListener("click", e => {
 document.addEventListener("input", e => {
   if (e.target.matches(".comment textarea")) {
     const it = shown[+e.target.closest(".item").dataset.i], k = id(it);
-    if (!state.decisions[k]) state.decisions[k] = { d: "unsure", c: "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
+    if (!(state.decisions[k] || {}).d) state.decisions[k] = { d: "unsure", c: "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
     state.decisions[k].c = e.target.value; save();
   } else if (e.target.id === "reviewer") { state.reviewer = e.target.value.trim(); save(); }
   else if (e.target.id === "search") { view.q = e.target.value; render(); }
 });
 document.addEventListener("keydown", e => {
   if (e.target.matches("button")) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;   // leave browser shortcuts (Ctrl+C, Cmd+A...) alone
   if (e.target.matches("textarea, input")) {
     if (e.key === "Escape") { const it = e.target.closest(".item"); (it || document.body).focus(); }
     return;
@@ -252,7 +254,7 @@ document.addEventListener("keydown", e => {
 const csvCell = v => /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 function exportCsv() {
   const head = ["onglet", "libelle", "proposition", "decision", "correction_commentaire", "relecteur", "date"];
-  const rows = ITEMS.filter(it => state.decisions[id(it)]).map(it => {
+  const rows = ITEMS.filter(it => (state.decisions[id(it)] || {}).d).map(it => {
     const d = state.decisions[id(it)];
     return [TABS[it.t], it.l, it.p, DECISION_FR[d.d], d.c || "", d.by || "", d.at || ""];
   });
