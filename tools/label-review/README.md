@@ -21,11 +21,13 @@ The procedure has three passes, and their answers never share a column:
 | 1 | `pass1-amr.R` | Anywhere with AMR 3.1.0 | The label lists, `ref/rouen/atb_regex_map.csv` | `organism-pass1.csv`, `antibiotic-pass1.csv` |
 | 2 | (hand-written) | Anywhere | The pass-1 tables | `claude-pass-organisms.csv`, `claude-pass-antibiotics.csv` |
 | 3 | `build-sheet.py` | Anywhere with Python and `openpyxl` | Pass 1 and pass 2 | `revue-libelles.xlsx` |
+| 4 | `build-app.py` | Anywhere with Python and `openpyxl` | The workbook | `revue-libelles.html` |
 
 ```sh
 Rscript --vanilla tools/label-review/list-labels.R [raw_RDS [output_dir]]
 Rscript --vanilla tools/label-review/pass1-amr.R [output_dir]
 python3 tools/label-review/build-sheet.py [output_dir]
+python3 tools/label-review/build-app.py [workbook.xlsx [app.html]]
 ```
 
 ## Nothing is counted
@@ -79,3 +81,15 @@ columns: laboratory label, AMR 3.1.0, ORCHIDEE v2, proposed mapping, point to
 check, microbiologist decision (`Accepter`, `Corriger`, `Incertain`) and
 correction or comment. The last two are always written empty: only a person
 fills them.
+
+## The review app
+
+`build-app.py` turns the workbook into one HTML file (template
+`review-app.html`) that the microbiologist opens in any browser, with no
+installation and no network. Each line is accepted in one click or one key,
+or corrected, or marked uncertain with a comment. Lines without a point to
+check can be accepted together once read. Decisions are kept in the browser
+and exported as a CSV file (`onglet;libelle;proposition;decision;
+correction_commentaire;relecteur;date`), which can be imported again to resume
+on another computer. Decisions already filled in the workbook are loaded as a
+starting point.
