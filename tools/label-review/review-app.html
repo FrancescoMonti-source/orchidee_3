@@ -108,14 +108,17 @@ function keepCurrent(decisions) {
   }
   return dropped;
 }
+// Decisions saved in this browser come first; decisions written in the
+// workbook fill the lines the browser has no decision for.
 function load() {
-  try {
-    const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && s.decisions) { s.dropped = keepCurrent(s.decisions); return s; }
-  } catch (e) {}
-  const decisions = {};
-  for (const it of ITEMS) if (it.d) decisions[id(it)] = { d: it.d, c: it.c, p: it.p, by: "", at: "" };
-  return { reviewer: "", decisions };
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (!s || !s.decisions) s = { reviewer: "", decisions: {} };
+  s.dropped = keepCurrent(s.decisions);
+  for (const it of ITEMS) {
+    if (it.d && !s.decisions[id(it)]) s.decisions[id(it)] = { d: it.d, c: it.c, p: it.p, by: "", at: "" };
+  }
+  return s;
 }
 const state = load();
 let saveOk = true;
