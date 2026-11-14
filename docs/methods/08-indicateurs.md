@@ -73,7 +73,15 @@ Each row carries:
 - `sample_scope` (`all_diagnostic`, `hemoculture`)
 - `numerator`, `denominator`, `indicator_value`
 - `tested_isolates`, `total_isolates`, `coverage_pct`
-- Provenance metadata: `exposure_profile` (`midnight_presence`, `hours`), `perimeter_version`, `deduplication_hash`
+- Provenance metadata: `exposure_profile` (`midnight_presence`, `hours`), `perimeter_version` (identifying the named perimeter — `spares_strict`, `spares_ed24h`, or `emergency_ta10` — and structure snapshot), `deduplication_hash`
+
+For `spares_strict` and `spares_ed24h`, both resistance proportions (`%R`) and
+incidence densities (`DI` per 1 000 $JH$) are produced. For `emergency_ta10`,
+only resistance proportions (`%R`) and isolate counts are produced (`DI` is not
+applicable because `TA 10` consists of emergency passages rather than inpatient
+bed-days). Because `spares_ed24h` and `emergency_ta10` both include
+pre-admission `TA 10` isolates followed within 24 hours by inpatient admission,
+rows from those two perimeters must never be summed together.
 
 Reports and dashboards consume this table and contain no business calculations of their own.
 

@@ -41,12 +41,19 @@ distinct mechanisms:
    SPARES perimeter.
 
 2. **Extraction boundaries and timing offsets: 1 456 isolates (40 %)**
-   - **632 in USLD** (soins de longue durée; UFs 7163, 7183, 7180, etc.): long-term
-     care stays are not captured in the acute PMSI MCO movement extract.
-   - **824 in MCO** (Chirurgie 266, Médecine 206, Réanimation 124, SSR 115,
+   - **632 in USLD** (soins de longue durée, `CODE_DE = 176`; UFs 7163, 7183,
+     7180, etc.): `data/pmsi` (`SRC = "C"` from CORA and `SRC = "DW"`) does
+     contain USLD and SSR movements (12 689 USLD patient-days and 60 526 SSR
+     patient-days in 2024; see `denominator.md`), but across the 927 raw USLD
+     samples in `data/bact22_24` (from which these 632 diagnostic antibiogram
+     isolates derive), the historical extract filtered on entry date
+     `DATENT >= 2022-01-01` (omitting 624 of 927 raw USLD samples from
+     residents admitted before 2022) and left ongoing stays with `DATSORT = NA`
+     (118 of the remaining 303 matched raw USLD samples).
+   - **824 in MCO/SSR** (Chirurgie 266, Médecine 206, Réanimation 124, SSR 115,
      Pédiatrie 55, Gynécologie 51): predominantly pre-admission sampling (e.g.
      sample taken at 08:30 in the ED before movement registration opens at 15:10)
-     or stays omitted from the warehouse export.
+     or long-stay SSR admissions predating 2022 / still open (`DATSORT = NA`).
 
 ## The comparison on E. coli 2024
 
@@ -71,9 +78,11 @@ distinct mechanisms:
 
 ## The denominator hazard
 
-Option B adds 110 deduplicated isolates to the numerator, but the PMSI denominator
-holds **no corresponding hospital days** for them:
-- The 632 USLD isolates would divide by 17 patient-days in 2024.
+Option B adds 110 deduplicated isolates to the numerator, but the movement
+denominator holds **no corresponding hospital days** for those unlinked stays:
+- The 632 USLD isolates belong to stays omitted by the `DATENT >= 2022-01-01`
+  extraction filter or still open (`DATSORT = NA`), so their days are not in the
+  closed-interval denominator.
 - Pre-admission MCO isolates would divide by days that only start counting after
   the sample was taken.
 
@@ -81,9 +90,15 @@ Under decision 04.7, the perimeter is one object handed to both numerator and
 denominator. Admitting isolates into the numerator whose exposure is absent from
 the denominator produces an incidence density of nothing.
 
-Option A is chosen: an isolate without active hospitalisation exposure cannot enter
-the numerator. The 2 190 outpatient cases are legitimately excluded; the 1 456
-extraction-boundary cases must be resolved at the adapter level (by extracting
-USLD movements or aligning admission timestamps), not by patching the attribution
-rule with an assumption movement data contradicts.
+Option A is chosen for inpatient perimeters (`spares_strict` and `spares_ed24h`,
+with a dedicated `emergency_ta10` perimeter computing `%R` and isolate counts
+for Emergency Department surveillance; see `03-activites.md` and
+`05-structure.md`): an isolate without active hospitalisation exposure cannot
+enter the inpatient numerator. The 2 190 outpatient cases are legitimately
+excluded from inpatient perimeters; in the Rouen site adapter, the pre-2022
+USLD/SSR extraction truncation and ongoing inpatient stays are resolved by
+selecting CORA movements by interval intersection (`DATE_DEBUT_MVT <
+period_end` and `(DATE_FIN_MVT > period_start OR DATE_FIN_MVT IS NULL)`) and
+capping genuinely ongoing `CODE_TA ∈ {03, 20}` stays at
+$\min(T_{\text{end}}, T_{\text{extraction}})$.
 

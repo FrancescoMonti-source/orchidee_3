@@ -381,26 +381,40 @@ different operation wearing the same name.
 _Avoid_: filtering, subsetting, scoping
 
 **Perimeter**:
-The single resolved set of units whose activity enters the surveillance. One
-object, handed to both the numerator and the denominator. Two independent
-selections would each be defensible and their ratio would be a rate of nothing.
+The named, versioned definition of eligible hospital activity and sample
+attribution scope handed to an analysis (`spares_strict`, `spares_ed24h`,
+`emergency_ta10`). For inpatient perimeters (`spares_strict` and
+`spares_ed24h`), one resolved set of eligible units (`CODE_TA ∈ {03, 20}` and
+eligible `CODE_DE`) is handed to both the numerator and the exposure
+denominator; two independent unit selections would each be defensible and their
+ratio would be a rate of nothing. `emergency_ta10` evaluates resistance
+proportions (`%R`) and isolate counts across all Emergency (`TA 10`) diagnostic
+samples without an inpatient patient-day denominator.
 _Avoid_: scope, inclusion criteria, filter
 
 **Hospitalisation unit attribution**:
-Deciding which clinical unit an isolate belongs to: the unit whose stay interval
-contains the sample time. A sample outside every stay interval is not
-attributed to a ward; an emergency isolate is the case that matters. It is never
-attributed from the ordering laboratory's unit code when the intervals
-contradict it.
+Deciding which clinical unit an isolate belongs to from the patient's stay
+intervals at sampling time (`DATENT <= sample_datetime < DATSORT`). In
+`spares_strict`, a sample outside every active inpatient stay interval is not
+attributed to a ward (`SEJUF = NA`). In `spares_ed24h`, a diagnostic sample
+from the emergency department (`TA 10`) outside an active inpatient stay is
+linked to the earliest eligible inpatient stay starting within
+`(sample_datetime, sample_datetime + 24h]` (`ADR-0009`). An inpatient unit is
+never attributed from the ordering laboratory's unit code when the stay
+intervals contradict it.
 _Avoid_: unit mapping (when sample attribution is meant), sample location
 
 **Emergency isolate**:
-An isolate from a diagnostic sample drawn in the emergency department, usually
-before any admission, so it cannot have been acquired in a ward. SPARES
+An isolate from a diagnostic sample drawn in the emergency department (`TA 10`),
+usually before any admission, so it cannot have been acquired in a ward. SPARES
 attributes a sample to the unit at the time of sampling and excludes emergency
-activity (SPARES pp. 10, 15), so on a literal reading it drops these isolates; v3 keeps them. Whether they are linked to
-the stay that follows or kept as their own stratum is open (chapter 05).
-_Avoid_: pre-admission linkage (names one of the open options)
+activity (SPARES pp. 10, 15), so on a literal reading it drops these isolates;
+v3 retains them by exposing three named perimeters (`spares_strict`,
+`spares_ed24h` with 24-hour pre-admission linkage under `ADR-0009`, and a
+dedicated `emergency_ta10` perimeter computing `%R` and isolate counts; see
+chapters 03 and 05). Because admitted emergency isolates appear in both
+`spares_ed24h` and `emergency_ta10`, those two perimeters are never summed.
+_Avoid_: silently mixing unlinked emergency visits into inpatient numerators or denominators
 
 **Structure snapshot**:
 The annual version of the establishment's structural referential (UFs, TAs,
