@@ -1,0 +1,3 @@
+source_label,row_kind,proposed_code,proposed_name,proposed_rank,confidence,rationale
+Enterobacter complexe cloacae,organism,B_ENTRBC_CLOC-C,Enterobacter cloacae complex,species group,high,"Le laboratoire rend le complexe, pas une espèce. AMR le réduit à la sous-espèce E. cloacae subsp. cloacae : trop précis. Garder le rang rendu."
+Staphylococcus argenteus / schweitzeri (ex S. aureus),organism,,Staphylococcus argenteus / schweitzeri (taxon local),species group,medium,"Deux espèces proches de S. aureus (complexe S. aureus) rendues sous un seul libellé ; AMR ne le reconnaît pas. Proposition : un taxon local distinct de S. aureus. Question pour le SARM : ces isolats comptent-ils avec S. aureus ?"
