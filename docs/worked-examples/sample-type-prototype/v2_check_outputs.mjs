@@ -65,8 +65,15 @@ const wsState = Logic.transition(initState, { query: "__WS_NL__" }, PAYLOAD);
 const wsRows = Logic.filterLabels(wsState, PAYLOAD);
 assert.ok(wsRows.length >= 857, "Expected >=857 labels with double spaces or newlines");
 
+const wsCheckState = Logic.transition(initState, { wsOnly: true }, PAYLOAD);
+const wsCheckRows = Logic.filterLabels(wsCheckState, PAYLOAD);
+assert.equal(wsCheckRows.length, wsRows.length, "wsOnly flag must match __WS_NL__");
+
 const sortedAsc = Logic.sortRows(sparesRows.slice(0, 50), "n_samples", "asc");
 assert.ok(sortedAsc[0].ns <= sortedAsc[sortedAsc.length - 1].ns, "Ascending sort failed");
+
+const sortedCat = Logic.sortRows(sparesRows.slice(0, 50), "cat", "asc");
+assert.ok(sortedCat[0].cat <= sortedCat[sortedCat.length - 1].cat, "Category sort failed");
 
 console.log(
   `[node-check] ALL PASSED: labels=${fullSummary.nLabels}, samples=${fullSummary.nSamples}, ` +

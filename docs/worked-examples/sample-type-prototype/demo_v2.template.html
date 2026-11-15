@@ -2,149 +2,429 @@
 <html lang="fr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rouen NATUREPVT Mapping Explorer v2 — Audit 1-à-1 des 8 462 libellés (ADR-0003)</title>
+<title>Audit des prélèvements (NATUREPVT v2) — CHU de Rouen</title>
 <style>
   :root {
-    --bg: #f4f7f5;
+    --bg: #f3f6f4;
     --surface: #ffffff;
-    --ink: #17312c;
-    --muted: #53665c;
-    --accent: #1f6b53;
-    --accent-soft: #edf3ef;
-    --border: #d7e3dc;
-    --border-strong: #b5cbbf;
-    --warn-bg: #fff9ee;
-    --warn-border: #ad7621;
-    --warn-ink: #715014;
+    --surface-soft: #f7faf8;
+    --ink: #162e29;
+    --muted: #52655c;
+    --accent: #1b654e;
+    --accent-soft: #e8f2ed;
+    --border: #d5e1da;
+    --border-strong: #b0c7ba;
+    --warn-bg: #fff8eb;
+    --warn-border: #b87a1e;
+    --warn-ink: #6e4910;
+    --danger-bg: #fdeceb;
+    --danger-ink: #8f221b;
+    --info-bg: #eaf2fd;
+    --info-ink: #134a8e;
+    --purple-bg: #f3e8fa;
+    --purple-ink: #5d1b87;
   }
   * { box-sizing: border-box; }
   body {
-    font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 14.5px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--ink);
     background: var(--bg);
-    max-width: 1340px;
-    margin: 26px auto;
-    padding: 0 20px 48px;
+    max-width: 1480px;
+    margin: 18px auto;
+    padding: 0 18px 48px;
   }
-  h1 { font-size: 27px; line-height: 1.2; margin: 0 0 8px; }
-  h2 { font-size: 19px; margin: 0; }
-  h3 { font-size: 16px; margin: 0 0 8px; }
-  p { margin: 0 0 10px; max-width: 100ch; }
-  code { background: #edf3ef; padding: 1px 5px; border-radius: 4px; font-size: 13px; overflow-wrap: anywhere; }
-  .tag { color: var(--accent); font-size: 12px; letter-spacing: .07em; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-  section, .guide-panel, .run-panel {
+  h1 { font-size: 23px; line-height: 1.25; margin: 0 0 4px; }
+  h2 { font-size: 16.5px; margin: 0; }
+  h3 { font-size: 14.5px; margin: 0 0 6px; }
+  p { margin: 0 0 8px; }
+  code {
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    overflow-wrap: anywhere;
+  }
+  abbr[title], .help-tip[title] {
+    text-decoration: underline dotted var(--border-strong);
+    cursor: help;
+  }
+  .tag {
+    color: var(--accent);
+    font-size: 11.5px;
+    letter-spacing: .06em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 18px;
-    margin: 14px 0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 10px 0;
   }
-  .notice {
-    border-left: 4px solid var(--warn-border);
-    background: var(--warn-bg);
-    padding: 10px 14px;
-    border-radius: 5px;
-    font-size: 14px;
-    margin: 12px 0;
-  }
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
-    gap: 12px;
-    margin: 12px 0;
-  }
-  .kpi-card {
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 12px 14px;
-  }
-  .kpi-card strong { display: block; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .kpi-val { font-size: 21px; font-weight: 700; color: var(--ink); margin: 2px 0; }
-  .kpi-sub { font-size: 12.5px; color: var(--muted); }
-  .coverage-wrap { margin: 10px 0 4px; }
-  .coverage-track { position: relative; height: 14px; background: #e2ebe5; border-radius: 7px; overflow: hidden; }
-  .coverage-fill { height: 100%; background: var(--accent); transition: width .2s ease; }
-  button, select, input {
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .between { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+  .small { font-size: 12.5px; color: var(--muted); }
+  button, select, input[type="search"], textarea {
     font: inherit;
-    padding: 7px 11px;
+    padding: 6px 10px;
     border: 1px solid var(--border-strong);
-    border-radius: 5px;
-    background: white;
+    border-radius: 6px;
+    background: #ffffff;
     color: var(--ink);
   }
-  button { cursor: pointer; }
-  button[aria-pressed="true"] { background: var(--accent); color: white; border-color: var(--accent); }
-  button:disabled { opacity: .45; cursor: default; }
-  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .filter-grid {
+  button { cursor: pointer; transition: background .12s, border-color .12s; }
+  button:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-soft); }
+  button:disabled { opacity: .42; cursor: default; }
+  .btn-primary { background: var(--accent); color: #ffffff; border-color: var(--accent); font-weight: 600; }
+  .btn-primary:hover:not(:disabled) { background: #14503d; border-color: #14503d; }
+  .btn-sm { font-size: 12.5px; padding: 4px 9px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .tab-btn {
+    padding: 7px 12px;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 13.5px;
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+  }
+  .tab-btn:hover:not(:disabled) { background: var(--accent-soft); color: var(--ink); border-color: transparent; }
+  .tab-btn[aria-pressed="true"] {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+  }
+  .tab-count {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(0,0,0,.08);
+  }
+  .tab-btn[aria-pressed="true"] .tab-count { background: rgba(255,255,255,.22); color: #ffffff; }
+
+  /* Summary strip */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .stat-tile {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+  }
+  .stat-tile.warn-tile { background: var(--warn-bg); border-color: #ecd2a2; }
+  .stat-tile .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .stat-tile .stat-val { font-size: 19px; font-weight: 750; color: var(--ink); margin: 2px 0; font-variant-numeric: tabular-nums; }
+  .stat-tile .stat-sub { font-size: 12px; color: var(--muted); }
+  .coverage-track { position: relative; height: 9px; background: #e1ebe5; border-radius: 6px; overflow: hidden; margin-top: 5px; }
+  .coverage-fill { height: 100%; background: var(--accent); transition: width .2s ease; }
+
+  /* Quick tour ribbon */
+  .tour-ribbon {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 12px;
+    margin: 10px 0;
+  }
+  .tour-label { font-size: 12.5px; font-weight: 700; color: var(--accent); margin-right: 4px; }
+  .pill-btn { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: #ffffff; }
+  .pill-btn[aria-pressed="true"] { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+  .story-box { background: #ffffff; border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; margin-top: 8px; font-size: 13px; width: 100%; }
+
+  /* Search & filter bar */
+  .toolbar {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) minmax(175px, 1.1fr) minmax(185px, 1.2fr) auto auto auto;
+    gap: 8px;
+    align-items: center;
+  }
+  .toolbar input, .toolbar select { width: 100%; min-width: 0; }
+  @media (max-width: 1080px) {
+    .toolbar { grid-template-columns: 1fr 1fr; }
+    .toolbar .span-full { grid-column: 1 / -1; }
+  }
+  @media (max-width: 600px) {
+    .toolbar { grid-template-columns: 1fr; }
+  }
+  .adv-drawer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
-    margin: 12px 0;
+    align-items: end;
   }
-  .filter-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
-  .filter-grid select, .filter-grid input { width: 100%; min-width: 0; font-weight: 400; font-size: 14px; }
-  .filter-span-2 { grid-column: span 2; }
-  @media (max-width: 980px) { .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-span-2 { grid-column: span 2; } }
-  @media (max-width: 580px) { .filter-grid { grid-template-columns: 1fr; } .filter-span-2 { grid-column: span 1; } }
-  .guide-panel { padding: 14px 18px; }
-  .guide-panel summary, .run-panel summary { cursor: pointer; font-weight: 650; }
-  .guide-panel[open] > summary, .run-panel[open] > summary { margin-bottom: 12px; }
-  .story-box { background: var(--accent-soft); border-radius: 6px; padding: 12px 14px; margin: 10px 0; font-size: 14px; }
+  .adv-drawer label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .adv-drawer label.check-inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    padding: 6px 0;
+    cursor: pointer;
+  }
+  .adv-drawer select { width: 100%; min-width: 0; font-weight: 400; }
+  @media (max-width: 960px) { .adv-drawer { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .adv-drawer { grid-template-columns: 1fr; } }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .chip button {
+    border: 0;
+    background: transparent;
+    padding: 0 2px;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--muted);
+  }
+  .chip button:hover { color: var(--danger-ink); background: transparent; }
+
+  /* Master-Detail Workspace */
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(330px, 1fr);
+    gap: 14px;
+    align-items: start;
+    margin-top: 10px;
+  }
+  .pane-left, .pane-right {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .pane-right {
+    position: sticky;
+    top: 12px;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+  }
+  @media (max-width: 820px) {
+    .workspace { grid-template-columns: 1fr; }
+    .pane-right {
+      position: sticky;
+      bottom: 0;
+      top: auto;
+      max-height: 52vh;
+      box-shadow: 0 -4px 18px rgba(0,0,0,.1);
+      z-index: 5;
+    }
+  }
+
+  /* Table */
+  .scroll {
+    overflow: auto;
+    max-height: calc(100vh - 270px);
+    min-height: 320px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e7efea; vertical-align: top; }
+  th { position: sticky; top: 0; background: var(--surface-soft); z-index: 1; font-weight: 650; border-bottom: 1px solid var(--border); }
+  tbody tr.data-row { cursor: pointer; }
+  tbody tr.data-row:hover { background: #f4faf6; }
+  tbody tr.selected-row { background: #dff0e7; outline: 2px solid var(--accent); outline-offset: -2px; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sort-btn { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 650; color: inherit; cursor: pointer; text-align: left; }
+  .sort-btn:hover { text-decoration: underline; background: transparent; }
+
+  /* Badges */
   .badge {
     display: inline-block;
     font-size: 11.5px;
-    font-weight: 600;
+    font-weight: 650;
     padding: 2px 7px;
-    border-radius: 4px;
+    border-radius: 5px;
     white-space: nowrap;
   }
+  .b-ok { background: #e7f4ea; color: #195e28; }
+  .b-recl { background: var(--danger-bg); color: var(--danger-ink); }
+  .b-flag { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid #ecd2a2; }
+  .b-lev-ok { background: #edf3ef; color: #2b5446; }
+  .b-lev-sil { background: var(--purple-bg); color: var(--purple-ink); }
+  .b-lev-ask { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid #ecd2a2; }
   .b-diag { background: #e4f3ec; color: #14543f; }
-  .b-scr { background: #fce8e6; color: #8c231c; }
-  .b-ctx { background: #fff1cc; color: #715014; }
+  .b-scr { background: var(--danger-bg); color: var(--danger-ink); }
+  .b-ctx { background: var(--warn-bg); color: var(--warn-ink); }
   .b-uncl { background: #eceff1; color: #455a64; }
   .b-high { background: #e8f5e9; color: #1b5e20; }
-  .b-med { background: #e3f2fd; color: #0d47a1; }
-  .b-ambig { background: #fff1cc; color: #715014; }
-  .b-target { background: #1f6b53; color: #ffffff; }
-  .b-conf { background: #e8f5e9; color: #1b5e20; }
-  .b-recl { background: #fce8e6; color: #8c231c; }
-  .b-flag { background: #fff1cc; color: #715014; }
-  .b-lev { background: #ede7f6; color: #4527a0; }
-  .b-myco { background: #f3e5f5; color: #6a1b9a; }
-  .b-ws { background: #eceff1; color: #37474f; }
-  .scroll { overflow: auto; max-height: 510px; border: 1px solid var(--border); border-radius: 6px; }
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6eee9; vertical-align: top; }
-  th { position: sticky; top: 0; background: var(--accent-soft); z-index: 1; font-weight: 650; }
-  tr.selected-row { background: #e4f3ec; }
-  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .pick-btn { text-align: left; padding: 3px 7px; font-size: 13px; border-color: var(--border); }
-  .pick-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
-  .sort-btn { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 650; color: inherit; cursor: pointer; }
-  .sort-btn:hover { text-decoration: underline; }
-  .inspector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 12px; margin: 10px 0; }
-  .inspector-box { background: #f8fbf9; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
-  .inspector-box strong { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; }
-  .small { font-size: 12.5px; color: var(--muted); }
-  .theme-card { border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; background: #fbfdfb; }
+  .b-med { background: var(--info-bg); color: var(--info-ink); }
+  .b-ambig { background: var(--warn-bg); color: var(--warn-ink); }
+  .b-myco { background: var(--purple-bg); color: var(--purple-ink); }
+  .b-ws { background: #f1f3f4; color: #5f6368; font-weight: 500; }
+  .b-target { background: var(--accent); color: #ffffff; }
+  .b-note { background: #e0f2f1; color: #004d40; }
+
+  /* Detail Inspector */
+  .raw-label-box {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    margin: 8px 0;
+    font-size: 15.5px;
+    font-weight: 700;
+    word-break: break-word;
+  }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 8px 0;
+  }
+  @media (max-width: 520px) { .compare-grid { grid-template-columns: 1fr; } }
+  .detail-box {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 11px;
+  }
+  .detail-box.highlight-v2 { background: #f2f9f5; border-color: #b4d5c4; }
+  .detail-box h4 {
+    margin: 0 0 5px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 9px 12px;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  .callout.warn { border-left-color: var(--warn-border); background: var(--warn-bg); color: var(--warn-ink); }
+  .callout.purple { border-left-color: #6a1b9a; background: var(--purple-bg); color: var(--purple-ink); }
+  .rule-pre {
+    background: #172a24;
+    color: #e6f4ee;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font: 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+    white-space: pre-wrap;
+    margin: 6px 0 0;
+  }
+  .kv-list { display: grid; grid-template-columns: 135px 1fr; gap: 5px 10px; font-size: 13px; margin: 8px 0; }
+  .kv-list dt { color: var(--muted); font-weight: 600; margin: 0; }
+  .kv-list dd { margin: 0; word-break: break-word; }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .mini-stat {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 11.5px;
+  }
+  .mini-stat.zero { opacity: .45; background: var(--surface-soft); }
+  .mini-stat.active { border-color: var(--accent); background: #f2f9f5; }
+  .mini-stat strong { display: block; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .review-box {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    background: #fbfdfb;
+  }
+  .review-box textarea { width: 100%; min-height: 54px; font-size: 13px; margin-top: 6px; resize: vertical; }
+  .theme-card {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 11px 13px;
+    margin-bottom: 9px;
+    background: var(--surface-soft);
+  }
+  .cat-link, .ex-btn {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--accent);
+    font-weight: 650;
+    text-align: left;
+    cursor: pointer;
+  }
+  .cat-link:hover, .ex-btn:hover { text-decoration: underline; background: transparent; }
+  .ex-btn {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    margin: 2px 3px 2px 0;
+  }
+  details.guide-panel summary { cursor: pointer; font-weight: 650; color: var(--accent); }
   [hidden] { display: none !important; }
 </style>
 
-<div class="tag">PROTOTYPE V2 · AUDIT 1-À-1 SUR LES 8 462 LIBELLÉS · LOCAL ROUEN SITE ADAPTER (ADR-0003) · ZÉRO IDENTIFIANT</div>
-<h1>Explorateur de mappage <code>NATUREPVT</code> v2 (CHU de Rouen)</h1>
-<p id="subtitle"></p>
+<header>
+  <div class="tag">CHU DE ROUEN · REVUE DE NOMENCLATURE MICROBIOLOGIQUE · ZÉRO IDENTIFIANT PATIENT</div>
+  <div class="between">
+    <div>
+      <h1>Audit des libellés de prélèvement</h1>
+      <p class="small" id="subtitle"></p>
+    </div>
+    <div class="row">
+      <button id="export-view-csv" type="button" class="btn-sm" title="Télécharger les lignes actuellement filtrées au format CSV">Exporter la sélection (.csv)</button>
+      <button id="export-reviews-csv" type="button" class="btn-sm btn-primary" hidden>Exporter mes avis (0)</button>
+    </div>
+  </div>
+  <div class="tabs" id="view-buttons" role="tablist"></div>
+</header>
 
-<div class="notice">
-  <strong>Évolution v1 → v2 (<code>ADR-0003</code>)</strong> : la v1 s'appuyait sur l'héritage de 396 familles regex (seules 2 081 étiquettes avaient été lues directement). La v2 vérifie individuellement par <code>label_id</code> (<code>LBL_0001</code>..<code>LBL_8462</code>) <strong>100 % des 8 462 libellés <code>NATUREPVT</code></strong> enrichis depuis <code>data/bact22_24</code> avec <code>SEJUF</code>, <code>SEJUM</code>, <code>TRI</code>, <code>TYPEANA</code>, espèces bactériennes et séparation antifongique <code>*_MY</code>.
-</div>
-
-<section id="kpi-section">
-  <div class="kpi-grid" id="kpi-cards"></div>
-  <div class="coverage-wrap">
-    <div class="row" style="justify-content:space-between;">
+<section class="card" id="summary-section">
+  <div class="summary-strip" id="summary-cards"></div>
+  <div>
+    <div class="between">
       <strong class="small" id="coverage-label"></strong>
       <span class="small" id="coverage-pct"></span>
     </div>
@@ -152,67 +432,90 @@
   </div>
 </section>
 
-<details id="walkthrough-panel" class="guide-panel" open>
-  <summary>Parcours guidés (5 cas d'usage v2 : reclassifications, mycologie *_MY, règles composites LIS)</summary>
+<div class="tour-ribbon" id="tour-ribbon">
+  <span class="tour-label">Parcours rapides :</span>
   <div id="scenario-buttons" class="row"></div>
-  <div id="story-container" class="story-box"></div>
-  <div id="step-buttons" class="row"></div>
-</details>
+  <div id="story-container" class="story-box" hidden></div>
+  <div id="step-buttons" class="row" style="width:100%;" hidden></div>
+</div>
 
-<section id="explore-panel">
-  <div class="section-heading">
-    <h2>Exploration 1-à-1 des 8 462 libellés</h2>
-    <div class="row">
-      <button id="clear-filters" type="button">Effacer les filtres</button>
-      <button id="reset-demo" type="button">Réinitialiser</button>
-    </div>
+<section class="card" id="filter-section">
+  <div class="toolbar">
+    <input id="f-query" class="span-full" type="search" placeholder="Rechercher un libellé, une bactérie, un code unité (SEJUF) ou analyse (TYPEANA)...">
+    <select id="f-cat" aria-label="Catégorie cible v2"></select>
+    <select id="f-lever" aria-label="Action requise"></select>
+    <button id="toggle-adv" type="button" aria-expanded="false">+ Filtres avancés</button>
+    <button id="clear-filters" type="button">Effacer filtres</button>
+    <button id="reset-demo" type="button" title="Revenir à la vue initiale">Réinitialiser</button>
   </div>
 
-  <div id="view-buttons" class="row" style="margin-bottom:10px;"></div>
-
-  <div id="filter-controls" class="filter-grid">
-    <label>Catégorie cible v2 (<code>naturepvt_norm</code>)
-      <select id="f-cat"></select>
-    </label>
-    <label>Statut vs v1 (<code>v1_status</code>)
+  <div id="adv-drawer" class="adv-drawer" hidden>
+    <label>Statut par rapport à la v1
       <select id="f-status"></select>
     </label>
-    <label>Levier de résolution (<code>resolution_lever</code>)
-      <select id="f-lever"></select>
-    </label>
-    <label>Rôle diagnostique vs dépistage
+    <label>Rôle clinique (diagnostique vs dépistage)
       <select id="f-role"></select>
     </label>
-    <label>Confiance individuelle v2
+    <label>Niveau de confiance
       <select id="f-conf"></select>
     </label>
-    <label>Flux Mycologie <code>*_MY</code> vs Bactériologie
+    <label>Flux mycologie (<abbr title="Panels antifongiques du laboratoire, ex. LEV_MY, AP_MY, PM_MY*">*_MY</abbr>)
       <select id="f-myco"></select>
     </label>
-    <label class="filter-span-2">Recherche (<code>label_id</code>, <code>NATUREPVT</code>, <code>SEJUF</code>, <code>TYPEANA</code>, espèce, justification)
-      <input id="f-query" type="search" placeholder="Ex: LBL_0011, CAE, BOURSE, ESCARRE, BGSTRB, AMYGDALE, *_MY...">
+    <label class="check-inline" style="grid-column: span 2;">
+      <input type="checkbox" id="f-ws">
+      Uniquement anomalies de saisie (doubles espaces / retours à la ligne)
+    </label>
+    <label>Lignes par page
+      <select id="f-pagesize">
+        <option value="25">25 par page</option>
+        <option value="50" selected>50 par page</option>
+        <option value="100">100 par page</option>
+      </select>
     </label>
   </div>
 
-  <p class="small" id="selection-summary"></p>
-
-  <div id="table-container"></div>
-  <div id="pagination-bar" class="row" style="margin-top:10px; justify-content:space-between;" hidden></div>
+  <div id="active-chips" class="row" style="margin-top:8px;" hidden></div>
 </section>
 
-<section id="inspector-section" hidden>
-  <div class="section-heading">
-    <h2 id="inspector-title">Inspecteur détaillé du libellé</h2>
-    <div class="row">
-      <button id="prev-item" type="button">Précédent</button>
-      <button id="next-item" type="button">Suivant</button>
+<div class="workspace" id="main-workspace">
+  <div class="pane-left">
+    <div class="between" style="margin-bottom:8px;">
+      <div class="row">
+        <button id="back-to-cat-btn" type="button" class="btn-sm" hidden>← Retour aux catégories</button>
+        <span class="small" id="selection-summary"></span>
+      </div>
+      <span class="small" id="page-indicator"></span>
     </div>
+    <div id="table-container"></div>
+    <div id="pagination-bar" class="between" style="margin-top:10px;" hidden></div>
   </div>
-  <div id="inspector-body"></div>
-</section>
 
-<details id="run-panel" class="run-panel">
-  <summary>Métadonnées du run v2 et contrôles d'intégrité</summary>
+  <aside class="pane-right" id="inspector-section">
+    <div class="between" style="margin-bottom:6px;">
+      <h2 id="inspector-title">Fiche détaillée</h2>
+      <div class="row" id="inspector-nav">
+        <button id="prev-item" type="button">← Précédent</button>
+        <button id="next-item" type="button">Suivant →</button>
+      </div>
+    </div>
+    <div id="inspector-body"></div>
+  </aside>
+</div>
+
+<details id="run-panel" class="card guide-panel" style="margin-top:14px;">
+  <summary>À propos de l'audit v2, glossaire <abbr title="Système d'Information de Laboratoire">SIL</abbr> &amp; contrôles d'intégrité (ADR-0003)</summary>
+  <p class="small" style="margin-bottom:8px;">
+    <strong>Objectif :</strong> vérifier individuellement les 8 462 libellés bruts (champ <code>NATUREPVT</code> dans GLIMS) pour construire l'adaptateur local du CHU de Rouen selon les référentiels ONERBA et SPARES. Aucun identifiant (<code>PATID</code>, <code>EVTID</code>, <code>ELTID</code>) n'est présent dans ce fichier.
+  </p>
+  <p class="small" style="margin-bottom:10px;">
+    <strong>Glossaire rapide :</strong>
+    <code>SIL</code> = Système d'Information de Laboratoire (GLIMS) ·
+    <code>TYPEANA</code> = code d'analyse prescrite (ex. <code>BGSTRB</code> dépistage Strepto B, <code>BGSTA_R</code> dépistage SARM, <code>BGCULTAE</code> culture aérobie, <code>BGFA*</code> flacon hémoculture, <code>BGUCYTO</code>/<code>BGASPU</code> ECBU, <code>BGNUML</code>/<code>BGEDL</code> liquides stériles, <code>_R</code> dépistage BMR/BHRe) ·
+    <code>*_MY</code> = panel antifongique de mycologie ·
+    <code>SEJUF</code> / <code>SEJUM</code> = unité fonctionnelle / médicale ·
+    <code>TRI</code> = discipline de tri laboratoire.
+  </p>
   <div id="run-meta"></div>
 </details>
 
@@ -222,97 +525,98 @@ const PAYLOAD = /*PROTOTYPE_DATA_V2*/null;
 /* === PURE LOGIC MODULE === */
 const Logic = (() => {
   const VIEWS = [
-    { id: "labels", label: "1. Audit 1-à-1 (8 462 libellés)" },
-    { id: "diff", label: "2. Différences v1 → v2" },
-    { id: "composite", label: "3. Règles composites LIS (TYPEANA / SEJUF / *_MY)" },
-    { id: "rouen", label: "4. Questions CHU Rouen" },
-    { id: "matrix", label: "5. Matrice ONERBA / SPARES" }
+    { id: "labels", label: "Tous les libellés" },
+    { id: "diff", label: "Corrigés ou signalés vs v1" },
+    { id: "composite", label: "Règles SIL à appliquer" },
+    { id: "rouen", label: "Avis CHU Rouen & SIL" },
+    { id: "themes", label: "Thèmes transversaux" },
+    { id: "matrix", label: "Vue par catégorie (17)" }
   ];
 
   const STATUS_LABELS = {
-    all: "Tous les statuts v1→v2",
-    confirmed: "confirmed (v1 confirmée sans règle composite)",
-    reclassified: "reclassified (catégorie ou rôle corrigé vs v1)",
-    flagged: "flagged (même cat./rôle mais règle LIS / myco / question Rouen)"
+    all: "Tous les statuts",
+    confirmed: "Confirmé (identique à la v1, texte suffisant)",
+    reclassified: "Corrigé (catégorie ou rôle modifié vs v1)",
+    flagged: "Signalé (même cat./rôle, mais règle SIL ou avis Rouen)"
   };
 
   const LEVER_LABELS = {
-    all: "Tous les leviers de résolution",
-    text_sufficient: "text_sufficient (texte NATUREPVT seul suffisant)",
-    filter_typeana: "filter_typeana (tri par TYPEANA: BGSTRB, _R, BGSTA_R, BGUCYTO...)",
-    filter_sejuf_tri: "filter_sejuf_tri (tri par unité SEJUF / SEJUM / TRI)",
-    exclude_mycology: "exclude_mycology (exclusion panels antifongiques *_MY)",
-    ask_chu_rouen: "ask_chu_rouen (validation CHU Rouen requise)",
-    __composite_any__: "Tous avec needs_composite_lis_rule = true"
+    all: "Toutes les actions requises",
+    text_sufficient: "Texte suffisant (aucune règle SIL en plus)",
+    filter_typeana: "Filtrer par analyse (TYPEANA : BGSTRB, _R, BGUCYTO…)",
+    filter_sejuf_tri: "Filtrer par unité / discipline (SEJUF / TRI)",
+    exclude_mycology: "Exclure la mycologie (*_MY)",
+    ask_chu_rouen: "Demander l'avis du CHU de Rouen",
+    __composite_any__: "Toutes les règles composites SIL"
   };
 
   const ROLE_LABELS = {
-    all: "Tous les rôles",
-    diagnostic: "diagnostic",
-    screening_site: "screening_site",
-    context_dependent: "context_dependent",
-    unclassifiable: "unclassifiable"
+    all: "Tous les rôles cliniques",
+    diagnostic: "Diagnostique (prélèvement clinique)",
+    screening_site: "Dépistage / portage",
+    context_dependent: "Dépend du contexte (clinique vs dépistage)",
+    unclassifiable: "Inclassable / ambigu"
   };
 
   const CONF_LABELS = {
-    all: "Toutes les confiances",
-    high: "high (confiance individuelle élevée)",
-    medium: "medium (confiance moyenne)",
-    ambiguous_needs_human_review: "ambiguous_needs_human_review"
+    all: "Tous les niveaux de confiance",
+    high: "Confiance élevée",
+    medium: "Confiance moyenne",
+    ambiguous_needs_human_review: "Revue humaine requise"
   };
 
   const MYCO_LABELS = {
-    all: "Tous (bactériologie + mycologie)",
-    has_myco_only: "Avec échantillons *_MY uniquement (> 0)",
+    all: "Bactériologie + Mycologie",
+    has_myco_only: "Contient des prélèvements *_MY seuls (> 0)",
     pure_myco: "100 % mycologie *_MY (0 ATB bactérien)",
-    bact_only: "100 % ATB bactérien (0 *_MY)"
+    bact_only: "100 % bactériologie (0 *_MY)"
   };
 
   const SCENARIOS = [
     {
-      name: "1. Reclassifications v1 → v2 (collisions & ONERBA)",
-      text: "L'audit 1-à-1 détecte les pièges masqués par l'héritage de familles v1 : CAE = Conduit Auditif Externe (jamais caecum), BOURSE PRE PATELLAIRE = genou (jamais scrotum), PRE AURICULAIRE/STERNAL (jamais prépuce), CUL DE SAC SOUS QUADRI, AMYGDALE diagnostic ORL, et ESCARRE reclassifiée en pus_superficiel (ONERBA Cap. II p. 22).",
+      name: "1. Erreurs corrigées (v1 → v2)",
+      text: "L'audit 1-à-1 révèle les collisions masquées par les familles regex de la v1 : CAE = Conduit Auditif Externe (et non caecum), BOURSE PRE PATELLAIRE = genou (et non scrotum), PRE AURICULAIRE/STERNAL (et non prépuce), AMYGDALE diagnostic ORL, et ESCARRE reclassée en pus superficiel (ONERBA Chapitre II p. 22).",
       steps: [
-        { label: "Toutes les reclassifications v1→v2", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", query: "" } },
-        { label: "Piège CAE / BOURSE / CUL DE SAC / PRE", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", query: "BOURSE" } },
-        { label: "Règle ONERBA p. 22 sur ESCARRE", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", query: "ESCARRE" } },
-        { label: "AMYGDALE (ORL diagnostic vs gorge)", action: { view: "diff", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "AMYGDAL" } }
+        { label: "Toutes les corrections", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } },
+        { label: "Piège BOURSE / CAE / PRE", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "BOURSE" } },
+        { label: "Règle ONERBA sur ESCARRE", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "ESCARRE" } },
+        { label: "AMYGDALE (ORL vs gorge)", action: { view: "diff", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "AMYGDAL" } }
       ]
     },
     {
-      name: "2. Fuite antifongique *_MY (Mycologie)",
-      text: "La sélection par STRRES %in% S/SFP/I/R/ZIT sans filtrage des panels *_MY fait entrer 1 259 échantillons (dont 137 libellés 100 % *_MY et des doublons à double espace comme 'Aspiration bronchique', 'Hémoculture  périphérique', 'Ecouvillon  gorge').",
+      name: "2. Fuite antifongique (*_MY)",
+      text: "Sélectionner tous les résultats S/SFP/I/R/ZIT sans écarter les panels *_MY fait entrer 1 259 prélèvements fongiques (dont 137 libellés 100 % *_MY et des doublons avec double espace comme « Hémoculture  périphérique »).",
       steps: [
-        { label: "137 libellés 100 % *_MY (0 bactérien)", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "pure_myco", query: "" } },
-        { label: "Tous les libellés avec flux *_MY (>0)", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "has_myco_only", query: "" } },
-        { label: "Levier exclude_mycology", action: { view: "composite", cat: "all", st: "all", lev: "exclude_mycology", role: "all", conf: "all", myco: "all", query: "" } }
+        { label: "137 libellés 100 % *_MY", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "pure_myco", wsOnly: false, query: "" } },
+        { label: "Tous avec flux *_MY (> 0)", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "has_myco_only", wsOnly: false, query: "" } },
+        { label: "Action : exclure mycologie", action: { view: "composite", cat: "all", st: "all", lev: "exclude_mycology", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } }
       ]
     },
     {
-      name: "3. Règles composites TYPEANA & SEJUF/TRI",
-      text: "Au-delà du texte NATUREPVT brut, certaines étiquettes sont résolues de façon déterministe par TYPEANA (`BGSTRB`, `BGSTA_R` vs `BGCULTAE`, `_R`, `BGUCYTO`, `BGFA*`) ou par l'unité `SEJUF`/`SEJUM` et la discipline `TRI` (`SONDE` en Urologie vs Cardiologie).",
+      name: "3. Règles du SIL",
+      text: "Lorsque le texte seul ne suffit pas, la décision est tranchée de façon déterministe par TYPEANA (BGSTRB, BGSTA_R seul vs +BGCULTAE, _R, BGUCYTO, BGFA*) ou par l'unité SEJUF/TRI (ex. SONDE en Urologie vs Cardiologie).",
       steps: [
-        { label: "Vue Règles composites LIS", action: { view: "composite", cat: "all", st: "all", lev: "__composite_any__", role: "all", conf: "all", myco: "all", query: "" } },
-        { label: "Levier filter_typeana", action: { view: "labels", cat: "all", st: "all", lev: "filter_typeana", role: "all", conf: "all", myco: "all", query: "" } },
-        { label: "Levier filter_sejuf_tri", action: { view: "labels", cat: "all", st: "all", lev: "filter_sejuf_tri", role: "all", conf: "all", myco: "all", query: "" } }
+        { label: "Toutes les règles SIL", action: { view: "composite", cat: "all", st: "all", lev: "__composite_any__", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } },
+        { label: "Filtrer par TYPEANA", action: { view: "labels", cat: "all", st: "all", lev: "filter_typeana", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } },
+        { label: "Filtrer par unité SEJUF/TRI", action: { view: "labels", cat: "all", st: "all", lev: "filter_sejuf_tri", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } }
       ]
     },
     {
-      name: "4. Cibles SPARES (hemoculture & urines)",
-      text: "Vérification 1-à-1 des deux cibles SPARES actuelles (`hemoculture` et `urines`), incluant l'isolement des hémocultures à double espace exclusivement fongiques (`Hémoculture  périphérique`) et les abcès de loge de néphrostomie exclus d'urines.",
+      name: "4. Cibles SPARES",
+      text: "Vérification complète des deux catégories cibles SPARES actuelles (hemoculture et urines), incluant les hémocultures exclusivement fongiques à double espace et les abcès de loge de néphrostomie exclus d'urines.",
       steps: [
-        { label: "Cibles SPARES actuelles", action: { view: "labels", cat: "__spares_targets__", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "" } },
-        { label: "Cibles SPARES signalées ou reclassifiées", action: { view: "diff", cat: "__spares_targets__", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "" } },
-        { label: "Matrice 17 catégories ONERBA/SPARES", action: { view: "matrix", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "" } }
+        { label: "Cibles SPARES actuelles", action: { view: "labels", cat: "__spares_targets__", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } },
+        { label: "Écarts / alertes sur SPARES", action: { view: "diff", cat: "__spares_targets__", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } },
+        { label: "Synthèse 17 catégories", action: { view: "matrix", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } }
       ]
     },
     {
-      name: "5. Questions résiduelles pour CHU Rouen",
-      text: "Synthèse des seules étiquettes et règles ambiguës non tranchables ni par le texte ni par TYPEANA/SEJUF (`ask_chu_rouen` + validation des règles composites), prêtes pour revue microbiologique locale.",
+      name: "5. Questions CHU Rouen",
+      text: "Les 164 libellés demandant directement l'avis du CHU de Rouen, les thèmes transversaux et les chaînes avec espaces doubles ou retours à la ligne.",
       steps: [
-        { label: "Questions strictes ask_chu_rouen", action: { view: "rouen", cat: "all", st: "all", lev: "ask_chu_rouen", role: "all", conf: "all", myco: "all", query: "" } },
-        { label: "Écouvillons sur sites stériles / profonds", action: { view: "rouen", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "ECOUVILLON" } },
-        { label: "Libellés avec retour chariot / double espace", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "__WS_NL__" } }
+        { label: "164 avis CHU Rouen stricts", action: { view: "rouen", cat: "all", st: "all", lev: "ask_chu_rouen", role: "all", conf: "all", myco: "all", wsOnly: false, query: "" } },
+        { label: "Écouvillons sites profonds", action: { view: "rouen", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "ECOUVILLON" } },
+        { label: "Anomalies d'espacement", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: true, query: "" } }
       ]
     }
   ];
@@ -327,21 +631,23 @@ const Logic = (() => {
       role: "all",
       conf: "all",
       myco: "all",
+      wsOnly: false,
       query: "",
       sortBy: "n_samples",
       sortDir: "desc",
       page: 0,
-      pageSize: 100,
+      pageSize: 50,
       selectedId: firstId,
-      scenario: 0,
+      scenario: -1,
       step: -1
     };
   }
 
   function filterLabels(state, payload, forcedMode) {
     const rawQ = (state.query || "").trim();
-    const wsNlOnly = rawQ === "__WS_NL__";
-    const q = wsNlOnly ? "" : rawQ.toLocaleLowerCase();
+    const wsToken = rawQ === "__WS_NL__";
+    const wsNlOnly = Boolean(state.wsOnly) || wsToken;
+    const q = wsToken ? "" : rawQ.toLocaleLowerCase();
     const targets = new Set((payload.metadata && payload.metadata.current_spares_targets) || ["hemoculture", "urines"]);
     return (payload.labels || []).filter(l => {
       if (forcedMode === "diff" && !(l.chg || l.st !== "confirmed")) return false;
@@ -460,19 +766,23 @@ const Logic = (() => {
     if (action.clearFilters) {
       return {
         ...state,
-        cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "", page: 0, step: -1
+        cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all",
+        wsOnly: false, query: "", page: 0, scenario: -1, step: -1
       };
     }
     const next = { ...state, ...action };
     if (
       action.cat !== undefined || action.st !== undefined || action.lev !== undefined ||
       action.role !== undefined || action.conf !== undefined || action.myco !== undefined ||
-      action.query !== undefined || action.view !== undefined
+      action.wsOnly !== undefined || action.query !== undefined || action.view !== undefined ||
+      action.pageSize !== undefined
     ) {
       next.page = 0;
     }
     const rows = getRowsForView(next, payload);
-    if (!rows.some(r => r.id === next.selectedId)) {
+    if (action.selectedId === undefined && !rows.some(r => r.id === next.selectedId)) {
+      next.selectedId = rows.length ? rows[0].id : null;
+    } else if (!rows.some(r => r.id === next.selectedId)) {
       next.selectedId = rows.length ? rows[0].id : null;
     }
     return next;
@@ -496,42 +806,86 @@ const Logic = (() => {
   const fmtPct = n => `${Number(n || 0).toFixed(2).replace(".", ",")} %`;
 
   if (!PAYLOAD || !PAYLOAD.metadata) {
-    document.body.innerHTML = "<section><h1>Aucune donnée injectée</h1><p>Exécutez <code>v2_build_deliverables.R</code> pour générer <code>outputs/sample-type-prototype/v2/demo.html</code>.</p></section>";
+    document.body.innerHTML = "<section class='card'><h1>Aucune donnée injectée</h1><p>Exécutez <code>v2_build_deliverables.R</code> pour générer <code>outputs/sample-type-prototype/v2/demo.html</code>.</p></section>";
     return;
   }
 
   const meta = PAYLOAD.metadata;
-  document.getElementById("subtitle").innerHTML =
-    `Audit complet étiquette par étiquette des <strong>${fmtInt(meta.total_labels)}</strong> libellés <code>NATUREPVT</code> (<strong>${fmtInt(meta.total_samples)}</strong> ELTIDs, <strong>${fmtInt(meta.total_isolates)}</strong> isolats), dont <strong>${fmtInt(meta.n_reclassified)}</strong> reclassifiés vs v1, <strong>${fmtInt(meta.n_flagged)}</strong> signalés pour règle composite ou revue locale, et <strong>${fmtInt(meta.n_phase2_crosschecked)}</strong> cross-checkés par le modèle principal.`;
+  const allRows = PAYLOAD.labels || [];
+  const allThemes = PAYLOAD.themes || [];
+  const catNames = {};
+  for (const o of (PAYLOAD.onerba_summary || [])) {
+    catNames[o.naturepvt_norm] = o.onerba_label || o.naturepvt_norm;
+  }
+  const catLabel = code => catNames[code] || code || "—";
 
-  const statusBadge = st => {
-    const cls = st === "confirmed" ? "b-conf" : st === "reclassified" ? "b-recl" : "b-flag";
-    return `<span class="badge ${cls}">${esc(st)}</span>`;
+  const LEVER_SHORT = {
+    text_sufficient: ["Texte OK", "b-lev-ok"],
+    filter_typeana: ["Filtrer TYPEANA", "b-lev-sil"],
+    filter_sejuf_tri: ["Filtrer unité", "b-lev-sil"],
+    exclude_mycology: ["Exclure *_MY", "b-myco"],
+    ask_chu_rouen: ["Avis Rouen", "b-lev-ask"]
   };
-  const roleBadge = role => {
-    const cls = role === "diagnostic" ? "b-diag" : role === "screening_site" ? "b-scr" : role === "context_dependent" ? "b-ctx" : "b-uncl";
-    return `<span class="badge ${cls}">${esc(role)}</span>`;
+  const STATUS_SHORT = {
+    confirmed: ["Confirmé", "b-ok"],
+    reclassified: ["Corrigé", "b-recl"],
+    flagged: ["Signalé", "b-flag"]
   };
-  const confBadge = conf => {
-    const cls = conf === "high" ? "b-high" : conf === "medium" ? "b-med" : "b-ambig";
-    const lbl = conf === "ambiguous_needs_human_review" ? "ambiguous" : conf;
-    return `<span class="badge ${cls}">${esc(lbl)}</span>`;
+  const ROLE_SHORT = {
+    diagnostic: ["Diagnostique", "b-diag"],
+    screening_site: ["Dépistage", "b-scr"],
+    context_dependent: ["Selon contexte", "b-ctx"],
+    unclassifiable: ["Inclassable", "b-uncl"]
   };
+  const CONF_SHORT = {
+    high: ["Confiance élevée", "b-high"],
+    medium: ["Confiance moyenne", "b-med"],
+    ambiguous_needs_human_review: ["Revue humaine requise", "b-ambig"]
+  };
+
+  const makeBadge = (map, val) => {
+    const [txt, cls] = map[val] || [val || "—", "b-ws"];
+    return `<span class="badge ${cls}">${esc(txt)}</span>`;
+  };
+
+  // Persistent local clinician annotations
+  const STORAGE_KEY = "orchidee_naturepvt_v2_reviews";
+  let reviews = {};
+  try {
+    reviews = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+  } catch { reviews = {}; }
+  const saveReviews = () => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews)); } catch {}
+    updateExportReviewBtn();
+  };
+
+  document.getElementById("subtitle").innerHTML =
+    `<strong>${fmtInt(meta.total_labels)}</strong> libellés GLIMS (<code>NATUREPVT</code>) vérifiés un par un sur <strong>${fmtInt(meta.total_samples)}</strong> prélèvements (<strong>${fmtInt(meta.total_isolates)}</strong> isolats) pour construire les règles de routage du laboratoire.`;
 
   let state = Logic.initial(PAYLOAD);
+  let advOpen = false;
+  let cameFromView = null;
+  let activeThemeIdx = 0;
+
+  function updateExportReviewBtn() {
+    const n = Object.keys(reviews).length;
+    const btn = document.getElementById("export-reviews-csv");
+    btn.hidden = n === 0;
+    btn.textContent = `Exporter mes avis (${n})`;
+  }
 
   function populateSelects() {
     const catOpts = [
-      `<option value="all">Toutes les 17 catégories ONERBA/SPARES</option>`,
-      `<option value="__spares_targets__">Cibles SPARES actuelles (hemoculture + urines)</option>`
+      `<option value="all">Toutes les catégories (17)</option>`,
+      `<option value="__spares_targets__">Cibles SPARES actuelles (hémocultures + urines)</option>`
     ];
     for (const o of (PAYLOAD.onerba_summary || [])) {
-      catOpts.push(`<option value="${esc(o.naturepvt_norm)}">${esc(o.naturepvt_norm)} (${fmtInt(o.n_samples)} éch. · ${fmtInt(o.n_labels)} lib.)</option>`);
+      catOpts.push(`<option value="${esc(o.naturepvt_norm)}">${esc(o.onerba_label || o.naturepvt_norm)} (${fmtInt(o.n_samples)} prél.)</option>`);
     }
     document.getElementById("f-cat").innerHTML = catOpts.join("");
-    document.getElementById("f-status").innerHTML = Object.entries(Logic.STATUS_LABELS)
-      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
     document.getElementById("f-lever").innerHTML = Object.entries(Logic.LEVER_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-status").innerHTML = Object.entries(Logic.STATUS_LABELS)
       .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
     document.getElementById("f-role").innerHTML = Object.entries(Logic.ROLE_LABELS)
       .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
@@ -543,36 +897,113 @@ const Logic = (() => {
 
   function renderRunMeta() {
     document.getElementById("run-meta").innerHTML = `
-      <div class="inspector-grid">
-        <div class="inspector-box"><strong>Audit 1-à-1 Phase 1 (Flash)</strong>${fmtInt(meta.total_labels)} / ${fmtInt(meta.total_labels)} libellés vérifiés (0 manquant)</div>
-        <div class="inspector-box"><strong>Cross-check Phase 2 (Modèle principal)</strong>${fmtInt(meta.n_phase2_crosschecked)} libellés haute priorité</div>
-        <div class="inspector-box"><strong>Flux bactérien vs *_MY</strong>${fmtInt(meta.total_bacterial_samples)} éch. bactériens / ${fmtInt(meta.total_mycology_only_samples)} *_MY seuls</div>
-        <div class="inspector-box"><strong>Qualité chaînes NATUREPVT</strong>${fmtInt(meta.labels_with_double_space)} doubles espaces · ${fmtInt(meta.labels_with_newline)} retours ligne</div>
-        <div class="inspector-box"><strong>Horodatage (UTC)</strong>${esc(meta.run_utc)}</div>
+      <div class="compare-grid">
+        <div class="detail-box"><h4>Couverture de vérification</h4><strong>${fmtInt(meta.total_labels)} / ${fmtInt(meta.total_labels)}</strong> libellés vérifiés individuellement (Phase 1) · <strong>${fmtInt(meta.n_phase2_crosschecked)}</strong> revus en double passe (Phase 2)</div>
+        <div class="detail-box"><h4>Répartition bactériologie vs *_MY</h4><strong>${fmtInt(meta.total_bacterial_samples)}</strong> prélèvements bactériens · <strong>${fmtInt(meta.total_mycology_only_samples)}</strong> uniquement fongiques (<code>*_MY</code>)</div>
+        <div class="detail-box"><h4>Anomalies de chaîne brute</h4><strong>${fmtInt(meta.labels_with_double_space)}</strong> avec doubles espaces · <strong>${fmtInt(meta.labels_with_newline)}</strong> avec retours à la ligne</div>
+        <div class="detail-box"><h4>Horodatage du run (UTC)</h4>${esc(meta.run_utc)}</div>
       </div>`;
   }
 
-  function renderKPIs(sum) {
-    document.getElementById("kpi-cards").innerHTML = `
-      <div class="kpi-card"><strong>Libellés filtrés</strong><div class="kpi-val">${fmtInt(sum.nLabels)}</div><div class="kpi-sub">sur ${fmtInt(meta.total_labels)} NATUREPVT</div></div>
-      <div class="kpi-card"><strong>Échantillons (ELTID)</strong><div class="kpi-val">${fmtInt(sum.nSamples)}</div><div class="kpi-sub">${fmtPct(sum.pctSamples)} · ${fmtInt(sum.nBactSamples)} bact. / ${fmtInt(sum.nMycoSamples)} *_MY</div></div>
-      <div class="kpi-card"><strong>Reclassifiés vs v1</strong><div class="kpi-val">${fmtInt(sum.reclassified)}</div><div class="kpi-sub">dans la vue courante (${fmtInt(meta.n_reclassified)} global)</div></div>
-      <div class="kpi-card"><strong>Signalés / Règle LIS</strong><div class="kpi-val">${fmtInt(sum.flagged)}</div><div class="kpi-sub">${fmtInt(sum.composite)} avec règle composite LIS</div></div>
-      <div class="kpi-card"><strong>Questions CHU Rouen</strong><div class="kpi-val">${fmtInt(sum.askRouen)}</div><div class="kpi-sub">levier <code>ask_chu_rouen</code></div></div>`;
+  function hasActiveLabelFilters() {
+    return (
+      state.cat !== "all" || state.st !== "all" || state.lev !== "all" ||
+      state.role !== "all" || state.conf !== "all" || state.myco !== "all" ||
+      Boolean(state.wsOnly) || state.query.trim() !== ""
+    );
+  }
 
-    document.getElementById("coverage-label").textContent = `Couverture de la sélection (${fmtInt(sum.nLabels)} / ${fmtInt(meta.total_labels)} libellés)`;
-    document.getElementById("coverage-pct").textContent = `${fmtPct(sum.pctSamples)} des échantillons (${fmtInt(sum.nSamples)} éch. · ${fmtInt(sum.nIsolates)} isolats)`;
+  function renderViews() {
+    const filteredActive = hasActiveLabelFilters();
+    const counts = {
+      labels: Logic.filterLabels(state, PAYLOAD, null).length,
+      diff: Logic.filterLabels(state, PAYLOAD, "diff").length,
+      composite: Logic.filterLabels(state, PAYLOAD, "composite").length,
+      rouen: Logic.filterLabels(state, PAYLOAD, "rouen").length,
+      themes: allThemes.length,
+      matrix: (PAYLOAD.onerba_summary || []).length
+    };
+    const globals = {
+      labels: allRows.length,
+      diff: allRows.filter(l => l.chg || l.st !== "confirmed").length,
+      composite: allRows.filter(l => l.comp || l.lev !== "text_sufficient").length,
+      rouen: allRows.filter(l => l.lev !== "text_sufficient").length,
+      themes: allThemes.length,
+      matrix: (PAYLOAD.onerba_summary || []).length
+    };
+
+    document.getElementById("view-buttons").innerHTML = Logic.VIEWS.map(v => {
+      const showFiltered = filteredActive && v.id !== "themes" && v.id !== "matrix" && counts[v.id] !== globals[v.id];
+      const badgeTxt = showFiltered ? `${fmtInt(counts[v.id])} / ${fmtInt(globals[v.id])}` : fmtInt(globals[v.id]);
+      return `<button type="button" class="tab-btn" role="tab" data-view="${esc(v.id)}" aria-pressed="${state.view === v.id}">${esc(v.label)}<span class="tab-count">${badgeTxt}</span></button>`;
+    }).join("");
+  }
+
+  function renderSummary(sum) {
+    const mycoWarn = sum.nMycoSamples > 0 ? " warn-tile" : "";
+    const flaggedWarn = sum.flagged > 0 && sum.reclassified === 0 ? " warn-tile" : "";
+    document.getElementById("summary-cards").innerHTML = `
+      <div class="stat-tile"><div class="stat-label">Libellés affichés</div><div class="stat-val">${fmtInt(sum.nLabels)}</div><div class="stat-sub">sur ${fmtInt(meta.total_labels)} au total</div></div>
+      <div class="stat-tile${mycoWarn}"><div class="stat-label">Prélèvements couverts</div><div class="stat-val">${fmtInt(sum.nSamples)}</div><div class="stat-sub">${fmtInt(sum.nBactSamples)} bact. · ${fmtInt(sum.nMycoSamples)} *_MY à purger</div></div>
+      <div class="stat-tile${flaggedWarn}"><div class="stat-label">Écarts vs v1 (Cat./Rôle)</div><div class="stat-val">${fmtInt(sum.reclassified)}</div><div class="stat-sub">+ ${fmtInt(sum.flagged)} signalés (règle SIL / avis)</div></div>
+      <div class="stat-tile"><div class="stat-label">Règle SIL requise</div><div class="stat-val">${fmtInt(sum.composite)}</div><div class="stat-sub">TYPEANA / SEJUF / *_MY</div></div>
+      <div class="stat-tile"><div class="stat-label">Avis CHU Rouen requis</div><div class="stat-val">${fmtInt(sum.askRouen)}</div><div class="stat-sub">sur ${fmtInt(meta.n_ask_chu_rouen)} au total</div></div>`;
+
+    document.getElementById("coverage-label").textContent =
+      `Poids de cette sélection : ${fmtPct(sum.pctSamples)} des prélèvements (${fmtInt(sum.nSamples)} / ${fmtInt(meta.total_samples)})`;
+    document.getElementById("coverage-pct").textContent =
+      `${fmtInt(sum.nIsolates)} / ${fmtInt(meta.total_isolates)} isolats (${fmtPct(sum.pctIsolates)})`;
     document.getElementById("coverage-fill").style.width = `${Math.min(100, sum.pctSamples)}%`;
   }
 
   function renderWalkthroughs() {
-    const scen = Logic.SCENARIOS[state.scenario] || Logic.SCENARIOS[0];
+    const activeScen = state.scenario >= 0 ? Logic.SCENARIOS[state.scenario] : null;
     document.getElementById("scenario-buttons").innerHTML = Logic.SCENARIOS.map((s, idx) =>
-      `<button type="button" data-scen="${idx}" aria-pressed="${state.scenario === idx}">${esc(s.name)}</button>`
+      `<button type="button" class="pill-btn" data-scen="${idx}" aria-pressed="${state.scenario === idx}">${esc(s.name)}</button>`
     ).join("");
-    document.getElementById("story-container").innerHTML = `<p style="margin:0;">${esc(scen.text)}</p>`;
-    document.getElementById("step-buttons").innerHTML = scen.steps.map((st, idx) =>
-      `<button type="button" data-step="${idx}" aria-pressed="${state.step === idx}">${idx + 1}. ${esc(st.label)}</button>`
+    if (activeScen) {
+      document.getElementById("story-container").hidden = false;
+      document.getElementById("story-container").innerHTML = `<p style="margin:0;">${esc(activeScen.text)}</p>`;
+      document.getElementById("step-buttons").hidden = false;
+      document.getElementById("step-buttons").innerHTML = activeScen.steps.map((st, idx) =>
+        `<button type="button" class="pill-btn" data-step="${idx}" aria-pressed="${state.step === idx}">${idx + 1}. ${esc(st.label)}</button>`
+      ).join("");
+    } else {
+      document.getElementById("story-container").hidden = true;
+      document.getElementById("step-buttons").hidden = true;
+    }
+  }
+
+  function renderActiveChips() {
+    const chips = [];
+    if (state.cat !== "all") {
+      const lbl = state.cat === "__spares_targets__" ? "Cibles SPARES" : catLabel(state.cat);
+      chips.push({ key: "cat", text: `Catégorie : ${lbl}` });
+    }
+    if (state.lev !== "all") chips.push({ key: "lev", text: `Action : ${(LEVER_SHORT[state.lev]?.[0]) || "Règles SIL"}` });
+    if (state.st !== "all") chips.push({ key: "st", text: `Statut : ${STATUS_SHORT[state.st]?.[0] || state.st}` });
+    if (state.role !== "all") chips.push({ key: "role", text: `Rôle : ${ROLE_SHORT[state.role]?.[0] || state.role}` });
+    if (state.conf !== "all") chips.push({ key: "conf", text: `Confiance : ${CONF_SHORT[state.conf]?.[0] || state.conf}` });
+    if (state.myco !== "all") chips.push({ key: "myco", text: `Mycologie : ${Logic.MYCO_LABELS[state.myco] || state.myco}` });
+    if (state.wsOnly || state.query.trim() === "__WS_NL__") chips.push({ key: "wsOnly", text: "Espaces doubles / sauts de ligne" });
+    if (state.query.trim() && state.query.trim() !== "__WS_NL__") chips.push({ key: "query", text: `Recherche : « ${state.query.trim()} »` });
+
+    const advCount = [state.st !== "all", state.role !== "all", state.conf !== "all", state.myco !== "all", state.wsOnly].filter(Boolean).length;
+    const advBtn = document.getElementById("toggle-adv");
+    advBtn.textContent = advCount > 0 ? `+ Filtres avancés (${advCount})` : "+ Filtres avancés";
+    advBtn.setAttribute("aria-expanded", String(advOpen || advCount > 0));
+    document.getElementById("adv-drawer").hidden = !(advOpen || advCount > 0);
+    document.getElementById("clear-filters").disabled = !hasActiveLabelFilters();
+
+    const wrap = document.getElementById("active-chips");
+    if (!chips.length) {
+      wrap.hidden = true;
+      wrap.innerHTML = "";
+      return;
+    }
+    wrap.hidden = false;
+    wrap.innerHTML = chips.map(c =>
+      `<span class="chip">${esc(c.text)} <button type="button" data-clear-chip="${esc(c.key)}" title="Retirer ce filtre">×</button></span>`
     ).join("");
   }
 
@@ -581,172 +1012,388 @@ const Logic = (() => {
     return `<button type="button" class="sort-btn" data-sort="${esc(key)}">${esc(label)}${arrow}</button>`;
   }
 
-  function renderThemesHtml() {
-    return (PAYLOAD.themes || []).map(th => `
-      <div class="theme-card">
-        <h3>${esc(th.theme_id)} — ${esc(th.title)}</h3>
-        <p class="small"><strong>Impact :</strong> ${esc(th.impact_summary)}</p>
-        <p><strong>Question CHU Rouen :</strong> ${esc(th.clinical_question)}</p>
-        <p><strong>Règle recommandée :</strong> ${esc(th.recommended_site_adapter_rule)}</p>
-        <p class="small"><strong>Exemples :</strong> ${(th.example_labels || []).map(x => `<code>${esc(x)}</code>`).join(" ")}</p>
-      </div>`).join("");
+  function buildSilPseudoRule(cur) {
+    if (cur.lev === "text_sufficient" && !cur.comp) return null;
+    const lines = [`# Règle SIL suggérée pour ${cur.id} ("${cur.lbl.replace(/\n/g, "\\n")}")`];
+    if (cur.sp2 || cur.nl) {
+      lines.push(`NORMALISER espaces / sauts de ligne avant correspondance texte`);
+    }
+    if (cur.nm > 0) {
+      lines.push(`EXCLURE lignes antifongiques : TYPEANA LIKE '%_MY' OR TYPEANA LIKE 'PM_MY%' OR TYPEANA LIKE 'PM_ATF%' (${cur.nm} prél. *_MY seuls)`);
+    }
+    if (cur.sb > 0) {
+      lines.push(`SI TYPEANA = 'BGSTRB' ALORS depistage_portage (dépistage Strepto B, ${cur.sb} prél.)`);
+    }
+    if (cur.sr > 0) {
+      lines.push(`SI TYPEANA IN ('BGBLSE_R','BGCARBA_R','BGERV_R','BGSAMR_R','BGABRI_R','BGABMR_R','BGPYOBMR_R') ALORS depistage_portage (${cur.sr} prél.)`);
+    }
+    if (cur.so > 0 || cur.sc > 0) {
+      lines.push(`SI TYPEANA = 'BGSTA_R' SANS BGCULTAE ALORS depistage_portage (${cur.so} prél.) ; AVEC BGCULTAE voir contexte (${cur.sc} prél.)`);
+    }
+    if (cur.lev === "filter_sejuf_tri") {
+      lines.push(`ROUTER selon unité/discipline : SEJUF/SEJUM (${cur.uf || cur.um || "?"}) · TRI (${cur.tri || "?"})`);
+    }
+    if (cur.lev === "ask_chu_rouen") {
+      lines.push(`EN ATTENTE D'ARBITRAGE CHU ROUEN : valider la catégorie cible avant mise en production`);
+    } else {
+      lines.push(`SINON (bactériologie diagnostique) -> ${cur.cat}`);
+    }
+    return lines.join("\n");
+  }
+
+  function renderThemeDetail(th, idx) {
+    const examples = (th.example_labels || []).map(id =>
+      `<button type="button" class="ex-btn" data-jump-label="${esc(id)}" title="Ouvrir la fiche ${esc(id)}">${esc(id)}</button>`
+    ).join("");
+    return `
+      <div class="raw-label-box">
+        <div class="small" style="font-weight:600;margin-bottom:2px;">${esc(th.theme_id || `Thème ${idx + 1}`)}</div>
+        ${esc(th.title)}
+      </div>
+      <div class="callout warn"><strong>Impact observé :</strong> ${esc(th.impact_summary)}</div>
+      <div style="margin:10px 0;">
+        <div class="small" style="font-weight:700;text-transform:uppercase;margin-bottom:3px;">Question pour le CHU de Rouen (EN)</div>
+        <p>${esc(th.clinical_question)}</p>
+      </div>
+      <div class="callout">
+        <div class="small" style="font-weight:700;text-transform:uppercase;margin-bottom:3px;">Règle SIL recommandée (EN)</div>
+        <div>${esc(th.recommended_site_adapter_rule)}</div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="small" style="font-weight:700;text-transform:uppercase;margin-bottom:4px;">Libellés exemples (cliquer pour inspecter)</div>
+        <div>${examples || "—"}</div>
+      </div>`;
+  }
+
+  function renderInspector(rows) {
+    const body = document.getElementById("inspector-body");
+    const title = document.getElementById("inspector-title");
+    const nav = document.getElementById("inspector-nav");
+    const prevBtn = document.getElementById("prev-item");
+    const nextBtn = document.getElementById("next-item");
+
+    if (state.view === "themes") {
+      nav.hidden = false;
+      const th = allThemes[activeThemeIdx];
+      prevBtn.disabled = activeThemeIdx <= 0;
+      nextBtn.disabled = activeThemeIdx >= allThemes.length - 1;
+      prevBtn.onclick = () => { if (activeThemeIdx > 0) { activeThemeIdx--; renderTable(); } };
+      nextBtn.onclick = () => { if (activeThemeIdx < allThemes.length - 1) { activeThemeIdx++; renderTable(); } };
+      title.textContent = allThemes.length ? `Thème ${activeThemeIdx + 1} / ${fmtInt(allThemes.length)}` : "Thèmes transversaux";
+      body.innerHTML = th ? renderThemeDetail(th, activeThemeIdx) : "<p class='small'>Aucun thème disponible.</p>";
+      return;
+    }
+
+    if (state.view === "matrix") {
+      nav.hidden = true;
+      title.textContent = `Thèmes transversaux (${fmtInt(allThemes.length)})`;
+      body.innerHTML = `<p class="small">Ces ${fmtInt(allThemes.length)} thèmes regroupent les questions récurrentes pour le CHU de Rouen. Cliquez sur un exemple (<code>LBL_xxxx</code>) pour ouvrir sa fiche, ou sur une catégorie à gauche pour filtrer ses libellés.</p>` +
+        allThemes.slice(0, 25).map((th, i) => `
+          <div class="theme-card">
+            <h3>${esc(th.theme_id || `Thème ${i + 1}`)} — ${esc(th.title)}</h3>
+            <p class="small">${esc(th.impact_summary)}</p>
+            <div>${(th.example_labels || []).map(id => `<button type="button" class="ex-btn" data-jump-label="${esc(id)}">${esc(id)}</button>`).join("")}</div>
+          </div>`).join("") +
+        (allThemes.length > 25 ? `<button type="button" class="btn-primary" id="open-all-themes-tab">Voir tous les ${fmtInt(allThemes.length)} thèmes dans l'onglet dédié →</button>` : "");
+      return;
+    }
+
+    nav.hidden = false;
+    if (!rows.length) {
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      title.textContent = "Aucun libellé affiché";
+      body.innerHTML = `<p class="small">Aucun libellé ne correspond aux filtres actuels. Essayez de retirer un critère ou cliquez sur <strong>Effacer filtres</strong>.</p>`;
+      return;
+    }
+
+    const idx = Math.max(0, rows.findIndex(r => r.id === state.selectedId));
+    const cur = rows[idx];
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = idx >= rows.length - 1;
+    prevBtn.onclick = () => {
+      if (idx > 0) {
+        const targetIdx = idx - 1;
+        update({ selectedId: rows[targetIdx].id, page: Math.floor(targetIdx / state.pageSize) });
+      }
+    };
+    nextBtn.onclick = () => {
+      if (idx < rows.length - 1) {
+        const targetIdx = idx + 1;
+        update({ selectedId: rows[targetIdx].id, page: Math.floor(targetIdx / state.pageSize) });
+      }
+    };
+
+    title.textContent = `Fiche ${fmtInt(idx + 1)} / ${fmtInt(rows.length)} · #${cur.r}`;
+
+    const wsInfo = [];
+    if (cur.sp2) wsInfo.push("contient un double espace");
+    if (cur.nl) wsInfo.push("contient un saut de ligne (\\n)");
+    const wsBanner = wsInfo.length ? `<div class="small" style="margin-top:4px;color:var(--warn-ink);">Anomalie de saisie : ${wsInfo.join(" et ")}.</div>` : "";
+
+    const ruleText = buildSilPseudoRule(cur);
+    let silCallout = "";
+    if (cur.lev === "ask_chu_rouen") {
+      silCallout = `<div class="callout warn"><strong>À demander au CHU de Rouen :</strong> ni le libellé ni les signaux disponibles ne suffisent à trancher ce prélèvement avec certitude.${ruleText ? `<pre class="rule-pre" id="sil-rule-pre">${esc(ruleText)}</pre>` : ""}</div>`;
+    } else if (cur.lev === "exclude_mycology") {
+      silCallout = `<div class="callout purple"><div class="between"><strong>Action SIL — Exclure la mycologie (<code>*_MY</code>)</strong><button type="button" class="btn-sm" id="copy-rule-btn">Copier la règle</button></div><div>${fmtInt(cur.nm)} sur ${fmtInt(cur.ns)} prélèvements n'ont qu'un antifongigramme <code>*_MY</code> (sans antibiogramme bactérien).</div>${ruleText ? `<pre class="rule-pre" id="sil-rule-pre">${esc(ruleText)}</pre>` : ""}</div>`;
+    } else if (ruleText) {
+      silCallout = `<div class="callout"><div class="between"><strong>Règle SIL à appliquer (${esc(LEVER_SHORT[cur.lev]?.[0] || cur.lev)})</strong><button type="button" class="btn-sm" id="copy-rule-btn">Copier la règle</button></div><pre class="rule-pre" id="sil-rule-pre">${esc(ruleText)}</pre></div>`;
+    }
+
+    const v1CatHtml = catLabel(cur.v1c) !== cur.v1c ? `<strong>${esc(catLabel(cur.v1c))}</strong> <code class="small">${esc(cur.v1c)}</code>` : `<strong>${esc(catLabel(cur.v1c))}</strong>`;
+    const v2CatHtml = catLabel(cur.cat) !== cur.cat ? `<strong>${esc(catLabel(cur.cat))}</strong> <code class="small">${esc(cur.cat)}</code>` : `<strong>${esc(catLabel(cur.cat))}</strong>`;
+
+    const statTile = (label, val, tip) => {
+      const n = Number(val || 0);
+      const cls = n > 0 ? "mini-stat active" : "mini-stat zero";
+      return `<div class="${cls}" title="${esc(tip)}"><span>${esc(label)}</span><strong>${fmtInt(n)}</strong></div>`;
+    };
+
+    const saved = reviews[cur.id] || { decision: "", targetCat: cur.cat, note: "" };
+    const catSelectOpts = (PAYLOAD.onerba_summary || []).map(o =>
+      `<option value="${esc(o.naturepvt_norm)}" ${saved.targetCat === o.naturepvt_norm ? "selected" : ""}>${esc(o.onerba_label || o.naturepvt_norm)}</option>`
+    ).join("");
+
+    const backThemes = cameFromView === "themes" || cameFromView === "matrix"
+      ? `<div style="margin-bottom:8px;"><button type="button" class="btn-sm" id="back-from-jump-btn">← Revenir aux thèmes</button></div>`
+      : "";
+
+    body.innerHTML = `
+      ${backThemes}
+      <div class="raw-label-box">
+        <div class="small" style="font-weight:600;margin-bottom:2px;">Libellé brut GLIMS (<code>${esc(cur.id)}</code>)</div>
+        ${esc(cur.lbl)}
+        ${wsBanner}
+      </div>
+
+      <div class="compare-grid">
+        <div class="detail-box">
+          <h4>Avant (v1 · ${esc(cur.fid)})</h4>
+          <div>${v1CatHtml}</div>
+          <div class="row" style="margin-top:6px;">${makeBadge(ROLE_SHORT, cur.v1r)} ${makeBadge(CONF_SHORT, cur.v1f)}</div>
+          <div class="small" style="margin-top:5px;">Origine v1 : ${cur.v1s === "crosscheck_label_override" ? "override manuel v1" : "hérité de famille"}</div>
+        </div>
+        <div class="detail-box highlight-v2">
+          <h4>Décision v2 vérifiée</h4>
+          <div>${v2CatHtml}</div>
+          <div class="row" style="margin-top:6px;">${makeBadge(ROLE_SHORT, cur.role)} ${makeBadge(CONF_SHORT, cur.conf)}</div>
+          <div class="row" style="margin-top:5px;">${makeBadge(STATUS_SHORT, cur.st)} ${makeBadge(LEVER_SHORT, cur.lev)}</div>
+        </div>
+      </div>
+
+      ${silCallout}
+
+      <div style="margin:8px 0;">
+        <div class="small" style="font-weight:700;text-transform:uppercase;margin-bottom:3px;">Pourquoi cette décision ? <span style="font-weight:400;">(note d'audit EN)</span></div>
+        <p style="margin:0;">${esc(cur.rat)}</p>
+      </div>
+
+      <dl class="kv-list">
+        <dt><abbr title="Unités fonctionnelles (SEJUF) / médicales (SEJUM) et discipline de tri (TRI) dans GLIMS">Unités / disciplines</abbr></dt>
+        <dd>${esc(cur.uf || "—")}${cur.um ? ` · SEJUM : ${esc(cur.um)}` : ""}${cur.tri ? ` · TRI : ${esc(cur.tri)}` : ""}</dd>
+        <dt><abbr title="Codes d'analyse prescrits sur ces prélèvements dans GLIMS">Analyses (TYPEANA)</abbr></dt>
+        <dd>${esc(cur.ta || "—")}</dd>
+        <dt>Germes fréquents</dt>
+        <dd>${esc(cur.sp || "—")}</dd>
+      </dl>
+
+      <div class="small" style="font-weight:700;text-transform:uppercase;margin-top:8px;">Volumétrie &amp; marqueurs du SIL (${fmtInt(cur.ns)} prélèvements · ${fmtInt(cur.ni)} isolats)</div>
+      <div class="mini-grid">
+        ${statTile("ATB bactérien", cur.nb, "Prélèvements avec au moins un antibiogramme bactérien (hors *_MY)")}
+        ${statTile("Myco *_MY seul", cur.nm, "Prélèvements ayant uniquement un antifongigramme (*_MY)")}
+        ${statTile("Flacons hémoc", cur.nbl, "Présence de codes BGFA* (flacons d'hémoculture)")}
+        ${statTile("ECBU (urines)", cur.nur, "Présence de BGUCYTO ou BGASPU")}
+        ${statTile("Liquides stériles", cur.nfl, "Présence de BGNUML ou BGEDL (ponctions stériles)")}
+        ${statTile("Dépistage _R sys.", cur.sr, "Dépistage systématique BMR/BHRe (_R : BLSE, CARBA, ERV, SAMR…)")}
+        ${statTile("BGSTA_R seul", cur.so, "Dépistage SARM (BGSTA_R) sans culture BGCULTAE")}
+        ${statTile("BGSTA_R + culture", cur.sc, "BGSTA_R accompagné d'une culture BGCULTAE")}
+        ${statTile("Dépistage Strepto B", cur.sb, "Dépistage Streptocoque B (BGSTRB)")}
+      </div>
+
+      <div class="review-box">
+        <div class="between">
+          <strong class="small" style="text-transform:uppercase;">Votre avis local (enregistré dans le navigateur)</strong>
+          ${saved.decision ? `<button type="button" class="btn-sm" id="clear-review-btn">Effacer</button>` : ""}
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button type="button" class="btn-sm rev-choice ${saved.decision === "valide" ? "btn-primary" : ""}" data-rev="valide">✓ Valider v2</button>
+          <button type="button" class="btn-sm rev-choice ${saved.decision === "reclasser" ? "btn-primary" : ""}" data-rev="reclasser">✎ Proposer autre catégorie</button>
+          <select id="rev-cat" aria-label="Catégorie proposée" ${saved.decision === "reclasser" ? "" : "hidden"}>${catSelectOpts}</select>
+        </div>
+        <textarea id="rev-note" placeholder="Commentaire libre pour l'équipe (ex. règle locale Rouen, précision clinique)...">${esc(saved.note || "")}</textarea>
+      </div>
+    `;
   }
 
   function renderTable() {
     const tc = document.getElementById("table-container");
     const pagBar = document.getElementById("pagination-bar");
-    const filterBox = document.getElementById("filter-controls");
-    filterBox.hidden = (state.view === "matrix");
+    const pageInd = document.getElementById("page-indicator");
+    const filterSec = document.getElementById("filter-section");
+    const tourRib = document.getElementById("tour-ribbon");
+    const backCatBtn = document.getElementById("back-to-cat-btn");
 
-    if (state.view === "matrix") {
+    backCatBtn.hidden = !(cameFromView === "matrix" && state.view === "labels");
+
+    if (state.view === "themes") {
+      filterSec.hidden = true;
+      tourRib.hidden = true;
       pagBar.hidden = true;
-      const allSum = Logic.computeSummary(PAYLOAD.labels || [], meta);
-      renderKPIs(allSum);
+      pageInd.textContent = "";
+      renderSummary(Logic.computeSummary(allRows, meta));
       document.getElementById("selection-summary").textContent =
-        "Matrice des 17 catégories ONERBA / SPARES post-audit 1-à-1 v2 (cliquez sur une catégorie pour filtrer ses libellés).";
+        `${fmtInt(allThemes.length)} thèmes transversaux à valider avec le CHU de Rouen`;
       tc.innerHTML = `<div class="scroll"><table>
         <thead><tr>
-          <th>Catégorie (<code>naturepvt_norm</code>)</th>
-          <th>Libellé ONERBA / SPARES</th>
-          <th class="num">Libellés</th>
-          <th class="num">Échantillons</th>
-          <th class="num">Bactériens</th>
-          <th class="num">*_MY seuls</th>
-          <th class="num">% Éch.</th>
-          <th class="num">Isolats</th>
-          <th class="num">Reclassifiés vers cat.</th>
+          <th>Thème</th>
+          <th>Exemples de libellés</th>
         </tr></thead>
         <tbody>
-          ${(PAYLOAD.onerba_summary || []).map(o => `<tr>
-            <td><button type="button" class="pick-btn" data-cat-jump="${esc(o.naturepvt_norm)}"><code>${esc(o.naturepvt_norm)}</code></button>${o.is_current_spares_target ? ` <span class="badge b-target">SPARES</span>` : ""}</td>
-            <td>${esc(o.onerba_label_fr)}</td>
-            <td class="num">${fmtInt(o.n_labels)}</td>
-            <td class="num">${fmtInt(o.n_samples)}</td>
-            <td class="num">${fmtInt(o.n_samp_bacterial)}</td>
-            <td class="num">${fmtInt(o.n_samp_mycology_only)}</td>
-            <td class="num">${fmtPct(o.pct_samples)}</td>
-            <td class="num">${fmtInt(o.n_isolates)}</td>
-            <td class="num">${fmtInt(o.n_reclassified_into)}</td>
-          </tr>`).join("")}
+          ${allThemes.map((th, i) => `
+            <tr class="data-row ${i === activeThemeIdx ? "selected-row" : ""}" data-theme-idx="${i}">
+              <td>
+                <div style="font-weight:650;">${esc(th.theme_id || `Thème ${i + 1}`)} — ${esc(th.title)}</div>
+                <div class="small">${esc(th.impact_summary)}</div>
+              </td>
+              <td>${(th.example_labels || []).map(id => `<button type="button" class="ex-btn" data-jump-label="${esc(id)}">${esc(id)}</button>`).join("")}</td>
+            </tr>`).join("")}
         </tbody>
       </table></div>`;
-      document.getElementById("inspector-section").hidden = false;
-      document.getElementById("inspector-title").textContent = `Thèmes transversaux issus du cross-check v2 (${(PAYLOAD.themes || []).length})`;
-      document.getElementById("inspector-body").innerHTML = renderThemesHtml();
+      renderInspector([]);
       return;
     }
 
-    const rawRows = Logic.getRowsForView(state, PAYLOAD);
-    const rows = Logic.sortRows(rawRows, state.sortBy, state.sortDir);
+    if (state.view === "matrix") {
+      filterSec.hidden = true;
+      tourRib.hidden = false;
+      pagBar.hidden = true;
+      pageInd.textContent = "";
+      renderSummary(Logic.computeSummary(allRows, meta));
+      document.getElementById("selection-summary").textContent =
+        "Répartition globale sur les 17 catégories ONERBA / SPARES (cliquez sur une catégorie pour inspecter ses libellés).";
+      tc.innerHTML = `<div class="scroll"><table>
+        <thead><tr>
+          <th>Catégorie</th>
+          <th class="num">Libellés</th>
+          <th class="num">Prélèvements</th>
+          <th class="num">% total</th>
+          <th class="num">Dont *_MY seuls</th>
+          <th>Exemples fréquents</th>
+        </tr></thead>
+        <tbody>
+          ${(PAYLOAD.onerba_summary || []).map(o => `
+            <tr>
+              <td>
+                <button type="button" class="cat-link" data-cat-jump="${esc(o.naturepvt_norm)}">${esc(o.onerba_label || o.naturepvt_norm)}</button>
+                ${o.is_current_spares_target ? ` <span class="badge b-target">SPARES</span>` : ""}
+                ${o.onerba_label && o.onerba_label !== o.naturepvt_norm ? `<div class="small"><code>${esc(o.naturepvt_norm)}</code></div>` : ""}
+              </td>
+              <td class="num">${fmtInt(o.n_labels)}</td>
+              <td class="num">${fmtInt(o.n_samples)}</td>
+              <td class="num">${fmtPct(o.pct_samples)}</td>
+              <td class="num">${o.n_samp_mycology_only > 0 ? `<span class="badge b-myco">${fmtInt(o.n_samp_mycology_only)}</span>` : "0"}</td>
+              <td class="small">${esc(o.top_examples)}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table></div>`;
+      renderInspector([]);
+      return;
+    }
+
+    filterSec.hidden = false;
+    tourRib.hidden = false;
+    const filtered = Logic.getRowsForView(state, PAYLOAD);
+    const rows = Logic.sortRows(filtered, state.sortBy, state.sortDir);
     const sum = Logic.computeSummary(rows, meta);
-    renderKPIs(sum);
+    renderSummary(sum);
 
     const totalPages = Math.max(1, Math.ceil(rows.length / state.pageSize));
     const curPage = Math.min(state.page, totalPages - 1);
     const slice = rows.slice(curPage * state.pageSize, (curPage + 1) * state.pageSize);
 
-    document.getElementById("selection-summary").textContent =
-      `${fmtInt(rows.length)} libellés correspondants (${fmtInt(sum.nSamples)} éch., ${fmtPct(sum.pctSamples)}). Affichage ${rows.length ? curPage * state.pageSize + 1 : 0}–${curPage * state.pageSize + slice.length}.`;
+    const rouenQuick = state.view === "rouen"
+      ? ` <button type="button" class="btn-sm ${state.lev === "ask_chu_rouen" ? "btn-primary" : ""}" id="toggle-strict-rouen">${state.lev === "ask_chu_rouen" ? "✓ Uniquement avis Rouen (164)" : "Filtrer : avis Rouen stricts (164)"}</button>`
+      : "";
+    document.getElementById("selection-summary").innerHTML =
+      `${fmtInt(rows.length)} libellé${rows.length > 1 ? "s" : ""} (${fmtInt(sum.nSamples)} prélèvements)` + rouenQuick;
+    pageInd.textContent = rows.length ? `Page ${curPage + 1} / ${totalPages}` : "";
 
     pagBar.hidden = rows.length <= state.pageSize;
     pagBar.innerHTML = `
-      <span class="small">Page ${curPage + 1} / ${totalPages} (${fmtInt(rows.length)} libellés)</span>
+      <span class="small">Affichage ${fmtInt(curPage * state.pageSize + 1)}–${fmtInt(curPage * state.pageSize + slice.length)} sur ${fmtInt(rows.length)}</span>
       <div class="row">
-        <button type="button" data-page="${curPage - 1}" ${curPage <= 0 ? "disabled" : ""}>Page précédente</button>
-        <button type="button" data-page="${curPage + 1}" ${curPage >= totalPages - 1 ? "disabled" : ""}>Page suivante</button>
+        <button type="button" data-page="${curPage - 1}" ${curPage <= 0 ? "disabled" : ""}>← Page préc.</button>
+        <button type="button" data-page="${curPage + 1}" ${curPage >= totalPages - 1 ? "disabled" : ""}>Page suiv. →</button>
       </div>`;
 
-    tc.innerHTML = `<div class="scroll"><table>
+    if (!slice.length) {
+      tc.innerHTML = `<div class="story-box">Aucun libellé ne correspond à ces critères. Essayez de retirer un filtre ou cliquez sur <strong>Effacer filtres</strong>.</div>`;
+      renderInspector([]);
+      return;
+    }
+
+    tc.innerHTML = `<div class="scroll" id="table-scroll"><table>
       <thead><tr>
-        <th>${sortHeading("id", "ID")}</th>
-        <th>${sortHeading("name", "Libellé NATUREPVT brut")}</th>
-        <th>${sortHeading("v1c", "v1 → v2")}</th>
-        <th>${sortHeading("st", "Statut")}</th>
-        <th>${sortHeading("lev", "Levier LIS")}</th>
-        <th>${sortHeading("role", "Rôle")}</th>
-        <th>${sortHeading("conf", "Confiance")}</th>
-        <th class="num">${sortHeading("n_samples", "Éch.")}</th>
-        <th class="num">${sortHeading("n_myco", "*_MY")}</th>
-        <th>Signaux GLIMS (SEJUF / TYPEANA / Espèce)</th>
+        <th>${sortHeading("name", "Libellé brut")}</th>
+        <th>${sortHeading("cat", "Catégorie (v1 → v2)")}</th>
+        <th>${sortHeading("lev", "Action & Statut")}</th>
+        <th class="num">${sortHeading("n_samples", "Prélèvements")}</th>
       </tr></thead>
       <tbody>
         ${slice.map(l => {
           const sel = l.id === state.selectedId ? "selected-row" : "";
-          const catChange = l.v1c !== l.cat
-            ? `<div class="small" style="text-decoration:line-through;color:#8c231c">${esc(l.v1c)}</div><code>${esc(l.cat)}</code>`
-            : `<code>${esc(l.cat)}</code>`;
-          const wsBadges = (l.sp2 ? ` <span class="badge b-ws">2x espace</span>` : "") + (l.nl ? ` <span class="badge b-ws">\\n</span>` : "");
-          return `<tr class="${sel}">
-            <td><button type="button" class="pick-btn" data-id="${esc(l.id)}"><strong>${esc(l.id)}</strong></button><div class="small">#${l.r}</div></td>
-            <td><button type="button" class="pick-btn" data-id="${esc(l.id)}">${esc(l.lbl)}</button>${wsBadges}</td>
-            <td>${catChange}</td>
-            <td>${statusBadge(l.st)}</td>
-            <td><span class="badge b-lev">${esc(l.lev)}</span></td>
-            <td>${roleBadge(l.role)}</td>
-            <td>${confBadge(l.conf)}</td>
-            <td class="num">${fmtInt(l.ns)}<div class="small">${fmtInt(l.nb)} bact.</div></td>
-            <td class="num">${l.nm > 0 ? `<span class="badge b-myco">${fmtInt(l.nm)}</span>` : "0"}</td>
-            <td class="small">${l.uf ? `UF: ${esc(l.uf)}<br>` : ""}${esc(l.sp || "")}</td>
+          const v1Name = catLabel(l.v1c);
+          const v2Name = catLabel(l.cat);
+          const catHtml = l.v1c !== l.cat
+            ? `<div class="small" style="text-decoration:line-through;color:var(--danger-ink);">${esc(v1Name)}</div><strong>${esc(v2Name)}</strong>`
+            : `<strong>${esc(v2Name)}</strong>`;
+          const codeSub = v2Name !== l.cat ? `<div class="small"><code>${esc(l.cat)}</code></div>` : "";
+          const roleDiff = l.v1r !== l.role
+            ? `<div class="small" style="color:var(--warn-ink);">Rôle : ${esc(ROLE_SHORT[l.v1r]?.[0] || l.v1r)} → <strong>${esc(ROLE_SHORT[l.role]?.[0] || l.role)}</strong></div>`
+            : "";
+          const revBadge = reviews[l.id]?.decision ? ` <span class="badge b-note">Avis saisi</span>` : "";
+          const extraBadges = [
+            l.sp2 ? `<span class="badge b-ws" title="Contient un double espace">2× espace</span>` : "",
+            l.nl ? `<span class="badge b-ws" title="Contient un retour à la ligne">\\n</span>` : "",
+            l.nm > 0 ? `<span class="badge b-myco">${fmtInt(l.nm)} *_MY</span>` : ""
+          ].filter(Boolean).join(" ");
+          const statusPart = l.st !== "confirmed" ? ` ${makeBadge(STATUS_SHORT, l.st)}` : "";
+          return `<tr class="data-row ${sel}" data-id="${esc(l.id)}">
+            <td>
+              <div style="font-weight:600;">${esc(l.lbl)}</div>
+              <div class="small">#${l.r} · ${esc(l.id)} ${extraBadges}${revBadge}</div>
+            </td>
+            <td>${catHtml}${codeSub}${roleDiff}</td>
+            <td><div class="row" style="gap:4px;">${makeBadge(LEVER_SHORT, l.lev)}${statusPart}</div></td>
+            <td class="num">
+              <strong>${fmtInt(l.ns)}</strong>
+              <div class="small">${fmtInt(l.nb)} bact.${l.nm > 0 ? ` · ${fmtInt(l.nm)} *_MY` : ""}</div>
+            </td>
           </tr>`;
         }).join("")}
       </tbody>
     </table></div>`;
 
     renderInspector(rows);
-  }
-
-  function renderInspector(rows) {
-    const sec = document.getElementById("inspector-section");
-    const prevBtn = document.getElementById("prev-item");
-    const nextBtn = document.getElementById("next-item");
-    if (!rows.length) {
-      if (state.view === "rouen" && (PAYLOAD.themes || []).length) {
-        sec.hidden = false;
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        document.getElementById("inspector-title").textContent = "Thèmes CHU Rouen";
-        document.getElementById("inspector-body").innerHTML = renderThemesHtml();
-        return;
-      }
-      sec.hidden = true;
-      return;
-    }
-    sec.hidden = false;
-    const idx = rows.findIndex(r => r.id === state.selectedId);
-    const cur = idx >= 0 ? rows[idx] : rows[0];
-    prevBtn.disabled = idx <= 0;
-    nextBtn.disabled = idx < 0 || idx >= rows.length - 1;
-    prevBtn.onclick = () => idx > 0 && update({ selectedId: rows[idx - 1].id });
-    nextBtn.onclick = () => idx < rows.length - 1 && update({ selectedId: rows[idx + 1].id });
-
-    document.getElementById("inspector-title").textContent = `${cur.id} (Rang #${cur.r}) — ${cur.lbl}`;
-    document.getElementById("inspector-body").innerHTML = `
-      <div class="inspector-grid">
-        <div class="inspector-box"><strong>Baseline v1 (${esc(cur.fid)})</strong><code>${esc(cur.v1c)}</code> · ${roleBadge(cur.v1r)} · ${confBadge(cur.v1f)}<div class="small">Source v1 : ${esc(cur.v1s)}</div></div>
-        <div class="inspector-box"><strong>Décision v2 vérifiée</strong><code>${esc(cur.cat)}</code> · ${roleBadge(cur.role)} · ${confBadge(cur.conf)}<div class="small">${statusBadge(cur.st)}</div></div>
-        <div class="inspector-box"><strong>Règle composite LIS</strong><span class="badge b-lev">${esc(cur.lev)}</span> · <code>needs_composite=${cur.comp}</code><div class="small">Blood:${cur.nbl} · Urine:${cur.nur} · Fluid:${cur.nfl}</div></div>
-        <div class="inspector-box"><strong>Volumes &amp; Dépistage (ELTID)</strong>${fmtInt(cur.ns)} éch. (${fmtInt(cur.nb)} bact. / ${fmtInt(cur.nm)} *_MY seul) · ${fmtInt(cur.ni)} isolats<div class="small">_R sys:${cur.sr} · BGSTA_R seul:${cur.so} · +BGCULTAE:${cur.sc} · BGSTRB:${cur.sb}</div></div>
-      </div>
-      <p><strong>Justification v2 :</strong> ${esc(cur.rat)}</p>
-      <p class="small"><strong>SEJUF :</strong> ${esc(cur.uf || "—")} &nbsp;|&nbsp; <strong>SEJUM :</strong> ${esc(cur.um || "—")} &nbsp;|&nbsp; <strong>TRI :</strong> ${esc(cur.tri || "—")}</p>
-      <p class="small"><strong>Top TYPEANA :</strong> ${esc(cur.ta || "—")}</p>
-      <p class="small"><strong>Top espèces :</strong> ${esc(cur.sp || "—")}</p>
-      ${state.view === "rouen" ? `<details style="margin-top:12px;"><summary><strong>Thèmes transversaux pour CHU Rouen (${(PAYLOAD.themes || []).length})</strong></summary><div style="margin-top:10px;">${renderThemesHtml()}</div></details>` : ""}`;
-  }
-
-  function renderViews() {
-    document.getElementById("view-buttons").innerHTML = Logic.VIEWS.map(v =>
-      `<button type="button" data-view="${esc(v.id)}" aria-pressed="${state.view === v.id}">${esc(v.label)}</button>`
-    ).join("");
+    const selRow = tc.querySelector("tr.selected-row");
+    if (selRow) selRow.scrollIntoView({ block: "nearest" });
   }
 
   function syncControls() {
     document.getElementById("f-cat").value = state.cat;
+    const levSel = document.getElementById("f-lever");
+    levSel.value = state.lev;
+    const textOpt = levSel.querySelector('option[value="text_sufficient"]');
+    if (textOpt) {
+      textOpt.disabled = (state.view === "composite" || state.view === "rouen");
+    }
     document.getElementById("f-status").value = state.st;
-    document.getElementById("f-lever").value = state.lev;
     document.getElementById("f-role").value = state.role;
     document.getElementById("f-conf").value = state.conf;
     document.getElementById("f-myco").value = state.myco;
+    document.getElementById("f-ws").checked = Boolean(state.wsOnly);
+    document.getElementById("f-pagesize").value = String(state.pageSize);
     document.getElementById("f-query").value = state.query;
   }
 
@@ -755,20 +1402,43 @@ const Logic = (() => {
     renderViews();
     renderWalkthroughs();
     syncControls();
+    renderActiveChips();
     renderTable();
+  }
+
+  function downloadCsv(filename, headers, rowArrays) {
+    const csvCell = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = "\ufeff" + [headers.map(csvCell).join(","), ...rowArrays.map(r => r.map(csvCell).join(","))].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   populateSelects();
   renderRunMeta();
+  updateExportReviewBtn();
   update({});
 
   document.getElementById("view-buttons").addEventListener("click", e => {
     const btn = e.target.closest("button[data-view]");
-    if (btn) update({ view: btn.dataset.view, step: -1 });
+    if (btn) {
+      cameFromView = null;
+      const v = btn.dataset.view;
+      const patch = { view: v, scenario: -1, step: -1 };
+      if ((v === "composite" || v === "rouen") && state.lev === "text_sufficient") {
+        patch.lev = "all";
+      }
+      update(patch);
+    }
   });
   document.getElementById("scenario-buttons").addEventListener("click", e => {
     const btn = e.target.closest("button[data-scen]");
     if (btn) {
+      cameFromView = null;
       const idx = Number(btn.dataset.scen);
       const firstAction = Logic.SCENARIOS[idx].steps[0]?.action || {};
       update({ ...firstAction, scenario: idx, step: 0 });
@@ -782,28 +1452,166 @@ const Logic = (() => {
       update({ ...act, step: sidx });
     }
   });
-  document.getElementById("f-cat").addEventListener("change", e => update({ cat: e.target.value, step: -1 }));
-  document.getElementById("f-status").addEventListener("change", e => update({ st: e.target.value, step: -1 }));
-  document.getElementById("f-lever").addEventListener("change", e => update({ lev: e.target.value, step: -1 }));
-  document.getElementById("f-role").addEventListener("change", e => update({ role: e.target.value, step: -1 }));
-  document.getElementById("f-conf").addEventListener("change", e => update({ conf: e.target.value, step: -1 }));
-  document.getElementById("f-myco").addEventListener("change", e => update({ myco: e.target.value, step: -1 }));
-  document.getElementById("f-query").addEventListener("input", e => update({ query: e.target.value, step: -1 }));
+  document.getElementById("toggle-adv").addEventListener("click", () => {
+    advOpen = !advOpen;
+    renderActiveChips();
+  });
+
+  document.getElementById("f-cat").addEventListener("change", e => update({ cat: e.target.value, scenario: -1, step: -1 }));
+  document.getElementById("f-lever").addEventListener("change", e => update({ lev: e.target.value, scenario: -1, step: -1 }));
+  document.getElementById("f-status").addEventListener("change", e => update({ st: e.target.value, scenario: -1, step: -1 }));
+  document.getElementById("f-role").addEventListener("change", e => update({ role: e.target.value, scenario: -1, step: -1 }));
+  document.getElementById("f-conf").addEventListener("change", e => update({ conf: e.target.value, scenario: -1, step: -1 }));
+  document.getElementById("f-myco").addEventListener("change", e => update({ myco: e.target.value, scenario: -1, step: -1 }));
+  document.getElementById("f-ws").addEventListener("change", e => update({ wsOnly: e.target.checked, scenario: -1, step: -1 }));
+  document.getElementById("f-pagesize").addEventListener("change", e => update({ pageSize: Number(e.target.value) || 50 }));
+  document.getElementById("f-query").addEventListener("input", e => update({ query: e.target.value, scenario: -1, step: -1 }));
   document.getElementById("clear-filters").addEventListener("click", () => update({ clearFilters: true }));
-  document.getElementById("reset-demo").addEventListener("click", () => update({ reset: true }));
+  document.getElementById("reset-demo").addEventListener("click", () => { advOpen = false; cameFromView = null; update({ reset: true }); });
+
+  document.getElementById("export-view-csv").addEventListener("click", () => {
+    const rows = Logic.sortRows(Logic.getRowsForView(state, PAYLOAD), state.sortBy, state.sortDir);
+    downloadCsv(
+      `naturepvt_v2_${state.view}.csv`,
+      ["label_id", "rank", "NATUREPVT", "v1_cat", "v2_cat", "v1_role", "v2_role", "v1_status", "resolution_lever", "n_samples", "n_bact", "n_myco_only", "top_sejuf", "top_typeana", "sil_rule_hint"],
+      rows.map(l => [l.id, l.r, l.lbl, l.v1c, l.cat, l.v1r, l.role, l.st, l.lev, l.ns, l.nb, l.nm, l.uf, l.ta, buildSilPseudoRule(l) || ""])
+    );
+  });
+
+  document.getElementById("export-reviews-csv").addEventListener("click", () => {
+    const entries = Object.entries(reviews);
+    if (!entries.length) return;
+    const byId = new Map(allRows.map(l => [l.id, l]));
+    downloadCsv(
+      "avis_chu_rouen_naturepvt_v2.csv",
+      ["label_id", "NATUREPVT", "v2_cat", "decision_locale", "categorie_proposee", "commentaire"],
+      entries.map(([id, rv]) => {
+        const l = byId.get(id) || {};
+        return [id, l.lbl || "", l.cat || "", rv.decision || "", rv.targetCat || "", rv.note || ""];
+      })
+    );
+  });
 
   document.addEventListener("click", e => {
-    const idBtn = e.target.closest("button[data-id]");
-    if (idBtn) { update({ selectedId: idBtn.dataset.id }); return; }
+    const chipBtn = e.target.closest("button[data-clear-chip]");
+    if (chipBtn) {
+      const k = chipBtn.dataset.clearChip;
+      if (k === "wsOnly") {
+        const patch = { wsOnly: false, scenario: -1, step: -1 };
+        if (state.query.trim() === "__WS_NL__") patch.query = "";
+        update(patch);
+      } else if (k === "query") {
+        update({ query: "", scenario: -1, step: -1 });
+      } else {
+        update({ [k]: "all", scenario: -1, step: -1 });
+      }
+      return;
+    }
+    if (e.target.closest("#toggle-strict-rouen")) {
+      update({ lev: state.lev === "ask_chu_rouen" ? "all" : "ask_chu_rouen", scenario: -1, step: -1 });
+      return;
+    }
+    if (e.target.closest("#open-all-themes-tab")) {
+      cameFromView = null;
+      update({ view: "themes", scenario: -1, step: -1 });
+      return;
+    }
+    if (e.target.closest("#back-to-cat-btn")) {
+      cameFromView = null;
+      update({ view: "matrix", cat: "all", scenario: -1, step: -1 });
+      return;
+    }
+    if (e.target.closest("#back-from-jump-btn")) {
+      const targetView = cameFromView || "themes";
+      cameFromView = null;
+      update({ view: targetView, scenario: -1, step: -1 });
+      return;
+    }
+    const jumpBtn = e.target.closest("button[data-jump-label]");
+    if (jumpBtn) {
+      cameFromView = state.view;
+      const targetId = jumpBtn.dataset.jumpLabel;
+      const next = { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "", selectedId: targetId, scenario: -1, step: -1 };
+      const sorted = Logic.sortRows(Logic.filterLabels({ ...state, ...next }, PAYLOAD, null), state.sortBy, state.sortDir);
+      const foundIdx = sorted.findIndex(r => r.id === targetId);
+      if (foundIdx >= 0) {
+        next.page = Math.floor(foundIdx / state.pageSize);
+      } else {
+        next.query = targetId;
+        delete next.selectedId;
+      }
+      update(next);
+      return;
+    }
+    if (e.target.closest("#copy-rule-btn")) {
+      const pre = document.getElementById("sil-rule-pre");
+      if (pre && navigator.clipboard) {
+        navigator.clipboard.writeText(pre.textContent).catch(() => {});
+        const b = e.target.closest("#copy-rule-btn");
+        b.textContent = "✓ Copié";
+        setTimeout(() => { b.textContent = "Copier la règle"; }, 1400);
+      }
+      return;
+    }
+    const revBtn = e.target.closest("button.rev-choice");
+    if (revBtn && state.selectedId) {
+      const curId = state.selectedId;
+      const curRow = allRows.find(r => r.id === curId);
+      const prev = reviews[curId] || { targetCat: curRow?.cat || "", note: "" };
+      reviews[curId] = { ...prev, decision: revBtn.dataset.rev };
+      saveReviews();
+      renderTable();
+      return;
+    }
+    if (e.target.closest("#clear-review-btn") && state.selectedId) {
+      delete reviews[state.selectedId];
+      saveReviews();
+      renderTable();
+      return;
+    }
+    const themeRow = e.target.closest("tr[data-theme-idx]");
+    if (themeRow) {
+      activeThemeIdx = Number(themeRow.dataset.themeIdx) || 0;
+      renderTable();
+      return;
+    }
+    const rowEl = e.target.closest("tr[data-id]");
+    if (rowEl) { update({ selectedId: rowEl.dataset.id }); return; }
     const catJumpBtn = e.target.closest("button[data-cat-jump]");
-    if (catJumpBtn) { update({ view: "labels", cat: catJumpBtn.dataset.catJump, st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "", step: -1 }); return; }
+    if (catJumpBtn) {
+      cameFromView = "matrix";
+      update({ view: "labels", cat: catJumpBtn.dataset.catJump, st: "all", lev: "all", role: "all", conf: "all", myco: "all", wsOnly: false, query: "", scenario: -1, step: -1 });
+      return;
+    }
     const pageBtn = e.target.closest("button[data-page]");
-    if (pageBtn && !pageBtn.disabled) { update({ page: Number(pageBtn.dataset.page) }); return; }
+    if (pageBtn && !pageBtn.disabled) {
+      const nextPage = Number(pageBtn.dataset.page);
+      const rows = Logic.sortRows(Logic.getRowsForView(state, PAYLOAD), state.sortBy, state.sortDir);
+      const firstOnPage = rows[nextPage * state.pageSize];
+      update({ page: nextPage, selectedId: firstOnPage ? firstOnPage.id : state.selectedId });
+      return;
+    }
     const sortBtn = e.target.closest("button[data-sort]");
     if (sortBtn) {
       const k = sortBtn.dataset.sort;
       const dir = state.sortBy === k && state.sortDir === "desc" ? "asc" : "desc";
       update({ sortBy: k, sortDir: dir });
+    }
+  });
+
+  document.addEventListener("change", e => {
+    if (e.target.id === "rev-cat" && state.selectedId) {
+      const prev = reviews[state.selectedId] || { decision: "reclasser", note: "" };
+      reviews[state.selectedId] = { ...prev, decision: prev.decision || "reclasser", targetCat: e.target.value };
+      saveReviews();
+    }
+  });
+  document.addEventListener("input", e => {
+    if (e.target.id === "rev-note" && state.selectedId) {
+      const curRow = allRows.find(r => r.id === state.selectedId);
+      const prev = reviews[state.selectedId] || { decision: "", targetCat: curRow?.cat || "" };
+      reviews[state.selectedId] = { ...prev, note: e.target.value };
+      saveReviews();
     }
   });
 })();
