@@ -1,4 +1,5 @@
 !demo.template.html
+!demo_v2.template.html
 outputs/
 R_libs/
 *.rds

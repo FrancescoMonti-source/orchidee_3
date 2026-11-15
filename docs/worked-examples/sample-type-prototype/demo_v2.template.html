@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rouen NATUREPVT Mapping Explorer v2 — Audit 1-à-1 des 8 462 libellés (ADR-0003)</title>
+<style>
+  :root {
+    --bg: #f4f7f5;
+    --surface: #ffffff;
+    --ink: #17312c;
+    --muted: #53665c;
+    --accent: #1f6b53;
+    --accent-soft: #edf3ef;
+    --border: #d7e3dc;
+    --border-strong: #b5cbbf;
+    --warn-bg: #fff9ee;
+    --warn-border: #ad7621;
+    --warn-ink: #715014;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    max-width: 1340px;
+    margin: 26px auto;
+    padding: 0 20px 48px;
+  }
+  h1 { font-size: 27px; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 0; }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 10px; max-width: 100ch; }
+  code { background: #edf3ef; padding: 1px 5px; border-radius: 4px; font-size: 13px; overflow-wrap: anywhere; }
+  .tag { color: var(--accent); font-size: 12px; letter-spacing: .07em; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+  section, .guide-panel, .run-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 18px;
+    margin: 14px 0;
+  }
+  .notice {
+    border-left: 4px solid var(--warn-border);
+    background: var(--warn-bg);
+    padding: 10px 14px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+  }
+  .kpi-card {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 12px 14px;
+  }
+  .kpi-card strong { display: block; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .kpi-val { font-size: 21px; font-weight: 700; color: var(--ink); margin: 2px 0; }
+  .kpi-sub { font-size: 12.5px; color: var(--muted); }
+  .coverage-wrap { margin: 10px 0 4px; }
+  .coverage-track { position: relative; height: 14px; background: #e2ebe5; border-radius: 7px; overflow: hidden; }
+  .coverage-fill { height: 100%; background: var(--accent); transition: width .2s ease; }
+  button, select, input {
+    font: inherit;
+    padding: 7px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: white;
+    color: var(--ink);
+  }
+  button { cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--accent); color: white; border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .filter-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .filter-grid select, .filter-grid input { width: 100%; min-width: 0; font-weight: 400; font-size: 14px; }
+  .filter-span-2 { grid-column: span 2; }
+  @media (max-width: 980px) { .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-span-2 { grid-column: span 2; } }
+  @media (max-width: 580px) { .filter-grid { grid-template-columns: 1fr; } .filter-span-2 { grid-column: span 1; } }
+  .guide-panel { padding: 14px 18px; }
+  .guide-panel summary, .run-panel summary { cursor: pointer; font-weight: 650; }
+  .guide-panel[open] > summary, .run-panel[open] > summary { margin-bottom: 12px; }
+  .story-box { background: var(--accent-soft); border-radius: 6px; padding: 12px 14px; margin: 10px 0; font-size: 14px; }
+  .badge {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .b-diag { background: #e4f3ec; color: #14543f; }
+  .b-scr { background: #fce8e6; color: #8c231c; }
+  .b-ctx { background: #fff1cc; color: #715014; }
+  .b-uncl { background: #eceff1; color: #455a64; }
+  .b-high { background: #e8f5e9; color: #1b5e20; }
+  .b-med { background: #e3f2fd; color: #0d47a1; }
+  .b-ambig { background: #fff1cc; color: #715014; }
+  .b-target { background: #1f6b53; color: #ffffff; }
+  .b-conf { background: #e8f5e9; color: #1b5e20; }
+  .b-recl { background: #fce8e6; color: #8c231c; }
+  .b-flag { background: #fff1cc; color: #715014; }
+  .b-lev { background: #ede7f6; color: #4527a0; }
+  .b-myco { background: #f3e5f5; color: #6a1b9a; }
+  .b-ws { background: #eceff1; color: #37474f; }
+  .scroll { overflow: auto; max-height: 510px; border: 1px solid var(--border); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6eee9; vertical-align: top; }
+  th { position: sticky; top: 0; background: var(--accent-soft); z-index: 1; font-weight: 650; }
+  tr.selected-row { background: #e4f3ec; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pick-btn { text-align: left; padding: 3px 7px; font-size: 13px; border-color: var(--border); }
+  .pick-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .sort-btn { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 650; color: inherit; cursor: pointer; }
+  .sort-btn:hover { text-decoration: underline; }
+  .inspector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 12px; margin: 10px 0; }
+  .inspector-box { background: #f8fbf9; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .inspector-box strong { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; }
+  .small { font-size: 12.5px; color: var(--muted); }
+  .theme-card { border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; background: #fbfdfb; }
+  [hidden] { display: none !important; }
+</style>
+
+<div class="tag">PROTOTYPE V2 · AUDIT 1-À-1 SUR LES 8 462 LIBELLÉS · LOCAL ROUEN SITE ADAPTER (ADR-0003) · ZÉRO IDENTIFIANT</div>
+<h1>Explorateur de mappage <code>NATUREPVT</code> v2 (CHU de Rouen)</h1>
+<p id="subtitle"></p>
+
+<div class="notice">
+  <strong>Évolution v1 → v2 (<code>ADR-0003</code>)</strong> : la v1 s'appuyait sur l'héritage de 396 familles regex (seules 2 081 étiquettes avaient été lues directement). La v2 vérifie individuellement par <code>label_id</code> (<code>LBL_0001</code>..<code>LBL_8462</code>) <strong>100 % des 8 462 libellés <code>NATUREPVT</code></strong> enrichis depuis <code>data/bact22_24</code> avec <code>SEJUF</code>, <code>SEJUM</code>, <code>TRI</code>, <code>TYPEANA</code>, espèces bactériennes et séparation antifongique <code>*_MY</code>.
+</div>
+
+<section id="kpi-section">
+  <div class="kpi-grid" id="kpi-cards"></div>
+  <div class="coverage-wrap">
+    <div class="row" style="justify-content:space-between;">
+      <strong class="small" id="coverage-label"></strong>
+      <span class="small" id="coverage-pct"></span>
+    </div>
+    <div class="coverage-track"><div class="coverage-fill" id="coverage-fill" style="width:0%"></div></div>
+  </div>
+</section>
+
+<details id="walkthrough-panel" class="guide-panel" open>
+  <summary>Parcours guidés (5 cas d'usage v2 : reclassifications, mycologie *_MY, règles composites LIS)</summary>
+  <div id="scenario-buttons" class="row"></div>
+  <div id="story-container" class="story-box"></div>
+  <div id="step-buttons" class="row"></div>
+</details>
+
+<section id="explore-panel">
+  <div class="section-heading">
+    <h2>Exploration 1-à-1 des 8 462 libellés</h2>
+    <div class="row">
+      <button id="clear-filters" type="button">Effacer les filtres</button>
+      <button id="reset-demo" type="button">Réinitialiser</button>
+    </div>
+  </div>
+
+  <div id="view-buttons" class="row" style="margin-bottom:10px;"></div>
+
+  <div id="filter-controls" class="filter-grid">
+    <label>Catégorie cible v2 (<code>naturepvt_norm</code>)
+      <select id="f-cat"></select>
+    </label>
+    <label>Statut vs v1 (<code>v1_status</code>)
+      <select id="f-status"></select>
+    </label>
+    <label>Levier de résolution (<code>resolution_lever</code>)
+      <select id="f-lever"></select>
+    </label>
+    <label>Rôle diagnostique vs dépistage
+      <select id="f-role"></select>
+    </label>
+    <label>Confiance individuelle v2
+      <select id="f-conf"></select>
+    </label>
+    <label>Flux Mycologie <code>*_MY</code> vs Bactériologie
+      <select id="f-myco"></select>
+    </label>
+    <label class="filter-span-2">Recherche (<code>label_id</code>, <code>NATUREPVT</code>, <code>SEJUF</code>, <code>TYPEANA</code>, espèce, justification)
+      <input id="f-query" type="search" placeholder="Ex: LBL_0011, CAE, BOURSE, ESCARRE, BGSTRB, AMYGDALE, *_MY...">
+    </label>
+  </div>
+
+  <p class="small" id="selection-summary"></p>
+
+  <div id="table-container"></div>
+  <div id="pagination-bar" class="row" style="margin-top:10px; justify-content:space-between;" hidden></div>
+</section>
+
+<section id="inspector-section" hidden>
+  <div class="section-heading">
+    <h2 id="inspector-title">Inspecteur détaillé du libellé</h2>
+    <div class="row">
+      <button id="prev-item" type="button">Précédent</button>
+      <button id="next-item" type="button">Suivant</button>
+    </div>
+  </div>
+  <div id="inspector-body"></div>
+</section>
+
+<details id="run-panel" class="run-panel">
+  <summary>Métadonnées du run v2 et contrôles d'intégrité</summary>
+  <div id="run-meta"></div>
+</details>
+
+<script>
+const PAYLOAD = /*PROTOTYPE_DATA_V2*/null;
+
+/* === PURE LOGIC MODULE === */
+const Logic = (() => {
+  const VIEWS = [
+    { id: "labels", label: "1. Audit 1-à-1 (8 462 libellés)" },
+    { id: "diff", label: "2. Différences v1 → v2" },
+    { id: "composite", label: "3. Règles composites LIS (TYPEANA / SEJUF / *_MY)" },
+    { id: "rouen", label: "4. Questions CHU Rouen" },
+    { id: "matrix", label: "5. Matrice ONERBA / SPARES" }
+  ];
+
+  const STATUS_LABELS = {
+    all: "Tous les statuts v1→v2",
+    confirmed: "confirmed (v1 confirmée sans règle composite)",
+    reclassified: "reclassified (catégorie ou rôle corrigé vs v1)",
+    flagged: "flagged (même cat./rôle mais règle LIS / myco / question Rouen)"
+  };
+
+  const LEVER_LABELS = {
+    all: "Tous les leviers de résolution",
+    text_sufficient: "text_sufficient (texte NATUREPVT seul suffisant)",
+    filter_typeana: "filter_typeana (tri par TYPEANA: BGSTRB, _R, BGSTA_R, BGUCYTO...)",
+    filter_sejuf_tri: "filter_sejuf_tri (tri par unité SEJUF / SEJUM / TRI)",
+    exclude_mycology: "exclude_mycology (exclusion panels antifongiques *_MY)",
+    ask_chu_rouen: "ask_chu_rouen (validation CHU Rouen requise)",
+    __composite_any__: "Tous avec needs_composite_lis_rule = true"
+  };
+
+  const ROLE_LABELS = {
+    all: "Tous les rôles",
+    diagnostic: "diagnostic",
+    screening_site: "screening_site",
+    context_dependent: "context_dependent",
+    unclassifiable: "unclassifiable"
+  };
+
+  const CONF_LABELS = {
+    all: "Toutes les confiances",
+    high: "high (confiance individuelle élevée)",
+    medium: "medium (confiance moyenne)",
+    ambiguous_needs_human_review: "ambiguous_needs_human_review"
+  };
+
+  const MYCO_LABELS = {
+    all: "Tous (bactériologie + mycologie)",
+    has_myco_only: "Avec échantillons *_MY uniquement (> 0)",
+    pure_myco: "100 % mycologie *_MY (0 ATB bactérien)",
+    bact_only: "100 % ATB bactérien (0 *_MY)"
+  };
+
+  const SCENARIOS = [
+    {
+      name: "1. Reclassifications v1 → v2 (collisions & ONERBA)",
+      text: "L'audit 1-à-1 détecte les pièges masqués par l'héritage de familles v1 : CAE = Conduit Auditif Externe (jamais caecum), BOURSE PRE PATELLAIRE = genou (jamais scrotum), PRE AURICULAIRE/STERNAL (jamais prépuce), CUL DE SAC SOUS QUADRI, AMYGDALE diagnostic ORL, et ESCARRE reclassifiée en pus_superficiel (ONERBA Cap. II p. 22).",
+      steps: [
+        { label: "Toutes les reclassifications v1→v2", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", query: "" } },
+        { label: "Piège CAE / BOURSE / CUL DE SAC / PRE", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", query: "BOURSE" } },
+        { label: "Règle ONERBA p. 22 sur ESCARRE", action: { view: "diff", cat: "all", st: "reclassified", lev: "all", role: "all", conf: "all", myco: "all", query: "ESCARRE" } },
+        { label: "AMYGDALE (ORL diagnostic vs gorge)", action: { view: "diff", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "AMYGDAL" } }
+      ]
+    },
+    {
+      name: "2. Fuite antifongique *_MY (Mycologie)",
+      text: "La sélection par STRRES %in% S/SFP/I/R/ZIT sans filtrage des panels *_MY fait entrer 1 259 échantillons (dont 137 libellés 100 % *_MY et des doublons à double espace comme 'Aspiration bronchique', 'Hémoculture  périphérique', 'Ecouvillon  gorge').",
+      steps: [
+        { label: "137 libellés 100 % *_MY (0 bactérien)", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "pure_myco", query: "" } },
+        { label: "Tous les libellés avec flux *_MY (>0)", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "has_myco_only", query: "" } },
+        { label: "Levier exclude_mycology", action: { view: "composite", cat: "all", st: "all", lev: "exclude_mycology", role: "all", conf: "all", myco: "all", query: "" } }
+      ]
+    },
+    {
+      name: "3. Règles composites TYPEANA & SEJUF/TRI",
+      text: "Au-delà du texte NATUREPVT brut, certaines étiquettes sont résolues de façon déterministe par TYPEANA (`BGSTRB`, `BGSTA_R` vs `BGCULTAE`, `_R`, `BGUCYTO`, `BGFA*`) ou par l'unité `SEJUF`/`SEJUM` et la discipline `TRI` (`SONDE` en Urologie vs Cardiologie).",
+      steps: [
+        { label: "Vue Règles composites LIS", action: { view: "composite", cat: "all", st: "all", lev: "__composite_any__", role: "all", conf: "all", myco: "all", query: "" } },
+        { label: "Levier filter_typeana", action: { view: "labels", cat: "all", st: "all", lev: "filter_typeana", role: "all", conf: "all", myco: "all", query: "" } },
+        { label: "Levier filter_sejuf_tri", action: { view: "labels", cat: "all", st: "all", lev: "filter_sejuf_tri", role: "all", conf: "all", myco: "all", query: "" } }
+      ]
+    },
+    {
+      name: "4. Cibles SPARES (hemoculture & urines)",
+      text: "Vérification 1-à-1 des deux cibles SPARES actuelles (`hemoculture` et `urines`), incluant l'isolement des hémocultures à double espace exclusivement fongiques (`Hémoculture  périphérique`) et les abcès de loge de néphrostomie exclus d'urines.",
+      steps: [
+        { label: "Cibles SPARES actuelles", action: { view: "labels", cat: "__spares_targets__", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "" } },
+        { label: "Cibles SPARES signalées ou reclassifiées", action: { view: "diff", cat: "__spares_targets__", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "" } },
+        { label: "Matrice 17 catégories ONERBA/SPARES", action: { view: "matrix", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "" } }
+      ]
+    },
+    {
+      name: "5. Questions résiduelles pour CHU Rouen",
+      text: "Synthèse des seules étiquettes et règles ambiguës non tranchables ni par le texte ni par TYPEANA/SEJUF (`ask_chu_rouen` + validation des règles composites), prêtes pour revue microbiologique locale.",
+      steps: [
+        { label: "Questions strictes ask_chu_rouen", action: { view: "rouen", cat: "all", st: "all", lev: "ask_chu_rouen", role: "all", conf: "all", myco: "all", query: "" } },
+        { label: "Écouvillons sur sites stériles / profonds", action: { view: "rouen", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "ECOUVILLON" } },
+        { label: "Libellés avec retour chariot / double espace", action: { view: "labels", cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "__WS_NL__" } }
+      ]
+    }
+  ];
+
+  function initial(payload) {
+    const firstId = payload && payload.labels && payload.labels.length ? payload.labels[0].id : null;
+    return {
+      view: "labels",
+      cat: "all",
+      st: "all",
+      lev: "all",
+      role: "all",
+      conf: "all",
+      myco: "all",
+      query: "",
+      sortBy: "n_samples",
+      sortDir: "desc",
+      page: 0,
+      pageSize: 100,
+      selectedId: firstId,
+      scenario: 0,
+      step: -1
+    };
+  }
+
+  function filterLabels(state, payload, forcedMode) {
+    const rawQ = (state.query || "").trim();
+    const wsNlOnly = rawQ === "__WS_NL__";
+    const q = wsNlOnly ? "" : rawQ.toLocaleLowerCase();
+    const targets = new Set((payload.metadata && payload.metadata.current_spares_targets) || ["hemoculture", "urines"]);
+    return (payload.labels || []).filter(l => {
+      if (forcedMode === "diff" && !(l.chg || l.st !== "confirmed")) return false;
+      if (forcedMode === "composite" && !(l.comp || l.lev !== "text_sufficient")) return false;
+      if (forcedMode === "rouen" && l.lev === "text_sufficient") return false;
+      if (wsNlOnly && !(l.sp2 || l.nl)) return false;
+
+      if (state.cat === "__spares_targets__") {
+        if (!targets.has(l.cat)) return false;
+      } else if (state.cat !== "all" && l.cat !== state.cat) {
+        return false;
+      }
+      if (state.st !== "all" && l.st !== state.st) return false;
+      if (state.lev === "__composite_any__") {
+        if (!l.comp) return false;
+      } else if (state.lev !== "all" && l.lev !== state.lev) {
+        return false;
+      }
+      if (state.role !== "all" && l.role !== state.role) return false;
+      if (state.conf !== "all" && l.conf !== state.conf) return false;
+
+      if (state.myco === "has_myco_only" && !(Number(l.nm) > 0)) return false;
+      if (state.myco === "pure_myco" && !(Number(l.nm) > 0 && Number(l.nb) === 0)) return false;
+      if (state.myco === "bact_only" && !(Number(l.nm) === 0)) return false;
+
+      if (q) {
+        const hay = [l.id, l.lbl, l.fid, l.cat, l.v1c, l.lev, l.uf, l.um, l.tri, l.ta, l.sp, l.rat]
+          .filter(Boolean).join(" ").toLocaleLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function filterDiff(state, payload) {
+    return filterLabels(state, payload, "diff");
+  }
+
+  function filterQuestions(state, payload) {
+    return filterLabels(state, payload, "rouen");
+  }
+
+  function sortRows(rows, sortBy, sortDir) {
+    const dir = sortDir === "asc" ? 1 : -1;
+    const keyMap = {
+      id: "id",
+      name: "lbl",
+      cat: "cat",
+      v1c: "v1c",
+      st: "st",
+      lev: "lev",
+      role: "role",
+      conf: "conf",
+      n_samples: "ns",
+      n_bact: "nb",
+      n_myco: "nm",
+      n_isolates: "ni"
+    };
+    const k = keyMap[sortBy] || "ns";
+    return [...rows].sort((a, b) => {
+      const av = a[k];
+      const bv = b[k];
+      let cmp = 0;
+      if (typeof av === "number" && typeof bv === "number") cmp = av - bv;
+      else cmp = String(av ?? "").localeCompare(String(bv ?? ""));
+      if (cmp !== 0) return cmp * dir;
+      return (b.ns || 0) - (a.ns || 0);
+    });
+  }
+
+  function computeSummary(rows, metadata) {
+    let samples = 0, bactSamples = 0, mycoSamples = 0, isolates = 0;
+    let confirmed = 0, reclassified = 0, flagged = 0, composite = 0, askRouen = 0;
+    for (const r of rows) {
+      samples += Number(r.ns || 0);
+      bactSamples += Number(r.nb || 0);
+      mycoSamples += Number(r.nm || 0);
+      isolates += Number(r.ni || 0);
+      if (r.st === "confirmed") confirmed++;
+      else if (r.st === "reclassified") reclassified++;
+      else if (r.st === "flagged") flagged++;
+      if (r.comp) composite++;
+      if (r.lev === "ask_chu_rouen") askRouen++;
+    }
+    const totSamp = (metadata && metadata.total_samples) || 1;
+    const totIso = (metadata && metadata.total_isolates) || 1;
+    return {
+      nLabels: rows.length,
+      nSamples: samples,
+      nBactSamples: bactSamples,
+      nMycoSamples: mycoSamples,
+      pctSamples: Math.round(10000 * samples / totSamp) / 100,
+      nIsolates: isolates,
+      pctIsolates: Math.round(10000 * isolates / totIso) / 100,
+      confirmed,
+      reclassified,
+      flagged,
+      composite,
+      askRouen
+    };
+  }
+
+  function computeCoverage(rows, metadata) {
+    return computeSummary(rows, metadata);
+  }
+
+  function getRowsForView(state, payload) {
+    if (state.view === "diff") return filterDiff(state, payload);
+    if (state.view === "composite") return filterLabels(state, payload, "composite");
+    if (state.view === "rouen") return filterQuestions(state, payload);
+    return filterLabels(state, payload, null);
+  }
+
+  function transition(state, action, payload) {
+    if (action.reset) return initial(payload);
+    if (action.clearFilters) {
+      return {
+        ...state,
+        cat: "all", st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "", page: 0, step: -1
+      };
+    }
+    const next = { ...state, ...action };
+    if (
+      action.cat !== undefined || action.st !== undefined || action.lev !== undefined ||
+      action.role !== undefined || action.conf !== undefined || action.myco !== undefined ||
+      action.query !== undefined || action.view !== undefined
+    ) {
+      next.page = 0;
+    }
+    const rows = getRowsForView(next, payload);
+    if (!rows.some(r => r.id === next.selectedId)) {
+      next.selectedId = rows.length ? rows[0].id : null;
+    }
+    return next;
+  }
+
+  return {
+    VIEWS, STATUS_LABELS, LEVER_LABELS, ROLE_LABELS, CONF_LABELS, MYCO_LABELS, SCENARIOS,
+    initial, transition, filterLabels, filterDiff, filterQuestions, sortRows,
+    computeSummary, computeCoverage, getRowsForView
+  };
+})();
+
+/* === DOM SHELL === */
+(() => {
+  const esc = s => String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  const fmtInt = n => Number(n || 0).toLocaleString("fr-FR");
+  const fmtPct = n => `${Number(n || 0).toFixed(2).replace(".", ",")} %`;
+
+  if (!PAYLOAD || !PAYLOAD.metadata) {
+    document.body.innerHTML = "<section><h1>Aucune donnée injectée</h1><p>Exécutez <code>v2_build_deliverables.R</code> pour générer <code>outputs/sample-type-prototype/v2/demo.html</code>.</p></section>";
+    return;
+  }
+
+  const meta = PAYLOAD.metadata;
+  document.getElementById("subtitle").innerHTML =
+    `Audit complet étiquette par étiquette des <strong>${fmtInt(meta.total_labels)}</strong> libellés <code>NATUREPVT</code> (<strong>${fmtInt(meta.total_samples)}</strong> ELTIDs, <strong>${fmtInt(meta.total_isolates)}</strong> isolats), dont <strong>${fmtInt(meta.n_reclassified)}</strong> reclassifiés vs v1, <strong>${fmtInt(meta.n_flagged)}</strong> signalés pour règle composite ou revue locale, et <strong>${fmtInt(meta.n_phase2_crosschecked)}</strong> cross-checkés par le modèle principal.`;
+
+  const statusBadge = st => {
+    const cls = st === "confirmed" ? "b-conf" : st === "reclassified" ? "b-recl" : "b-flag";
+    return `<span class="badge ${cls}">${esc(st)}</span>`;
+  };
+  const roleBadge = role => {
+    const cls = role === "diagnostic" ? "b-diag" : role === "screening_site" ? "b-scr" : role === "context_dependent" ? "b-ctx" : "b-uncl";
+    return `<span class="badge ${cls}">${esc(role)}</span>`;
+  };
+  const confBadge = conf => {
+    const cls = conf === "high" ? "b-high" : conf === "medium" ? "b-med" : "b-ambig";
+    const lbl = conf === "ambiguous_needs_human_review" ? "ambiguous" : conf;
+    return `<span class="badge ${cls}">${esc(lbl)}</span>`;
+  };
+
+  let state = Logic.initial(PAYLOAD);
+
+  function populateSelects() {
+    const catOpts = [
+      `<option value="all">Toutes les 17 catégories ONERBA/SPARES</option>`,
+      `<option value="__spares_targets__">Cibles SPARES actuelles (hemoculture + urines)</option>`
+    ];
+    for (const o of (PAYLOAD.onerba_summary || [])) {
+      catOpts.push(`<option value="${esc(o.naturepvt_norm)}">${esc(o.naturepvt_norm)} (${fmtInt(o.n_samples)} éch. · ${fmtInt(o.n_labels)} lib.)</option>`);
+    }
+    document.getElementById("f-cat").innerHTML = catOpts.join("");
+    document.getElementById("f-status").innerHTML = Object.entries(Logic.STATUS_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-lever").innerHTML = Object.entries(Logic.LEVER_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-role").innerHTML = Object.entries(Logic.ROLE_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-conf").innerHTML = Object.entries(Logic.CONF_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+    document.getElementById("f-myco").innerHTML = Object.entries(Logic.MYCO_LABELS)
+      .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+  }
+
+  function renderRunMeta() {
+    document.getElementById("run-meta").innerHTML = `
+      <div class="inspector-grid">
+        <div class="inspector-box"><strong>Audit 1-à-1 Phase 1 (Flash)</strong>${fmtInt(meta.total_labels)} / ${fmtInt(meta.total_labels)} libellés vérifiés (0 manquant)</div>
+        <div class="inspector-box"><strong>Cross-check Phase 2 (Modèle principal)</strong>${fmtInt(meta.n_phase2_crosschecked)} libellés haute priorité</div>
+        <div class="inspector-box"><strong>Flux bactérien vs *_MY</strong>${fmtInt(meta.total_bacterial_samples)} éch. bactériens / ${fmtInt(meta.total_mycology_only_samples)} *_MY seuls</div>
+        <div class="inspector-box"><strong>Qualité chaînes NATUREPVT</strong>${fmtInt(meta.labels_with_double_space)} doubles espaces · ${fmtInt(meta.labels_with_newline)} retours ligne</div>
+        <div class="inspector-box"><strong>Horodatage (UTC)</strong>${esc(meta.run_utc)}</div>
+      </div>`;
+  }
+
+  function renderKPIs(sum) {
+    document.getElementById("kpi-cards").innerHTML = `
+      <div class="kpi-card"><strong>Libellés filtrés</strong><div class="kpi-val">${fmtInt(sum.nLabels)}</div><div class="kpi-sub">sur ${fmtInt(meta.total_labels)} NATUREPVT</div></div>
+      <div class="kpi-card"><strong>Échantillons (ELTID)</strong><div class="kpi-val">${fmtInt(sum.nSamples)}</div><div class="kpi-sub">${fmtPct(sum.pctSamples)} · ${fmtInt(sum.nBactSamples)} bact. / ${fmtInt(sum.nMycoSamples)} *_MY</div></div>
+      <div class="kpi-card"><strong>Reclassifiés vs v1</strong><div class="kpi-val">${fmtInt(sum.reclassified)}</div><div class="kpi-sub">dans la vue courante (${fmtInt(meta.n_reclassified)} global)</div></div>
+      <div class="kpi-card"><strong>Signalés / Règle LIS</strong><div class="kpi-val">${fmtInt(sum.flagged)}</div><div class="kpi-sub">${fmtInt(sum.composite)} avec règle composite LIS</div></div>
+      <div class="kpi-card"><strong>Questions CHU Rouen</strong><div class="kpi-val">${fmtInt(sum.askRouen)}</div><div class="kpi-sub">levier <code>ask_chu_rouen</code></div></div>`;
+
+    document.getElementById("coverage-label").textContent = `Couverture de la sélection (${fmtInt(sum.nLabels)} / ${fmtInt(meta.total_labels)} libellés)`;
+    document.getElementById("coverage-pct").textContent = `${fmtPct(sum.pctSamples)} des échantillons (${fmtInt(sum.nSamples)} éch. · ${fmtInt(sum.nIsolates)} isolats)`;
+    document.getElementById("coverage-fill").style.width = `${Math.min(100, sum.pctSamples)}%`;
+  }
+
+  function renderWalkthroughs() {
+    const scen = Logic.SCENARIOS[state.scenario] || Logic.SCENARIOS[0];
+    document.getElementById("scenario-buttons").innerHTML = Logic.SCENARIOS.map((s, idx) =>
+      `<button type="button" data-scen="${idx}" aria-pressed="${state.scenario === idx}">${esc(s.name)}</button>`
+    ).join("");
+    document.getElementById("story-container").innerHTML = `<p style="margin:0;">${esc(scen.text)}</p>`;
+    document.getElementById("step-buttons").innerHTML = scen.steps.map((st, idx) =>
+      `<button type="button" data-step="${idx}" aria-pressed="${state.step === idx}">${idx + 1}. ${esc(st.label)}</button>`
+    ).join("");
+  }
+
+  function sortHeading(key, label) {
+    const arrow = state.sortBy === key ? (state.sortDir === "asc" ? " ▲" : " ▼") : "";
+    return `<button type="button" class="sort-btn" data-sort="${esc(key)}">${esc(label)}${arrow}</button>`;
+  }
+
+  function renderThemesHtml() {
+    return (PAYLOAD.themes || []).map(th => `
+      <div class="theme-card">
+        <h3>${esc(th.theme_id)} — ${esc(th.title)}</h3>
+        <p class="small"><strong>Impact :</strong> ${esc(th.impact_summary)}</p>
+        <p><strong>Question CHU Rouen :</strong> ${esc(th.clinical_question)}</p>
+        <p><strong>Règle recommandée :</strong> ${esc(th.recommended_site_adapter_rule)}</p>
+        <p class="small"><strong>Exemples :</strong> ${(th.example_labels || []).map(x => `<code>${esc(x)}</code>`).join(" ")}</p>
+      </div>`).join("");
+  }
+
+  function renderTable() {
+    const tc = document.getElementById("table-container");
+    const pagBar = document.getElementById("pagination-bar");
+    const filterBox = document.getElementById("filter-controls");
+    filterBox.hidden = (state.view === "matrix");
+
+    if (state.view === "matrix") {
+      pagBar.hidden = true;
+      const allSum = Logic.computeSummary(PAYLOAD.labels || [], meta);
+      renderKPIs(allSum);
+      document.getElementById("selection-summary").textContent =
+        "Matrice des 17 catégories ONERBA / SPARES post-audit 1-à-1 v2 (cliquez sur une catégorie pour filtrer ses libellés).";
+      tc.innerHTML = `<div class="scroll"><table>
+        <thead><tr>
+          <th>Catégorie (<code>naturepvt_norm</code>)</th>
+          <th>Libellé ONERBA / SPARES</th>
+          <th class="num">Libellés</th>
+          <th class="num">Échantillons</th>
+          <th class="num">Bactériens</th>
+          <th class="num">*_MY seuls</th>
+          <th class="num">% Éch.</th>
+          <th class="num">Isolats</th>
+          <th class="num">Reclassifiés vers cat.</th>
+        </tr></thead>
+        <tbody>
+          ${(PAYLOAD.onerba_summary || []).map(o => `<tr>
+            <td><button type="button" class="pick-btn" data-cat-jump="${esc(o.naturepvt_norm)}"><code>${esc(o.naturepvt_norm)}</code></button>${o.is_current_spares_target ? ` <span class="badge b-target">SPARES</span>` : ""}</td>
+            <td>${esc(o.onerba_label_fr)}</td>
+            <td class="num">${fmtInt(o.n_labels)}</td>
+            <td class="num">${fmtInt(o.n_samples)}</td>
+            <td class="num">${fmtInt(o.n_samp_bacterial)}</td>
+            <td class="num">${fmtInt(o.n_samp_mycology_only)}</td>
+            <td class="num">${fmtPct(o.pct_samples)}</td>
+            <td class="num">${fmtInt(o.n_isolates)}</td>
+            <td class="num">${fmtInt(o.n_reclassified_into)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>`;
+      document.getElementById("inspector-section").hidden = false;
+      document.getElementById("inspector-title").textContent = `Thèmes transversaux issus du cross-check v2 (${(PAYLOAD.themes || []).length})`;
+      document.getElementById("inspector-body").innerHTML = renderThemesHtml();
+      return;
+    }
+
+    const rawRows = Logic.getRowsForView(state, PAYLOAD);
+    const rows = Logic.sortRows(rawRows, state.sortBy, state.sortDir);
+    const sum = Logic.computeSummary(rows, meta);
+    renderKPIs(sum);
+
+    const totalPages = Math.max(1, Math.ceil(rows.length / state.pageSize));
+    const curPage = Math.min(state.page, totalPages - 1);
+    const slice = rows.slice(curPage * state.pageSize, (curPage + 1) * state.pageSize);
+
+    document.getElementById("selection-summary").textContent =
+      `${fmtInt(rows.length)} libellés correspondants (${fmtInt(sum.nSamples)} éch., ${fmtPct(sum.pctSamples)}). Affichage ${rows.length ? curPage * state.pageSize + 1 : 0}–${curPage * state.pageSize + slice.length}.`;
+
+    pagBar.hidden = rows.length <= state.pageSize;
+    pagBar.innerHTML = `
+      <span class="small">Page ${curPage + 1} / ${totalPages} (${fmtInt(rows.length)} libellés)</span>
+      <div class="row">
+        <button type="button" data-page="${curPage - 1}" ${curPage <= 0 ? "disabled" : ""}>Page précédente</button>
+        <button type="button" data-page="${curPage + 1}" ${curPage >= totalPages - 1 ? "disabled" : ""}>Page suivante</button>
+      </div>`;
+
+    tc.innerHTML = `<div class="scroll"><table>
+      <thead><tr>
+        <th>${sortHeading("id", "ID")}</th>
+        <th>${sortHeading("name", "Libellé NATUREPVT brut")}</th>
+        <th>${sortHeading("v1c", "v1 → v2")}</th>
+        <th>${sortHeading("st", "Statut")}</th>
+        <th>${sortHeading("lev", "Levier LIS")}</th>
+        <th>${sortHeading("role", "Rôle")}</th>
+        <th>${sortHeading("conf", "Confiance")}</th>
+        <th class="num">${sortHeading("n_samples", "Éch.")}</th>
+        <th class="num">${sortHeading("n_myco", "*_MY")}</th>
+        <th>Signaux GLIMS (SEJUF / TYPEANA / Espèce)</th>
+      </tr></thead>
+      <tbody>
+        ${slice.map(l => {
+          const sel = l.id === state.selectedId ? "selected-row" : "";
+          const catChange = l.v1c !== l.cat
+            ? `<div class="small" style="text-decoration:line-through;color:#8c231c">${esc(l.v1c)}</div><code>${esc(l.cat)}</code>`
+            : `<code>${esc(l.cat)}</code>`;
+          const wsBadges = (l.sp2 ? ` <span class="badge b-ws">2x espace</span>` : "") + (l.nl ? ` <span class="badge b-ws">\\n</span>` : "");
+          return `<tr class="${sel}">
+            <td><button type="button" class="pick-btn" data-id="${esc(l.id)}"><strong>${esc(l.id)}</strong></button><div class="small">#${l.r}</div></td>
+            <td><button type="button" class="pick-btn" data-id="${esc(l.id)}">${esc(l.lbl)}</button>${wsBadges}</td>
+            <td>${catChange}</td>
+            <td>${statusBadge(l.st)}</td>
+            <td><span class="badge b-lev">${esc(l.lev)}</span></td>
+            <td>${roleBadge(l.role)}</td>
+            <td>${confBadge(l.conf)}</td>
+            <td class="num">${fmtInt(l.ns)}<div class="small">${fmtInt(l.nb)} bact.</div></td>
+            <td class="num">${l.nm > 0 ? `<span class="badge b-myco">${fmtInt(l.nm)}</span>` : "0"}</td>
+            <td class="small">${l.uf ? `UF: ${esc(l.uf)}<br>` : ""}${esc(l.sp || "")}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table></div>`;
+
+    renderInspector(rows);
+  }
+
+  function renderInspector(rows) {
+    const sec = document.getElementById("inspector-section");
+    const prevBtn = document.getElementById("prev-item");
+    const nextBtn = document.getElementById("next-item");
+    if (!rows.length) {
+      if (state.view === "rouen" && (PAYLOAD.themes || []).length) {
+        sec.hidden = false;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        document.getElementById("inspector-title").textContent = "Thèmes CHU Rouen";
+        document.getElementById("inspector-body").innerHTML = renderThemesHtml();
+        return;
+      }
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+    const idx = rows.findIndex(r => r.id === state.selectedId);
+    const cur = idx >= 0 ? rows[idx] : rows[0];
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = idx < 0 || idx >= rows.length - 1;
+    prevBtn.onclick = () => idx > 0 && update({ selectedId: rows[idx - 1].id });
+    nextBtn.onclick = () => idx < rows.length - 1 && update({ selectedId: rows[idx + 1].id });
+
+    document.getElementById("inspector-title").textContent = `${cur.id} (Rang #${cur.r}) — ${cur.lbl}`;
+    document.getElementById("inspector-body").innerHTML = `
+      <div class="inspector-grid">
+        <div class="inspector-box"><strong>Baseline v1 (${esc(cur.fid)})</strong><code>${esc(cur.v1c)}</code> · ${roleBadge(cur.v1r)} · ${confBadge(cur.v1f)}<div class="small">Source v1 : ${esc(cur.v1s)}</div></div>
+        <div class="inspector-box"><strong>Décision v2 vérifiée</strong><code>${esc(cur.cat)}</code> · ${roleBadge(cur.role)} · ${confBadge(cur.conf)}<div class="small">${statusBadge(cur.st)}</div></div>
+        <div class="inspector-box"><strong>Règle composite LIS</strong><span class="badge b-lev">${esc(cur.lev)}</span> · <code>needs_composite=${cur.comp}</code><div class="small">Blood:${cur.nbl} · Urine:${cur.nur} · Fluid:${cur.nfl}</div></div>
+        <div class="inspector-box"><strong>Volumes &amp; Dépistage (ELTID)</strong>${fmtInt(cur.ns)} éch. (${fmtInt(cur.nb)} bact. / ${fmtInt(cur.nm)} *_MY seul) · ${fmtInt(cur.ni)} isolats<div class="small">_R sys:${cur.sr} · BGSTA_R seul:${cur.so} · +BGCULTAE:${cur.sc} · BGSTRB:${cur.sb}</div></div>
+      </div>
+      <p><strong>Justification v2 :</strong> ${esc(cur.rat)}</p>
+      <p class="small"><strong>SEJUF :</strong> ${esc(cur.uf || "—")} &nbsp;|&nbsp; <strong>SEJUM :</strong> ${esc(cur.um || "—")} &nbsp;|&nbsp; <strong>TRI :</strong> ${esc(cur.tri || "—")}</p>
+      <p class="small"><strong>Top TYPEANA :</strong> ${esc(cur.ta || "—")}</p>
+      <p class="small"><strong>Top espèces :</strong> ${esc(cur.sp || "—")}</p>
+      ${state.view === "rouen" ? `<details style="margin-top:12px;"><summary><strong>Thèmes transversaux pour CHU Rouen (${(PAYLOAD.themes || []).length})</strong></summary><div style="margin-top:10px;">${renderThemesHtml()}</div></details>` : ""}`;
+  }
+
+  function renderViews() {
+    document.getElementById("view-buttons").innerHTML = Logic.VIEWS.map(v =>
+      `<button type="button" data-view="${esc(v.id)}" aria-pressed="${state.view === v.id}">${esc(v.label)}</button>`
+    ).join("");
+  }
+
+  function syncControls() {
+    document.getElementById("f-cat").value = state.cat;
+    document.getElementById("f-status").value = state.st;
+    document.getElementById("f-lever").value = state.lev;
+    document.getElementById("f-role").value = state.role;
+    document.getElementById("f-conf").value = state.conf;
+    document.getElementById("f-myco").value = state.myco;
+    document.getElementById("f-query").value = state.query;
+  }
+
+  function update(action) {
+    state = Logic.transition(state, action, PAYLOAD);
+    renderViews();
+    renderWalkthroughs();
+    syncControls();
+    renderTable();
+  }
+
+  populateSelects();
+  renderRunMeta();
+  update({});
+
+  document.getElementById("view-buttons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-view]");
+    if (btn) update({ view: btn.dataset.view, step: -1 });
+  });
+  document.getElementById("scenario-buttons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-scen]");
+    if (btn) {
+      const idx = Number(btn.dataset.scen);
+      const firstAction = Logic.SCENARIOS[idx].steps[0]?.action || {};
+      update({ ...firstAction, scenario: idx, step: 0 });
+    }
+  });
+  document.getElementById("step-buttons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-step]");
+    if (btn) {
+      const sidx = Number(btn.dataset.step);
+      const act = Logic.SCENARIOS[state.scenario]?.steps[sidx]?.action || {};
+      update({ ...act, step: sidx });
+    }
+  });
+  document.getElementById("f-cat").addEventListener("change", e => update({ cat: e.target.value, step: -1 }));
+  document.getElementById("f-status").addEventListener("change", e => update({ st: e.target.value, step: -1 }));
+  document.getElementById("f-lever").addEventListener("change", e => update({ lev: e.target.value, step: -1 }));
+  document.getElementById("f-role").addEventListener("change", e => update({ role: e.target.value, step: -1 }));
+  document.getElementById("f-conf").addEventListener("change", e => update({ conf: e.target.value, step: -1 }));
+  document.getElementById("f-myco").addEventListener("change", e => update({ myco: e.target.value, step: -1 }));
+  document.getElementById("f-query").addEventListener("input", e => update({ query: e.target.value, step: -1 }));
+  document.getElementById("clear-filters").addEventListener("click", () => update({ clearFilters: true }));
+  document.getElementById("reset-demo").addEventListener("click", () => update({ reset: true }));
+
+  document.addEventListener("click", e => {
+    const idBtn = e.target.closest("button[data-id]");
+    if (idBtn) { update({ selectedId: idBtn.dataset.id }); return; }
+    const catJumpBtn = e.target.closest("button[data-cat-jump]");
+    if (catJumpBtn) { update({ view: "labels", cat: catJumpBtn.dataset.catJump, st: "all", lev: "all", role: "all", conf: "all", myco: "all", query: "", step: -1 }); return; }
+    const pageBtn = e.target.closest("button[data-page]");
+    if (pageBtn && !pageBtn.disabled) { update({ page: Number(pageBtn.dataset.page) }); return; }
+    const sortBtn = e.target.closest("button[data-sort]");
+    if (sortBtn) {
+      const k = sortBtn.dataset.sort;
+      const dir = state.sortBy === k && state.sortDir === "desc" ? "asc" : "desc";
+      update({ sortBy: k, sortDir: dir });
+    }
+  });
+})();
+</script>
+</html>
