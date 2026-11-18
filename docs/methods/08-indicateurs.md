@@ -183,10 +183,11 @@ into an alarming 83.0 % artifact.
 ### 08.8 note — database transparency vs presentation masking
 
 Statistical disclosure control (SDC) guidelines recommend suppressing cells with $n < 5$ or $n < 10$ in
-publicly facing reports to prevent patient re-identification. Applying suppression inside the database
-is catastrophic: it destroys additivity, prevents monthly-to-annual roll-ups, and prevents audits.
-ORCHIDEE's contract guarantees unmasked counts in the core indicator table; suppression is strictly a
-presentation-layer concern.
+publicly facing reports to prevent patient re-identification. The core indicator table keeps
+the exact numerator and denominator for each period so either can be audited. Monthly counts
+of retained isolates come from independent monthly deduplication runs. The annual count comes
+from a separate run over the year, in which isolates from different months can be duplicates.
+See [chapter 01](01-periode-surveillance.md#2-monthly-immutability-and-closed-windows).
 
 ---
 

@@ -37,7 +37,7 @@ responsibilities below, including the unmasked delivery to PDS, is ORCHIDEE's ow
 - Core ORCHIDEE computes and delivers **100 % unmasked indicator tables** (`ADR-0008`), preserving exact numerators, denominators, testing coverage, and exposure days across all strata.
 - Individual hospitals do **not** apply cell suppression or presentation masking ($n < 5$ or $n < 10$).
 - Statistical disclosure control (primary and secondary/complementary suppression) and public visualizations are strictly the operational responsibility of the national receiving infrastructure (**PDS / HDH**) and **SPF** at the national diffusion tier.
-- This prevents algebraic distortion, preserves additivity across strata, and eliminates redundant, divergent masking logic across hundreds of hospital sites.
+- Exact counts let the recipient check sector totals when each isolate retained in the hospital-wide analysis is assigned to exactly one sector. If sectors deduplicate independently, the hospital total comes from its own run. See [ADR-0008](../adr/0008-indicator-tables-use-tall-strata-without-cell-suppression.md#when-sector-counts-add-up).
 
 ### 2. Delivery Bundle Architecture
 Deliveries to PDS / HDH are packaged as self-contained, immutable release bundles (`.tar.gz` or `.zip`):
@@ -72,7 +72,7 @@ Before packaging a delivery bundle, ORCHIDEE runs automated post-flight verifica
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 09.1 | Privacy masking boundary | 100 % unmasked indicator upload to PDS; masking ($n < 5$) performed nationally by PDS/SPF | site-level cell suppression | protects database additivity; eliminates distributed masking code across hospitals; conforms to ADR-0008 |
+| 09.1 | Privacy masking boundary | hospitals deliver exact counts and the national recipient masks public outputs (see §1) | site-level cell suppression | preserves exact counts for audit and centralises public masking (ADR-0008) |
 | 09.2 | Delivery bundle architecture | self-contained immutable package with Parquet, CSV fallback, and `manifest.json` | bare CSV files or live database API | offline execution across hospital firewalls; complete historical auditability and cryptographic reproducibility |
 | 09.3 | Post-flight audit tiering | fatal structural breaches hard-block packaging; microbiological/epidemiological tripwires log warnings in manifest | all checks block, or pure ledger | prevents corrupt data delivery without suppressing surveillance reporting during genuine biological outbreaks |
 | 09.4 | Local hospital feedback deliverable | turnkey static Quarto HTML report consuming unmasked indicator table | headless tables only, or live Shiny app | zero-maintenance, serverless clinical steering for hospital hygiene teams, while preserving custom BI freedom |
