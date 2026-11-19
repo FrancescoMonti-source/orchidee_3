@@ -155,6 +155,14 @@ isolate retained by the March analysis.
 For surgery this stay contributes to the February denominator and the March
 numerator. The March rate divides all qualifying isolates collected in March
 by all stays with their first eligible surgical entry in March, per 1 000 stays.
+If March has one retained isolate and zero first entries, report both counts
+and mark the ratio as not calculable. The same patient could have remained
+in surgery throughout. Count distinct eligible stays separately for the
+hospital, since a stay can enter several sector denominators.
+
+The hospital admission month in row 04.8 is under review. Using the month
+of the first eligible movement anywhere in the hospital was proposed on
+19 November 2026. See the [review, Rouen results and questions awaiting a reply](../evidence/monthly_admissions_rouen.md).
 
 The 2024 Rouen return counts used movements from the PMSI module. Rouen plans
 to import movements directly from CPAGE and from the EDSAN `mouvements` module.

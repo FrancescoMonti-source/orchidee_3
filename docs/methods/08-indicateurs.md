@@ -127,6 +127,10 @@ ORCHIDEE enforces **zero cell suppression in the core indicator table**: every c
 its exact numerator and denominator. Privacy masking or presentation thresholds are strictly
 delegated to visualization consumers (Section 09).
 
+For the monthly indicator per 1 000 admissions, a sector can have retained
+isolates and zero first entries. Keep the counts and mark the value as not
+calculable. [March example](../evidence/monthly_admissions_rouen.md#what-a-sector-month-can-show)
+
 ---
 
 ## Decisions
