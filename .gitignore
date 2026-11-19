@@ -11,6 +11,7 @@
 /*.html
 /**/*.html
 !assets/**/*.html
+!tools/label-review/review-app.html
 /*.rmarkdown
 **/*_files/
 /.quarto/

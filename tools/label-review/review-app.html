@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revue des libellés</title>
+<style>
+:root {
+  --bg: #f6f7f9; --card: #ffffff; --ink: #1f2a37; --muted: #5b6878; --line: #dde2e8;
+  --accent: #30465d; --ok: #1f7a4d; --ok-bg: #e5f4ec; --fix: #b4541a; --fix-bg: #fcece2;
+  --unsure: #7a5a00; --unsure-bg: #fdf4d6; --note-bg: #fff8e1; --focus: #3a6ea5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181d; --card: #1d232a; --ink: #e6eaef; --muted: #9aa6b4; --line: #2e3640;
+    --accent: #8fb3d9; --ok: #5cc795; --ok-bg: #173527; --fix: #f0a070; --fix-bg: #3a2418;
+    --unsure: #e6c35c; --unsure-bg: #352d12; --note-bg: #2c2817; --focus: #7fb0e6;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+header { position: sticky; top: 0; z-index: 5; background: var(--card); border-bottom: 1px solid var(--line); padding: 10px 16px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 17px; margin: 0 auto 0 0; }
+input[type=text], input[type=search], textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
+button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 6px; padding: 5px 10px; }
+button:hover { border-color: var(--muted); }
+.progress { flex: 1 1 100%; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; display: flex; }
+.progress span { display: block; height: 100%; }
+.tabs, .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button[aria-pressed=true], .filters button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--card); }
+.count { opacity: .75; font-size: 13px; }
+main { max-width: 1100px; margin: 0 auto; padding: 12px 16px 80px; }
+.help { color: var(--muted); font-size: 13px; margin: 4px 0 12px; }
+kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; font-size: 12px; background: var(--card); }
+.item { background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; outline: none; }
+.item:focus { box-shadow: 0 0 0 2px var(--focus); }
+.item.ok { border-left-color: var(--ok); }
+.item.fix { border-left-color: var(--fix); }
+.item.unsure { border-left-color: var(--unsure); }
+.label { font-weight: 650; font-size: 16px; overflow-wrap: anywhere; }
+.prop { margin-top: 2px; }
+.prop b { font-weight: 600; }
+.note { background: var(--note-bg); border-radius: 5px; padding: 3px 7px; margin-top: 5px; font-size: 14px; }
+.meta { color: var(--muted); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
+.actions { display: flex; flex-direction: column; gap: 5px; min-width: 128px; }
+.actions button { text-align: left; }
+.actions .ok[aria-pressed=true] { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 600; }
+.actions .fix[aria-pressed=true] { background: var(--fix-bg); border-color: var(--fix); color: var(--fix); font-weight: 600; }
+.actions .unsure[aria-pressed=true] { background: var(--unsure-bg); border-color: var(--unsure); color: var(--unsure); font-weight: 600; }
+.comment { grid-column: 1 / -1; display: none; }
+.item.fix .comment, .item.unsure .comment, .item.has-comment .comment { display: block; }
+.comment textarea { width: 100%; min-height: 54px; resize: vertical; }
+.stamp { color: var(--muted); font-size: 12px; }
+.empty { color: var(--muted); padding: 30px 0; text-align: center; }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--card); padding: 8px 14px; border-radius: 6px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; }
+.bulk { display: none; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--ok-bg); border: 1px solid var(--ok); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; font-size: 14px; }
+.bulk.show { display: flex; }
+@media (max-width: 640px) {
+  .item { grid-template-columns: 1fr; }
+  .actions { flex-direction: row; flex-wrap: wrap; min-width: 0; }
+  .help .keys { display: none; }
+  header { position: static; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>Revue des libellés · ORCHIDEE v3</h1>
+    <label>Relecteur <input type="text" id="reviewer" placeholder="Nom" size="14"></label>
+    <button id="export" title="Enregistrer les décisions dans un fichier CSV">Exporter les décisions</button>
+    <button id="import" title="Reprendre des décisions exportées">Importer…</button>
+    <input type="file" id="file" accept=".csv,text/csv" hidden>
+    <div class="progress" id="progress" aria-label="Avancement"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="filters" id="filters"></div>
+    <input type="search" id="search" placeholder="Rechercher un libellé ou une proposition" style="flex:1 1 220px">
+  </div>
+</header>
+<main>
+  <p class="help">Accepter si la proposition est juste. Corriger ou Incertain sinon, et écrire la correction ou la question.
+    Les décisions restent dans ce navigateur : exportez-les à la fin et renvoyez le fichier CSV.
+    <span class="keys"><br>Clavier : <kbd>↓</kbd><kbd>↑</kbd> ligne suivante ou précédente, <kbd>A</kbd> accepter, <kbd>C</kbd> corriger, <kbd>I</kbd> incertain, <kbd>Suppr</kbd> effacer la décision.</span></p>
+  <div class="bulk" id="bulk"></div>
+  <div id="list"></div>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const ITEMS = __DATA__;
+const KEY = "orchidee-revue-libelles-v1";
+const TABS = { mo: "Micro-organismes", ab: "Antibiotiques et tests" };
+const DECISION_FR = { ok: "Accepter", fix: "Corriger", unsure: "Incertain" };
+const FILTERS = [
+  ["todo", "À faire"], ["note", "Avec point à vérifier"], ["plain", "Sans remarque"],
+  ["ok", "Acceptées"], ["fix", "À corriger"], ["unsure", "Incertaines"], ["all", "Toutes"]
+];
+const id = it => it.t + "|" + it.l;
+
+// A decision holds the proposal it was made on. When the proposal of a line
+// has changed since, the decision is dropped and the line is to review again.
+const PROPOSAL = Object.fromEntries(ITEMS.map(it => [id(it), it.p]));
+function keepCurrent(decisions) {
+  let dropped = 0;
+  for (const [k, d] of Object.entries(decisions)) {
+    if (!(k in PROPOSAL) || d.p !== PROPOSAL[k]) { delete decisions[k]; dropped++; }
+  }
+  return dropped;
+}
+// Decisions saved in this browser come first, including a decision the
+// reader cleared (kept with an empty d); decisions written in the workbook
+// fill only the lines the browser has never touched.
+function load() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (!s || !s.decisions) s = { reviewer: "", decisions: {} };
+  s.dropped = keepCurrent(s.decisions);
+  for (const it of ITEMS) {
+    if (it.d && !s.decisions[id(it)]) s.decisions[id(it)] = { d: it.d, c: it.c, p: it.p, by: "", at: "" };
+  }
+  return s;
+}
+const state = load();
+let saveOk = true;
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); saveOk = true; }
+  catch (e) { if (saveOk) toast("Ce navigateur n'enregistre pas : exportez vos décisions avant de fermer."); saveOk = false; }
+}
+let view = { tab: "mo", filter: "todo", q: "" };
+try { Object.assign(view, JSON.parse(localStorage.getItem(KEY + "-view")) || {}); } catch (e) {}
+const saveView = () => { try { localStorage.setItem(KEY + "-view", JSON.stringify(view)); } catch (e) {} };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3500); }
+
+function matches(it, f) {
+  const d = (state.decisions[id(it)] || {}).d;
+  if (f === "todo") return !d;
+  if (f === "note") return !d && it.n;
+  if (f === "plain") return !d && !it.n;
+  if (f === "all") return true;
+  return d === f;
+}
+let sticky = new Set();   // lines being corrected stay in view until the reader moves elsewhere
+function visible() {
+  const q = view.q.trim().toLowerCase();
+  return ITEMS.filter(it => it.t === view.tab && (matches(it, view.filter) || sticky.has(id(it))) &&
+    (!q || (it.l + " " + it.p + " " + it.n + " " + it.a).toLowerCase().includes(q)));
+}
+
+function renderBars() {
+  const tabItems = ITEMS.filter(it => it.t === view.tab);
+  $("#tabs").innerHTML = Object.entries(TABS).map(([k, name]) => {
+    const all = ITEMS.filter(it => it.t === k), done = all.filter(it => (state.decisions[id(it)] || {}).d).length;
+    return `<button data-tab="${k}" aria-pressed="${k === view.tab}">${name} <span class="count">${done}/${all.length}</span></button>`;
+  }).join("");
+  $("#filters").innerHTML = FILTERS.map(([k, name]) =>
+    `<button data-filter="${k}" aria-pressed="${k === view.filter}">${name} <span class="count">${tabItems.filter(it => matches(it, k)).length}</span></button>`).join("");
+  const n = { ok: 0, fix: 0, unsure: 0 };
+  for (const it of tabItems) { const d = (state.decisions[id(it)] || {}).d; if (d) n[d]++; }
+  const pct = k => (100 * n[k] / tabItems.length) + "%";
+  $("#progress").innerHTML = `<span style="width:${pct("ok")};background:var(--ok)"></span><span style="width:${pct("fix")};background:var(--fix)"></span><span style="width:${pct("unsure")};background:var(--unsure)"></span>`;
+  $("#progress").title = `${n.ok} acceptées, ${n.fix} à corriger, ${n.unsure} incertaines sur ${tabItems.length}`;
+}
+
+function itemHtml(it, i) {
+  const dec = state.decisions[id(it)] || {};
+  const btn = (k, text) => `<button class="${k}" data-act="${k}" aria-pressed="${dec.d === k}">${text}</button>`;
+  return `<article class="item ${dec.d || ""} ${dec.c ? "has-comment" : ""}" tabindex="0" data-i="${i}">
+    <div>
+      <div class="label">${esc(it.l)}</div>
+      <div class="prop">Proposition : <b>${esc(it.p)}</b></div>
+      ${it.n ? `<div class="note">${esc(it.n)}</div>` : ""}
+      <div class="meta">AMR 3.1.0 : ${esc(it.a || "—")}${it.v && it.v !== "Non vérifié" ? ` · ORCHIDEE v2 : ${esc(it.v)}` : ""}</div>
+    </div>
+    <div class="actions">${btn("ok", "✓ Accepter")}${btn("fix", "✎ Corriger")}${btn("unsure", "? Incertain")}
+      ${dec.d ? `<span class="stamp">${esc([dec.by, dec.at].filter(Boolean).join(" · "))}</span>` : ""}</div>
+    <div class="comment"><textarea placeholder="${dec.d === "unsure" ? "Votre question" : "Identité correcte ou commentaire"}">${esc(dec.c || "")}</textarea></div>
+  </article>`;
+}
+
+let shown = [];
+function render(focusIndex) {
+  renderBars();
+  shown = visible();
+  $("#list").innerHTML = shown.length ? shown.map(itemHtml).join("")
+    : `<div class="empty">${view.filter === "todo" ? "Tout est fait dans cet onglet. Pensez à exporter vos décisions." : "Aucune ligne."}</div>`;
+  const plain = view.filter === "plain" ? shown.filter(it => matches(it, "plain")).length : 0;
+  $("#bulk").className = "bulk" + (plain ? " show" : "");
+  $("#bulk").innerHTML = plain ? `Ces ${plain} lignes n'ont pas de remarque : la proposition reprend le libellé.
+    Parcourez-les, puis <button id="bulk-ok">Accepter ces ${plain} lignes</button>` : "";
+  if (focusIndex != null && shown.length) {
+    const el = $(`.item[data-i="${Math.min(focusIndex, shown.length - 1)}"]`);
+    if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: "nearest" }); }
+  }
+}
+
+function decide(i, d, keepPlace) {
+  const it = shown[i]; if (!it) return;
+  const k = id(it), cur = state.decisions[k];
+  if (!d || (cur && cur.d === d && !keepPlace)) state.decisions[k] = { d: "", c: "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
+  else state.decisions[k] = { d, c: cur ? cur.c : "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
+  save();
+  if (d === "fix" || d === "unsure") sticky.add(k); else sticky.delete(k);
+  const leaves = !matches(it, view.filter) && !sticky.has(k);
+  render(leaves ? i : (d === "ok" ? i + 1 : i));
+  if (d === "fix" || d === "unsure") { const el = $(`.item[data-i="${i}"] textarea`); if (el) el.focus(); }
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.tab) { view.tab = t.dataset.tab; sticky.clear(); saveView(); render(0); return; }
+  if (t.dataset.filter) { view.filter = t.dataset.filter; sticky.clear(); saveView(); render(0); return; }
+  if (t.dataset.act) { decide(+t.closest(".item").dataset.i, t.dataset.act); return; }
+  if (t.id === "bulk-ok") {
+    const today = new Date().toISOString().slice(0, 10);
+    const pending = shown.filter(it => matches(it, "plain"));
+    for (const it of pending) state.decisions[id(it)] = { d: "ok", c: "", p: it.p, by: state.reviewer, at: today };
+    save(); toast(`${pending.length} lignes acceptées.`); render(0); return;
+  }
+  if (t.id === "export") exportCsv();
+  if (t.id === "import") $("#file").click();
+});
+document.addEventListener("input", e => {
+  if (e.target.matches(".comment textarea")) {
+    const it = shown[+e.target.closest(".item").dataset.i], k = id(it);
+    if (!(state.decisions[k] || {}).d) state.decisions[k] = { d: "unsure", c: "", p: it.p, by: state.reviewer, at: new Date().toISOString().slice(0, 10) };
+    state.decisions[k].c = e.target.value; save();
+  } else if (e.target.id === "reviewer") { state.reviewer = e.target.value.trim(); save(); }
+  else if (e.target.id === "search") { view.q = e.target.value; render(); }
+});
+document.addEventListener("keydown", e => {
+  if (e.target.matches("button")) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;   // leave browser shortcuts (Ctrl+C, Cmd+A...) alone
+  if (e.target.matches("textarea, input")) {
+    if (e.key === "Escape") { const it = e.target.closest(".item"); (it || document.body).focus(); }
+    return;
+  }
+  const cur = document.activeElement.closest && document.activeElement.closest(".item");
+  const i = cur ? +cur.dataset.i : -1;
+  const go = j => { const el = $(`.item[data-i="${Math.max(0, Math.min(j, shown.length - 1))}"]`); if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: "nearest" }); } };
+  const k = e.key.toLowerCase();
+  if (k === "arrowdown" || k === "j") { go(i + 1); e.preventDefault(); }
+  else if (k === "arrowup" || k === "k") { go(i - 1); e.preventDefault(); }
+  else if (i < 0) return;
+  else if (k === "a" || k === "v" || k === "enter") { decide(i, "ok", true); e.preventDefault(); }
+  else if (k === "c") { decide(i, "fix", true); e.preventDefault(); }
+  else if (k === "i") { decide(i, "unsure", true); e.preventDefault(); }
+  else if (k === "delete" || k === "backspace") { decide(i, null); e.preventDefault(); }
+});
+
+const csvCell = v => /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+function exportCsv() {
+  const head = ["onglet", "libelle", "proposition", "decision", "correction_commentaire", "relecteur", "date"];
+  const rows = ITEMS.filter(it => (state.decisions[id(it)] || {}).d).map(it => {
+    const d = state.decisions[id(it)];
+    return [TABS[it.t], it.l, it.p, DECISION_FR[d.d], d.c || "", d.by || "", d.at || ""];
+  });
+  const text = "﻿" + [head, ...rows].map(r => r.map(v => csvCell(String(v))).join(";")).join("\r\n") + "\r\n";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  a.download = `revue-libelles-decisions-${(state.reviewer || "relecteur").replace(/[^\w-]+/g, "_")}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  toast(`${rows.length} décisions exportées.`);
+}
+function parseCsv(text) {
+  text = text.replace(/^﻿/, "");
+  const sep = (text.split(/\r?\n/)[0].match(/;/g) || []).length ? ";" : ",";
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === sep) { row.push(cell); cell = ""; }
+    else if (c === "\n") { row.push(cell.replace(/\r$/, "")); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+$("#file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rows = parseCsv(await f.text()), head = rows.shift() || [];
+  const col = n => head.indexOf(n), back = { Accepter: "ok", Corriger: "fix", Incertain: "unsure" };
+  const tabOf = Object.fromEntries(Object.entries(TABS).map(([k, v]) => [v, k]));
+  let n = 0, unknown = 0, changed = 0;
+  for (const r of rows) {
+    const t = tabOf[r[col("onglet")]], d = back[r[col("decision")]], k = t + "|" + r[col("libelle")];
+    if (!t || !d) continue;
+    if (!(k in PROPOSAL)) { unknown++; continue; }
+    if (r[col("proposition")] !== PROPOSAL[k]) { changed++; continue; }
+    state.decisions[k] = { d, c: r[col("correction_commentaire")] || "", p: PROPOSAL[k], by: r[col("relecteur")] || "", at: r[col("date")] || "" };
+    n++;
+  }
+  save(); e.target.value = ""; render(0);
+  toast(`${n} décisions importées` + (unknown ? `, ${unknown} libellés inconnus ignorés` : "") +
+        (changed ? `, ${changed} lignes dont la proposition a changé, à revoir` : "") + ".");
+});
+
+$("#reviewer").value = state.reviewer;
+$("#search").value = view.q;
+render(0);
+if (state.dropped) {
+  toast(`${state.dropped} décisions retirées : la proposition a changé depuis. Ces lignes sont à revoir.`);
+  delete state.dropped; save();
+}
+</script>
+</body>
+</html>
