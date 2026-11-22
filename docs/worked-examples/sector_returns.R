@@ -6,8 +6,14 @@
 # Rouen snapshot used in the other 2024 worked examples. Verify its applicability.
 # The cohort year is the year of the first observed movement. Supply whole stays,
 # including movements across calendar boundaries. Only aggregate counts are printed.
+# With pmsi$main already in R, source this file from the repository root,
+# then run moves <- prepare_rouen_pmsi_moves(pmsi$main).
+# monthly_sector_admissions(moves) compares reporting months across sectors.
 
-count_sector_returns <- function(moves, year) {
+# Return the first eligible row of each observed sector visit, in time order.
+# The annual return check selects stays by start year. The monthly comparison
+# examines the whole supplied history before selecting reporting months.
+observed_sector_entries <- function(moves, cohort_year = NULL) {
   required <- c("PATID", "EVTID", "DATENT", "DATSORT", "sector", "eligible")
   stopifnot(all(required %in% names(moves)), inherits(moves$DATENT, "POSIXt"),
             inherits(moves$DATSORT, "POSIXt"), is.logical(moves$eligible))
@@ -20,60 +26,98 @@ count_sector_returns <- function(moves, year) {
   d$stay <- cumsum(!duplicated(d[c("PATID", "EVTID")]))
   by_stay <- split(seq_len(nrow(d)), d$stay)
 
-  # A gap alone cannot establish a return. A different observed sector must
-  # intervene. Keep out-of-perimeter movements when reconstructing the path.
-  paths <- list()
+  starts <- as.numeric(d$DATENT)
+  ends <- as.numeric(d$DATSORT)
+  month <- format(d$DATENT, "%Y-%m", tz = "Europe/Paris")
+  stay_month <- month[!duplicated(d$stay)]
+  entry <- logical(nrow(d))
   pending_year <- uncertain <- outside <- 0L
   for (pos in by_stay) {
-    s <- d[pos, ]
-    if (anyNA(s$DATENT)) {
+    if (anyNA(starts[pos])) {
       pending_year <- pending_year + 1L
       next
     }
-    if (as.integer(format(s$DATENT[1L], "%Y", tz = "Europe/Paris")) != year) next
-    starts <- as.numeric(s$DATENT)
-    ends <- as.numeric(s$DATSORT)
+    if (!is.null(cohort_year) && substr(month[pos[1L]], 1L, 4L) != cohort_year) next
+    sector <- d$sector[pos]
+    eligible <- d$eligible[pos]
+    exit_time <- ends[pos]
     # An open final movement can confirm an observed entry. A missing earlier
     # end or overlapping different sectors makes the sequence uncertain.
-    if (anyNA(s$sector) || any(!nzchar(s$sector)) || anyNA(s$eligible) ||
-        anyNA(head(ends, -1L)) || any(ends <= starts, na.rm = TRUE)) {
+    if (anyNA(sector) || any(!nzchar(sector)) || anyNA(eligible) ||
+        anyNA(head(exit_time, -1L)) || any(exit_time <= starts[pos], na.rm = TRUE)) {
       uncertain <- uncertain + 1L
       next
     }
-    change <- s$sector[-1L] != head(s$sector, -1L)
-    if (any(change & starts[-1L] < cummax(head(ends, -1L)))) {
+    change <- sector[-1L] != head(sector, -1L)
+    if (any(change & starts[pos[-1L]] < cummax(head(exit_time, -1L)))) {
       uncertain <- uncertain + 1L
       next
     }
-    if (!any(s$eligible)) {
+    if (!any(eligible)) {
       outside <- outside + 1L
       next
     }
-    # Adjacent units of the same sector form one visit. Count an observed
-    # sector visit if at least one movement in it is eligible.
+    # A gap alone cannot establish a return. A different observed sector must
+    # intervene. Date a visit at its first eligible movement.
     visit <- cumsum(c(TRUE, change))
-    entries <- unique(data.frame(visit, sector = s$sector)[s$eligible, ])
-    counts <- table(entries$sector)
-    paths[[length(paths) + 1L]] <- data.frame(
-      patient = as.character(s$PATID[1L]), stay = s$stay[1L],
-      sector = names(counts), entries = as.integer(counts))
+    eligible_rows <- pos[eligible]
+    entry[eligible_rows[!duplicated(visit[eligible])]] <- TRUE
   }
-  all <- if (length(paths)) do.call(rbind, paths) else
-    data.frame(patient = character(), stay = integer(), sector = character(), entries = integer())
+  entries <- data.frame(patient = as.character(d$PATID[entry]), stay = d$stay[entry],
+    sector = as.character(d$sector[entry]), stay_month = stay_month[d$stay[entry]],
+    entry_month = month[entry])
+  list(entries = entries, rows_without_patient_or_stay = unkeyed_rows,
+       stays_with_missing_start_time = pending_year, stays_with_uncertain_path = uncertain,
+       stays_without_eligible_sector = outside)
+}
+
+count_sector_returns <- function(moves, year) {
+  result <- observed_sector_entries(moves, cohort_year = year)
+  all <- result$entries
   summarise <- function(rows) {
-    repeated <- rows$entries > 1L
+    repeated <- duplicated(rows[c("stay", "sector")])
     data.frame(patients = length(unique(rows$patient)),
                patients_with_return = length(unique(rows$patient[repeated])),
                stays = length(unique(rows$stay)),
                stays_with_return = length(unique(rows$stay[repeated])),
-               extra_entries = sum(rows$entries - 1L))
+               extra_entries = sum(repeated))
   }
-  list(year = year, rows_without_patient_or_stay = unkeyed_rows,
-       stays_with_uncertain_cohort_year = pending_year,
-       cohort_stays_with_uncertain_path = uncertain,
-       cohort_stays_without_eligible_sector = outside,
+  list(year = year, rows_without_patient_or_stay = result$rows_without_patient_or_stay,
+       stays_with_uncertain_cohort_year = result$stays_with_missing_start_time,
+       cohort_stays_with_uncertain_path = result$stays_with_uncertain_path,
+       cohort_stays_without_eligible_sector = result$stays_without_eligible_sector,
        any_sector = summarise(all),
        by_sector = lapply(split(all, all$sector), summarise))
+}
+
+# Compare counts for the same evaluable paths. A stay may enter different
+# sectors in different years. Select the reporting month separately for each
+# convention. Quality counts describe the entire supplied extract.
+monthly_sector_admissions <- function(moves, years = 2022:2024,
+    sectors = sort(unique(as.character(moves$sector[which(moves$eligible)])))) {
+  stopifnot(is.numeric(years), length(years) > 0L, all(is.finite(years)),
+            all(years == as.integer(years)), !anyNA(sectors))
+  months <- sort(unique(as.vector(outer(years, sprintf("%02d", 1:12), paste, sep = "-"))))
+  sectors <- unique(as.character(sectors))
+  result <- observed_sector_entries(moves)
+  entries <- result$entries
+  first <- entries[!duplicated(entries[c("stay", "sector")]), ]
+  grid <- expand.grid(month = months, sector = sectors, stringsAsFactors = FALSE)
+  dates <- moves$DATENT[!is.na(moves$DATENT)]
+  in_extract <- rep(FALSE, nrow(grid))
+  if (length(dates)) {
+    observed <- format(range(dates), "%Y-%m", tz = "Europe/Paris")
+    in_extract <- grid$month >= observed[1L] & grid$month <= observed[2L]
+  }
+  count <- function(month, sector) {
+    counts <- as.integer(table(factor(month, levels = months), factor(sector, levels = sectors)))
+    counts[!in_extract] <- NA_integer_
+    counts
+  }
+  grid$by_first_observed_stay_month <- count(first$stay_month, first$sector)
+  grid$by_first_eligible_sector_month <- count(first$entry_month, first$sector)
+  grid$entries_including_returns <- count(entries$entry_month, entries$sector)
+  list(by_sector_month = grid, quality_full_extract = result[names(result) != "entries"])
 }
 
 classify_rouen_movements <- function(raw, units, domains) {
@@ -97,16 +141,20 @@ classify_rouen_movements <- function(raw, units, domains) {
   raw
 }
 
+prepare_rouen_pmsi_moves <- function(raw, workbook = "ref/rouen/establishment_structure_2025.xlsx") {
+  # Apply the same Rouen source precedence as the denominator worked example.
+  raw <- as.data.frame(redsan::prefer_pmsi_src_c_over_dw(raw))
+  units <- as.data.frame(readxl::read_excel(workbook, sheet = "Fichier Structure", col_types = "text"))
+  domains <- read.csv2("ref/consores/codes_de.csv", colClasses = "character", fileEncoding = "UTF-8")
+  classify_rouen_movements(raw, units, domains)
+}
+
 if (sys.nframe() == 0L) {
   args <- commandArgs(trailingOnly = TRUE)
   if (!length(args) %in% 2:3) stop("Usage: Rscript sector_returns.R PMSI_RDS YEAR [STRUCTURE_XLSX]")
   year <- as.integer(args[2L])
   stopifnot(!is.na(year))
-  workbook <- if (length(args) == 3L) args[3L] else "ref/rouen/establishment_structure_2025.xlsx"
   raw <- readRDS(args[1L])$main
-  # Apply the same Rouen source precedence as the denominator worked example.
-  raw <- as.data.frame(redsan::prefer_pmsi_src_c_over_dw(raw))
-  units <- as.data.frame(readxl::read_excel(workbook, sheet = "Fichier Structure", col_types = "text"))
-  domains <- read.csv2("ref/consores/codes_de.csv", colClasses = "character", fileEncoding = "UTF-8")
-  print(count_sector_returns(classify_rouen_movements(raw, units, domains), year))
+  moves <- if (length(args) == 3L) prepare_rouen_pmsi_moves(raw, args[3L]) else prepare_rouen_pmsi_moves(raw)
+  print(count_sector_returns(moves, year))
 }

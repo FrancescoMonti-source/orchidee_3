@@ -59,6 +59,30 @@ and missing history separately. A December admission can have its first
 surgical entry in January; determining whether it is the first requires
 earlier movements of that same stay, even outside the reporting year.
 
+### Running the monthly comparison from PMSI
+
+From the repository root in R, use the full `pmsi$main` extract with the same
+source preference and unit classification as the return check:
+
+```r
+source("docs/worked-examples/sector_returns.R", encoding = "UTF-8")
+moves <- prepare_rouen_pmsi_moves(pmsi$main)
+res <- monthly_sector_admissions(moves, years = 2022:2024)
+subset(res$by_sector_month, sector == "CHIRURGIE")
+res$quality_full_extract
+```
+
+Each row compares stays by first observed hospital movement month, stays by
+first eligible sector entry month, and all eligible sector entries by entry
+month (including returns). All three counts use the same evaluable paths.
+The quality counts cover the entire supplied extract. The default unit
+reference is Rouen's 2025 workbook. Interpretation of earlier years depends
+on that mapping and on the available movement history at the extract boundaries.
+A zero counts observed events on evaluable paths; its interpretation depends
+on coverage. Months outside the observed movement start range have missing counts.
+These PMSI results are provisional for movements. Repeat the comparison on the
+dedicated `mouvement` export when it becomes available.
+
 ## Questions sent on 19 November 2026
 
 The project asked Santé publique France to clarify the indicator per 1 000

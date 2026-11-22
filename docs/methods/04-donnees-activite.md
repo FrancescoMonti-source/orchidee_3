@@ -172,9 +172,11 @@ hospital counts the stay in January even though the administrative stay
 started in December. ORCHIDEE adopted this convention on 22 November 2026.
 See the [Rouen results and questions awaiting a reply](../evidence/monthly_admissions_rouen.md).
 
-The 2024 Rouen return counts used movements from the PMSI module. Rouen plans
-to import movements directly from CPAGE and from the EDSAN `mouvements` module.
-Support for the latter is still to be added to the `redsan` package.
+The Rouen checks used `pmsi$main` to reconstruct observed movements. Rouen
+considers the dedicated EDSAN `mouvement` source more reliable for patient
+transfers and plans to use it alongside CPAGE. The module is now available
+in [redsan](https://github.com/FrancescoMonti-source/redsan/blob/4bf88ebf566108cd13245ef87379304177145b84/R/mouvement.R).
+The comparison on that source is pending.
 
 ### 04.9 note — the degradation is exact, and that is the hazard
 
