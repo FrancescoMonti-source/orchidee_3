@@ -1,7 +1,8 @@
 # 04 - Activity data (the denominator)
 
-Status: eleven decisions, ten witnesses, one unproven. Decision 04.8 assigns
-each sector stay to the month of its first eligible entry into that sector.
+Status: eleven decisions, ten witnesses, one unproven. Decision 04.8 counts a
+stay for the hospital in the month it first enters the surveillance perimeter.
+For each sector it counts the stay in the month of the first eligible entry there.
 Shared with the CATB project.
 
 ## What SPARES says
@@ -75,7 +76,7 @@ table, calendar year 2024, SPARES-eligible perimeter
 | 04.5 | Overlapping intervals | unioned per patient / stay / unit | convex hull of the episode | 2024 hull 365 887 against union 355 246: **−10 641 (3.0 %)**, 1 953 episodes |
 | 04.6 | Period grain | month, plus an independent annual run | annual only, or annual ÷ 12 | annual dedup keeps 4 441, monthly keeps 4 814 (**+8.40 %**) on *E. coli*/urines/2024, remeasured with phenotype comparison and 07.6 |
 | 04.7 | Perimeter | one object, consumed by numerator and denominator | each stage selects independently | the ConsoRes report, if its denominator is the whole-establishment SAE (04.1 note): a perimeter-restricted numerator over a wider denominator |
-| 04.8 | Stays in the denominator per 1 000 stays | count each eligible stay once in its hospital admission month and once per sector in the month of first eligible entry | count every sector entry, or assign all sectors to the hospital admission month | the Rouen 2024 comparison measured the effect of counting returns within a stay. [Sector return analysis](../worked-examples/sector_returns.R) |
+| 04.8 | Monthly admissions denominator | count each stay once for the hospital at its first entry into the surveillance perimeter and once per sector at its first eligible entry there | use the administrative admission month, or count repeat entries | [Rouen checks on the month of first eligibility and on sector returns](../evidence/monthly_admissions_rouen.md#what-the-rouen-movement-checks-measured) |
 | 04.9 | Timestamp resolution | declared by the site, checked against the data | inferred silently | Rouen: **4.11 %** of `DATENT` and 4.08 % of `DATSORT` at exactly 00:00; peaks 08:00 and 15:00 |
 | 04.10 | Plausibility | non-blocking, requires acknowledgement | blocking, or nothing | eligible denominator 327 301 / 347 303 / 355 246 while the raw table moved 1 016 036 → 564 968 |
 | 04.11 | Shared component | ORCHIDEE-RATB publishes a versioned file; CATB consumes it | a jointly owned repository | not measured. `unproven` |
@@ -136,18 +137,22 @@ expressed per passage.
 
 ### 04.8 note — one stay per sector
 
-For each distinct stay (`PATID`, `EVTID`), find the first eligible entry into
-each sector over the whole stay, including movements across a calendar-year
-boundary. Count the stay once in that sector in the month of that entry. A
-later eligible stay by the same patient counts separately.
+For the hospital denominator, count each distinct stay (`PATID`, `EVTID`)
+once, in the calendar month of its first entry into an eligible unit. The
+denominator label is « pour 1 000 séjours dont la première entrée dans le
+périmètre de surveillance a eu lieu au cours du mois ».
+For each sector, count the stay once in the month of its first eligible entry
+there. Use the movements for the whole stay, including those in the previous
+calendar year. A later eligible stay by the same patient counts separately.
 
-The monthly numerator uses the specimen collection date. In this example
-all movements are eligible. The only surgical specimen yields a resistant
-isolate retained by the March analysis.
+The monthly numerator uses the specimen collection date. In this example,
+one stay starts with an emergency visit in December. The only surgical
+specimen yields a resistant isolate retained by the March analysis.
 
 | Date | Movement | Stay added to denominators | Specimen collected | Isolate added to surgery numerator |
 |---|---|---|---|---|
-| 31 January | Hospital admission to medicine | 1 hospital, 1 medicine | None | 0 |
+| 31 December 2024 | Emergency visit outside the perimeter, without inpatient admission | 0 | None | 0 |
+| 2 January 2025 | First eligible entry, in medicine | 1 hospital, 1 medicine | None | 0 |
 | 2 February | First entry into surgery | 1 surgery | None | 0 |
 | 5 February | Return to medicine | 0 | None | 0 |
 | 2 March | Return to surgery | 0 | One surgical specimen | 1 |
@@ -160,9 +165,10 @@ and mark the ratio as not calculable. The same patient could have remained
 in surgery throughout. Count distinct eligible stays separately for the
 hospital, since a stay can enter several sector denominators.
 
-The hospital admission month in row 04.8 is under review. Using the month
-of the first eligible movement anywhere in the hospital was proposed on
-19 November 2026. See the [review, Rouen results and questions awaiting a reply](../evidence/monthly_admissions_rouen.md).
+December can close on the movements known in December. In this example the
+hospital counts the stay in January even though the administrative stay
+started in December. ORCHIDEE adopted this convention on 22 November 2026.
+See the [Rouen results and questions awaiting a reply](../evidence/monthly_admissions_rouen.md).
 
 The 2024 Rouen return counts used movements from the PMSI module. Rouen plans
 to import movements directly from CPAGE and from the EDSAN `mouvements` module.

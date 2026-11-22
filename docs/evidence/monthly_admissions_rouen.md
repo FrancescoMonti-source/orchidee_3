@@ -70,7 +70,8 @@ Its reply is pending.
    month with a resistant isolate before discharge?
 2. For the hospital denominator, should a stay first entering an eligible
    unit in January count in January if its administrative admission was in
-   December? January is the project proposal. Assigning it to December
+   December? ORCHIDEE adopted January on 22 November 2026, as the month
+   of the stay’s first entry into the surveillance perimeter. Assigning it to December
    would require knowing the January movement before closing December, or
    revising the closed month. [Monthly closure](../methods/01-periode-surveillance.md#2-monthly-immutability-and-closed-windows)
 3. Are both sector measures wanted? The rate within surgery uses isolates
