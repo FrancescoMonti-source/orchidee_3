@@ -26,7 +26,7 @@ patient-day denominator (see `04-donnees-activite.md`).
 | Structure de l'établissement | [05](05-structure.md) | **settled** |
 | Données de résistance bactérienne | [06](06-donnees-resistance.md) | **reviewed audit reporting retained; input boundary clarified; mapping dictionary entries open** |
 | Dédoublonnage | [07](07-dedoublonnage.md) | **settled** |
-| Construction des indicateurs | [08](08-indicateurs.md) | **settled** |
+| Construction des indicateurs | [08](08-indicateurs.md) | **admission-based measures adopted; Rouen comparison pending** |
 | Analyse et diffusion | [09](09-diffusion.md) | **settled** |
 | Données de consommation (ATB / ATF) | — | out of scope |
 

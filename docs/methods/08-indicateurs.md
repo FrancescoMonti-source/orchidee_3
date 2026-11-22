@@ -1,6 +1,7 @@
 # 08 - Indicator construction
 
-Status: **settled**. Eight decisions, eight witnesses, one tripwire. Zero unproven.
+Status: ORCHIDEE has adopted nine decisions. Eight have Rouen measurements.
+The two measures in 08.9 are defined and await a comparison on linked Rouen data.
 
 ---
 
@@ -131,6 +132,31 @@ For the monthly indicator per 1 000 admissions, a sector can have retained
 isolates and zero first entries. Keep the counts and mark the value as not
 calculable. [March example](../evidence/monthly_admissions_rouen.md#what-a-sector-month-can-show)
 
+### Monthly measures based on first sector entry
+
+ORCHIDEE adopted both measures on 22 November 2026. In surgery they share a
+denominator of all distinct stays whose first eligible surgical entry falls in the
+reporting month, including stays without a specimen. Each stay counts once. Apply
+the same bacterium, resistance and specimen criteria to both numerators.
+
+| Measure | Numerator in surgery | Calculation |
+|---|---|---|
+| Resistant isolates per 1 000 stays | Resistant isolates retained after deduplication within surgery for the specimen collection month, including isolates from stays that first entered surgery in an earlier month | 1 000 × retained isolates / stays |
+| Percentage of stays with at least one resistant isolate | Count the stays in the denominator with at least one resistant isolate from an eligible surgical specimen collected during that stay. Follow each stay through hospital discharge, including returns to surgery. | 100 × stays with at least one qualifying isolate / stays |
+
+For the percentage, establish whether each stay had a qualifying specimen using
+its own records. A patient with two stays can contribute to each separately.
+The percentage is final when all stays in that entry month have ended and their
+follow-up through discharge is complete. A cohort with zero entries has no
+calculable percentage.
+
+For example, a patient first enters surgery in March and has a surgical specimen
+collected in April. It yields a resistant isolate retained in April. For the
+first measure the stay counts in the March denominator and the isolate in the
+April numerator. For the second, the stay counts once in both the March
+denominator and the March numerator, even if another surgical specimen from the
+same stay also yields a resistant isolate.
+
 ---
 
 ## Decisions
@@ -149,8 +175,9 @@ and interval-derived exposure (**355 246 JH**). Method and reproduction:
 | 08.6 | Testing coverage transparency | Materialised on every indicator row (`tested_isolates`, `total_isolates`, `coverage_pct`) | Suppressed or hidden | Ceftriaxone %R is 0.28 % but coverage is only 44.4 %; without coverage, selective cascade reporting creates false clinical confidence |
 | 08.7 | Small numbers handling | No cell suppression in the core indicator table; numerator and denominator always published | Cell suppression (masking n < 5 or n < 10) | At monthly sector level, 23.9 % of cells have n < 5 and 35.9 % have n < 10. Suppression breaks time-series trend modeling and auditability |
 | 08.8 | Primary deliverable architecture | Single unified, tall indicator table with explicit dimensions, scopes, and provenance hash | Disparate separate tables per frequency / stratification | Unifies ratb indicators; guarantees identical schema across surveillance campaigns |
+| 08.9 | Monthly measures based on first sector entry | report both isolates per 1 000 stays and the percentage of stays with at least one resistant isolate by discharge | report only one measure | March–April example above. The [Rouen movement checks](../evidence/monthly_admissions_rouen.md#what-the-rouen-movement-checks-measured) cover admissions. The two microbiological measures still await empirical comparison. |
 
-Unproven: **0 of 8**.
+Awaiting an empirical comparison: **1 of 9** (08.9).
 
 ---
 
@@ -197,6 +224,7 @@ See [chapter 01](01-periode-surveillance.md#2-monthly-immutability-and-closed-wi
 
 ## Open
 
-None. All 8 indicator construction decisions are settled with empirical witnesses measured on Rouen 2024 raw data.
+The empirical comparison for 08.9 requires sector specimens linked to stays
+with follow-up through hospital discharge.
 Medium-term stratification additions (age, sex, infection site) requested by SPF will reuse the
 `stratum_dimension` / `stratum_value` architecture established in decision 08.8 without schema breakage.

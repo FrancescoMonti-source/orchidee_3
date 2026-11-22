@@ -128,7 +128,7 @@ A surveillance figure already communicated to hospital committees or SPF would c
 To prevent this instability:
 
 1. **Current Production Policy (Independent Closed Windows — Model 1)**:
-   Monthly surveillance runs under an independent monthly window (`window = "monthly"`). Deduplication is performed within each calendar month in isolation. Published monthly indicators are **final, closed, and immutable** upon month close; no subsequent hospitalization in September can alter April's count.
+   Monthly isolate counts use independent collection-month windows (`window = "monthly"`). Each count is final when its month closes. A specimen collected in September leaves April's isolate count unchanged.
 2. **Annual Surveillance (Model 2)**:
    The annual indicator table is a distinct measurement under `window = "annual"`, not the arithmetic sum of the twelve monthly tables.
 3. **Rolling Refractory Window (Experiment)**:

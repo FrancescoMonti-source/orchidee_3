@@ -25,9 +25,9 @@ unknown admission count as missing so it can be distinguished from zero entries.
   the month to new entries during that month.
 - Isolates per 1 000 sector patient-days relate the same events to time
   spent in the sector during the month, including time from earlier admissions.
-- The proportion of stays with at least one resistant isolate requires
-  following the stays with a first sector entry in a given month until an
-  agreed endpoint, such as hospital discharge. Each affected stay counts once.
+- The percentage of stays with at least one resistant isolate follows all
+  stays with a first eligible sector entry in the month through hospital
+  discharge. Each stay with a qualifying specimen from that sector counts once.
   A February cohort can therefore require March specimens before it is complete.
 
 ## What the Rouen movement checks measured
@@ -67,7 +67,8 @@ Its reply is pending.
 
 1. Should the monthly figure relate isolates to first entries during the
    same calendar month, or measure the proportion of stays entering that
-   month with a resistant isolate before discharge?
+   month with a resistant isolate before discharge? On 22 November 2026
+   ORCHIDEE adopted [both measures](../methods/08-indicateurs.md#monthly-measures-based-on-first-sector-entry).
 2. For the hospital denominator, should a stay first entering an eligible
    unit in January count in January if its administrative admission was in
    December? ORCHIDEE adopted January on 22 November 2026, as the month

@@ -30,7 +30,7 @@ The annual cadence comes from SPARES, whose campaign covers one calendar year (p
 ORCHIDEE disentangles temporal surveillance along three independent axes:
 1. **Cadence (When to report)**: Dual reporting — monthly for operational hospital monitoring, annual for national campaigns.
 2. **Deduplication Window (Over what timeframe to group duplicates)**: French calendar boundaries are the production rule. SPARES defines a duplicate over « la période de l'enquête » (SPARES p. 10) and gives no calendar rule, so the calendar boundaries are ORCHIDEE's own reading. A continuous 30-day rolling refractory window remains an experiment under audit (not the EARS-Net rule; see §3).
-3. **State Lifecycle (Can past monthly numbers change?)**: Strictly immutable upon month close — no retrospective revision from later cultures.
+3. **When figures become final.** Indicators based on the specimen collection month close at month end. The percentage of stays with a resistant isolate is grouped by first sector entry month and requires follow-up through hospital discharge.
 
 ### 1. Dual Temporal Cadence
 Surveillance indicators are produced at two distinct grains:
@@ -41,7 +41,8 @@ Surveillance indicators are produced at two distinct grains:
 To prevent the **retrospective instability hazard** identified in `docs/worked-examples/deduplication.md` (Result 3):
 - Under an annual deduplication window, the tiebreak rule favoring the isolate with **more molecules tested** can reach backwards across months (e.g. an October isolate with 22 molecules tested retroactively drops an April isolate with 19 molecules, reducing April's published count months later).
 - ORCHIDEE resolves this by enforcing **independent closed monthly windows** (`window = "monthly"`). Each calendar month is deduplicated in strict isolation.
-- Once a calendar month is closed, its published indicators are **final, closed, and immutable**. Subsequent hospitalizations or bacteriology cultures in later months never retroactively alter past monthly figures.
+- Once the collection month closes, its isolate counts and the corresponding rates are final. A later specimen counts in its own collection month.
+- For the percentage of stays with at least one resistant isolate, the entry month defines the group of stays to follow. The percentage becomes final once follow-up is complete through discharge for every stay in that group. [Measure definitions](08-indicateurs.md#monthly-measures-based-on-first-sector-entry)
 - The annual indicator table is an independent measurement under `window = "annual"`, not an arithmetic sum of the twelve monthly tables.
 
 ### 3. Calendar Production Windows and Rolling-Window Experiment
@@ -60,7 +61,7 @@ pp. 22 and 24-25).
 
 ### 4. Minimum Window and Real-Time Surveillance
 - A surveillance run requires a minimum temporal slice of **at least one full calendar month**.
-- In operational production, monthly indicators run continuously as each month concludes, without requiring the year to be complete.
+- Indicators based on the collection month can be produced as each month concludes.
 - Annual indicator tables require a full twelve-month calendar year (`01-01` 00:00:00 to `12-31` 23:59:59) to prevent seasonal bias. Historical Rouen data (2022–2024) serves as the development and calibration baseline, not a temporal restriction on the product.
 
 ---
@@ -72,7 +73,7 @@ All witnesses measured on real Rouen data (`data/bact22_24`, `data/pmsi`).
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
 | 01.1 | Temporal cadence | dual: monthly **and** annual | annual only | monthly provides real-time detection of resistance surges; annual keeps 4 441 isolates vs monthly 4 814 (+8.40 %) on *E. coli* urines (`07-dedoublonnage.md` 07.1) |
-| 01.2 | Monthly finality | immutable upon month close (`window = "monthly"`) | provisional, revised at year-end | prevents retrospective alteration of past published monthly tables (Result 3 in `docs/worked-examples/deduplication.md`) |
+| 01.2 | Monthly finality | collection-month indicators close at month end; the entry-month percentage closes after follow-up through discharge | revise published collection-month counts at year-end | independent monthly deduplication preserves the published isolate count (Result 3 in `docs/worked-examples/deduplication.md`) |
 | 01.3 | Window shape | calendar windows for production; rolling refractory remains an experiment | calendar only | historical rolling count 4 718 is unreproduced; direct current implementation gives 4 729 with phenotype flags and 07.6 or 4 727 without; see audit in `docs/evidence/dedup_window_30day_refractory_witness.md` |
 | 01.4 | Minimum run grain | $\ge 1$ full calendar month | full calendar years only | allows ongoing 2026 operational surveillance; partial months rejected to protect exposure denominators |
 

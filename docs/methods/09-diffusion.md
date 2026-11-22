@@ -51,7 +51,7 @@ The bundle contains:
 ### 3. Two-Tier Post-Flight Quality Audit
 Before packaging a delivery bundle, ORCHIDEE runs automated post-flight verification on the generated indicator table:
 - **Fatal Structural Invariants (Hard Block)**:
-  - $N_{\text{num}} \le N_{\text{den}}$ and $\text{rate} \in [0.0, 1.0]$.
+  - For a proportion, the numerator is at most the denominator. With a positive denominator, the fraction lies between 0 and 1 (0 to 100 when expressed as a percentage). Isolates per 1 000 stays can exceed 1 000. With zero stays, retain both counts and mark the value as not calculable. [Admission-based measures](08-indicateurs.md#monthly-measures-based-on-first-sector-entry)
   - Exposure days $> 0$ for all active hospital sectors.
   - Zero unmapped functional units (`SEJUF`) or invalid FINESS codes.
   - Foreign-key referential integrity between `indicators` and `exposure`.

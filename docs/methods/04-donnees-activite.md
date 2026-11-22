@@ -145,7 +145,7 @@ For each sector, count the stay once in the month of its first eligible entry
 there. Use the movements for the whole stay, including those in the previous
 calendar year. A later eligible stay by the same patient counts separately.
 
-The monthly numerator uses the specimen collection date. In this example,
+The numerator for isolates per 1 000 stays uses the specimen collection date. In this example,
 one stay starts with an emergency visit in December. The only surgical
 specimen yields a resistant isolate retained by the March analysis.
 
@@ -164,6 +164,8 @@ If March has one retained isolate and zero first entries, report both counts
 and mark the ratio as not calculable. The same patient could have remained
 in surgery throughout. Count distinct eligible stays separately for the
 hospital, since a stay can enter several sector denominators.
+For the [percentage of stays with at least one resistant isolate](08-indicateurs.md#monthly-measures-based-on-first-sector-entry),
+the same stay counts among the February surgical entries with a resistant isolate by discharge.
 
 December can close on the movements known in December. In this example the
 hospital counts the stay in January even though the administrative stay
@@ -223,9 +225,8 @@ over the annual denominator produces a number inflated by exactly the recurrence
 rate, which varies with case mix — which is the comparison between
 establishments the surveillance exists to make.
 
-So the monthly figure is **final**, not provisional: nothing outside its own
-month can change it. The annual figure is a separate measurement under a
-different window, not a summary of the twelve.
+The monthly isolate count is final at the close of the collection month.
+The annual count comes from its own deduplication window.
 
 The gap is published as an indicator in its own right. `Σ(monthly numerators) −
 annual numerator` is the count of patients with a recurrent episode of the same
