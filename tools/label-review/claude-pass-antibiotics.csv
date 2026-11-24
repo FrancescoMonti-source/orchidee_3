@@ -1,0 +1,41 @@
+source_label,proposal,note
+TEICOPLANINE,Teicoplanine [TEC] ; antibiogramme,Nom français de la téicoplanine.
+PENICILLINE G,Benzylpénicilline [PEN] ; antibiogramme ; fonction selon l’organisme à préciser,Distinguer le résultat usuel du dépistage chez Haemophilus. À confirmer selon l’organisme.
+PENI G MENINGITE,Benzylpénicilline [PEN] ; antibiogramme ; méningite,"Pénicilline G lue avec les concentrations critiques « méningite » (pneumocoque, méningocoque). Le contexte est une lecture, pas un type de prélèvement."
+PENI G AUTRES CONTEXTES,Benzylpénicilline [PEN] ; antibiogramme ; autres contextes,Pénicilline G lue avec les concentrations critiques hors méningite.
+AUGMENTIN CYSTITE,Amoxicilline/acide clavulanique [AMC] ; antibiogramme ; cystite,Augmentin = amoxicilline-acide clavulanique. Lecture avec la concentration critique « cystite » des entérobactéries (plus élevée que hors cystite).
+AUGMENTIN AUTRES CONTEXTES,Amoxicilline/acide clavulanique [AMC] ; antibiogramme ; autres contextes,"Amoxicilline-acide clavulanique, lecture hors cystite."
+CLAVENTIN,Ticarcilline/acide clavulanique [TCC] ; antibiogramme,Claventin = nom commercial de la ticarcilline-acide clavulanique.
+FOSFOMYCINE TROMETAMOL,Fosfomycine [FOS] ; antibiogramme ; trométamol,"Fosfomycine orale (trométamol), indication cystite. À garder distincte de la fosfomycine IV. Rendue surtout sur E. coli, mais aussi sur S. aureus : à confirmer."
+FOSFOMYCINE IV,Fosfomycine [FOS] ; antibiogramme ; IV,"Fosfomycine injectable, à garder distincte de la forme trométamol. Rendue sur les entérobactéries et sur S. aureus."
+PIPERA TAZO,Pipéracilline/tazobactam [TZP] ; antibiogramme ; panel anaérobies,Même molécule que PIPERACILLINE+TAZOBACTAM. Confirmer la différence de panel et le traitement des doublons.
+GENTAMICINE FORTE,Gentamicine [GEN] ; résistance de haut niveau ; FORTE,Code de molécule GEN ; le fichier initial cite GEH pour le test de haut niveau. Confirmer le test.
+GENTAMICINE FORTE.,Gentamicine [GEN] ; résistance de haut niveau ; FORTE,Confirmer la différence avec le libellé sans point et la charge du disque.
+CEFOTAXIME AUTRES CONTEXTES,Céfotaxime [CTX] ; antibiogramme ; autres contextes,"Céfotaxime, lecture hors méningite."
+CEFOTAXIME MENINGITE,Céfotaxime [CTX] ; antibiogramme ; méningite,"Céfotaxime, lecture avec les concentrations critiques « méningite »."
+CETRIAXONE AUTRES CONTEXTES,Ceftriaxone [CRO] ; antibiogramme ; autres contextes,"Faute de frappe pour ceftriaxone, lecture hors méningite."
+CEFTRIAXONE MENINGITE,Ceftriaxone [CRO] ; antibiogramme ; méningite,"Ceftriaxone, lecture avec les concentrations critiques « méningite »."
+AMOX MENINGITE,Amoxicilline [AMX] ; antibiogramme ; méningite,"Amoxicilline, lecture « méningite »."
+AMPI AUTRES CONTEXTES,Ampicilline [AMP] ; antibiogramme ; autres contextes,"Ampicilline, lecture hors méningite."
+AMOX VO,Amoxicilline [AMX] ; antibiogramme ; voie orale,"Amoxicilline, lecture pour la voie orale, rendue sur S. pneumoniae (concentrations critiques propres à la forme orale)."
+CLOXA 250,Cloxacilline [CLO] ; inhibition ; 250,Confirmer le test d’inhibition à 250 mg/L et la signification des valeurs S/R.
+CLOXA 500,Cloxacilline [CLO] ; inhibition ; 500,Confirmer le test d’inhibition à 500 mg/L et la signification des valeurs S/R.
+Technique ATB,commentaire ou champ technique,"Champ technique (méthode de l'antibiogramme). Sa valeur est presque toujours « S », qui n'est pas ici une catégorie de sensibilité : à écarter avant tout comptage."
+Commentaire C3G,commentaire ou champ technique,"Codé en S ou R, mais ce n'est ni un antibiotique ni, semble-t-il, un mécanisme : les effectifs sont proches de ceux de deux commentaires d'interprétation du champ COMMENTAIRE ATB BGN, « C3G et groupe III » (S) et « C3G et association » (R). Proposition : commentaire thérapeutique sur l'usage des C3G, à ne pas lire comme une résistance. À confirmer."
+COMMENTAIRE SAMR,signal de phénotype,Confirmer le sens de S et R et la correspondance avec les marqueurs de résistance à la méticilline.
+COMMENTAIRE BLSE,signal de phénotype,Confirmer le sens de S et R : absence / présence de BLSE ? Ne pas déduire cette correspondance des seuls effectifs.
+COMMENTAIRE CARBA,signal de phénotype,Confirmer le sens de S et R : absence / présence de carbapénémase ?
+COMMENTAIRE ERG,signal de phénotype,Confirmer le sens de S et R et la portée du signal « résistant aux glycopeptides ».
+CEFINASE,Beta-lactamase screening test [BLA-S] ; dépistage,"Cefinase = disque de nitrocéfine : recherche d'une bêta-lactamase (Haemophilus, Moraxella, gonocoque, staphylocoques, anaérobies). Test enzymatique, pas une molécule."
+AMOXICILLINE / AMPICILLINE,Amoxicilline ou Ampicilline (identité conjointe) [AMX|AMP] ; antibiogramme,"Résultat commun aux deux aminopénicillines, rendu sur les entérobactéries : l'une prédit l'autre. Identité conjointe « amoxicilline ou ampicilline »."
+AMPICILLINE/AMOXICILLINE,Amoxicilline ou Ampicilline (identité conjointe) [AMX|AMP] ; antibiogramme,"Même identité conjointe que AMOXICILLINE / AMPICILLINE, mais sur un autre panel : entérocoques, staphylocoques, Haemophilus, Pasteurella."
+NITROFURANES,Nitrofurantoïne [NIT] ; antibiogramme,Confirmer que ce libellé de famille désigne bien la nitrofurantoïne dans le laboratoire.
+NORFLO DEPIST RCC FQUINOLONES,Norfloxacine [NOR] ; dépistage,Code de molécule NOR ; le fichier initial cite NOR-S pour le test. Confirmer le sens de RCC.
+ASSO AZTRE/CAZA,Aztreonam + Céftazidime/avibactam [ATM+CZA] ; association,"Test d'association aztréonam + ceftazidime-avibactam (synergie), utilisé pour les isolats producteurs de métallo-bêta-lactamase."
+ASSO AUGMENTIN/CEFIXIME,Amoxicilline/acide clavulanique + Céfixime [AMC+CFM] ; association,"Test d'association amoxicilline-acide clavulanique + céfixime (synergie), option orale pour les entérobactéries BLSE urinaires."
+GENTAMICINE,Gentamicine [GEN] ; antibiogramme,
+CEFOTAXIME,Céfotaxime [CTX] ; antibiogramme,
+VANCOMYCINE,Vancomycine [VAN] ; antibiogramme,
+OXACILLINE,Oxacilline [OXA] ; antibiogramme ; fonction selon l’organisme à préciser,Distinguer la fonction du test selon l’organisme : staphylocoques / dépistage chez le pneumocoque. À confirmer.
+ERTAPENEME,Ertapenem [ETP] ; antibiogramme,
+PIPERACILLINE+TAZOBACTAM,Pipéracilline/tazobactam [TZP] ; antibiogramme,
