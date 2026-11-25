@@ -163,18 +163,18 @@ cols_diff <- c(
 )
 fwrite(diff_dt[, ..cols_diff], file.path(v2_dir, "v1_vs_v2_diff.csv"))
 
-# 3. CHU Rouen Questions table (labels/rules unresolvable from raw text alone: resolution_lever != "text_sufficient")
-rouen_dt <- export_v2[resolution_lever != "text_sufficient"]
+# 3. CHU Rouen Questions table (labels/rules unresolvable from raw text alone or carrying *_MY-only samples)
+rouen_dt <- export_v2[resolution_lever != "text_sufficient" | n_samp_mycology_only > 0L]
 rouen_dt[, question_priority := fifelse(
   resolution_lever == "ask_chu_rouen", "1_ask_chu_rouen",
-  fifelse(resolution_lever == "exclude_mycology", "2_validate_exclude_mycology",
+  fifelse(resolution_lever == "exclude_mycology" | (resolution_lever == "text_sufficient" & n_samp_mycology_only > 0L), "2_validate_exclude_mycology",
   fifelse(resolution_lever == "filter_typeana", "3_validate_filter_typeana", "4_validate_filter_sejuf_tri"))
 )]
 rouen_dt[, question_or_proposed_rule := fifelse(
   resolution_lever == "ask_chu_rouen",
   paste0("[Question clinique / codage CHU Rouen] ", rationale),
   fifelse(
-    resolution_lever == "exclude_mycology",
+    resolution_lever == "exclude_mycology" | (resolution_lever == "text_sufficient" & n_samp_mycology_only > 0L),
     paste0("[Exclusion *_MY en amont] ", rationale),
     fifelse(
       resolution_lever == "filter_typeana",

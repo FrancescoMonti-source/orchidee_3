@@ -50,7 +50,7 @@ const expectedDiffCount = PAYLOAD.labels.filter((l) => l.chg || l.st !== "confir
 assert.equal(diffRows.length, expectedDiffCount, "filterDiff count mismatch");
 
 const qRows = Logic.filterQuestions(initState, PAYLOAD);
-const expectedQCount = PAYLOAD.labels.filter((l) => l.lev !== "text_sufficient").length;
+const expectedQCount = PAYLOAD.labels.filter((l) => l.lev !== "text_sufficient" || Number(l.nm) > 0).length;
 assert.equal(qRows.length, expectedQCount, "filterQuestions count mismatch");
 
 const mycoState = Logic.transition(initState, { myco: "pure_myco" }, PAYLOAD);

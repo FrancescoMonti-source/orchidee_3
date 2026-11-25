@@ -10,7 +10,7 @@ Per rigenerarlo: `Rscript --vanilla docs/worked-examples/sample-type-prototype/v
 
 ## 1. Come è organizzata la pagina (dall'alto in basso)
 
-1. **Intestazione e Export**: titolo, riepilogo numerico e pulsanti **Exporter la sélection (.csv)** (scarica le righe filtrate correnti con la bozza di regola SIL) ed **Exporter mes avis** (appare appena salvi almeno un commento o decisione locale).
+1. **Intestazione, Relecteur e Import/Export**: titolo, riepilogo numerico, campo `Relecteur` (opzionale, salvato in locale) e pulsanti **Exporter la sélection (.csv)** (scarica le righe filtrate correnti con la bozza di regola SIL), **Importer avis…** (ricarica un CSV di revisione già esportato) ed **Exporter mes avis** (appare appena salvi almeno una decisione o nota).
 2. **Schede di lavoro (6 tab)**: ciascuna mostra il conteggio delle righe (che si aggiorna in formato `filtrate / totali` quando attivi un filtro).
 3. **Barra di sintesi e copertura**: 5 riquadri riepilogativi sulla selezione corrente (*Libellés affichés*, *Prélèvements couverts*, *Écarts vs v1 (Cat./Rôle)*, *Règle SIL requise*, *Avis CHU Rouen requis*) con evidenziazione gialla quando restano campioni `*_MY` da escludere o segnalazioni senza cambio di categoria.
 4. **Parcours rapides**: barra di avvio rapido con 5 percorsi cliccabili su casi concreti.
@@ -24,8 +24,8 @@ Per rigenerarlo: `Rscript --vanilla docs/worked-examples/sample-type-prototype/v
 |---|---|---|
 | `Tous les libellés` | Tutte le etichette | 8 462 |
 | `Corrigés ou signalés vs v1` | Etichette con categoria/ruolo cambiati oppure segnalate | 1 942 (= `v1_vs_v2_diff.csv`) |
-| `Règles SIL à appliquer` | Etichette con regola composita o azione oltre al testo | 554 (di cui 458 con `needs_composite_lis_rule = true`) |
-| `Avis CHU Rouen & SIL` | Tutte le 554 etichette non risolte dal solo testo, con pulsante rapido in cima **Filtrer : avis Rouen stricts (164)** | 554 (= `chu_rouen_questions.csv`) |
+| `Règles SIL à appliquer` | Etichette con regola composita, azione oltre al testo o campioni `*_MY` da purgare | 620 (554 non risolte dal solo testo + 66 `text_sufficient` con campioni `*_MY`) |
+| `Avis CHU Rouen & SIL` | Tutte le 620 etichette con azione SIL/micologia o domanda Rouen, con pulsante rapido in cima **Filtrer : avis Rouen stricts (164)** | 620 (= `chu_rouen_questions.csv`) |
 | `Thèmes transversaux` | I 104 temi trasversali emersi dal cross-check, con esempi `LBL_xxxx` cliccabili | 104 temi |
 | `Vue par catégorie (17)` | Riepilogo per le 17 categorie ONERBA / SPARES a sinistra e anteprima temi trasversali a destra | 17 categorie |
 
@@ -41,7 +41,7 @@ In primo piano trovi sempre:
 
 | Etichetta nel menu | Codice sottostante | Significato pratico |
 |---|---|---|
-| *Texte suffisant* | `text_sufficient` | Il testo `NATUREPVT` basta da solo (disabilitata nelle schede SIL/Rouen). |
+| *Texte suffisant* | `text_sufficient` | Il testo `NATUREPVT` basta per la categoria (nelle schede SIL/Rouen restano le 66 etichette con campioni `*_MY` da escludere). |
 | *Filtrer par analyse (TYPEANA)* | `filter_typeana` | Serve il codice d'analisi: `BGSTRB`, `BGSTA_R` con/senza `BGCULTAE`, `_R`, `BGUCYTO`, `BGFA*`, `BGNUML`. |
 | *Filtrer par unité / discipline* | `filter_sejuf_tri` | Serve l'unità (`SEJUF`/`SEJUM`) o la disciplina (`TRI`), ad es. `SONDE` in urologia vs cardiologia. |
 | *Exclure la mycologie (\*_MY)* | `exclude_mycology` | I campioni con solo antifungigramma `*_MY` vanno esclusi dal flusso batterico. |
@@ -64,7 +64,7 @@ La tabella mostra **4 colonne** (*Libellé brut*, *Catégorie (v1 → v2)* — c
 - Cliccando `← Précédent` / `Suivant →` nella scheda a destra, la tabella a sinistra scorre automaticamente sulla riga attiva e cambia pagina se necessario; viceversa, cambiando pagina con `Page suiv. →`, la scheda si aggiorna sulla prima riga della nuova pagina.
 - **Règle SIL suggérée**: sulle etichette con regola SIL appare un riquadro con pseudo-regola copiabile tramite **Copier la règle**.
 - **Volumétrie & marqueurs du SIL**: i contatori a `0` restano attenuati visivamente mentre i segnali attivi (> 0) sono evidenziati con descrizione al passaggio del mouse.
-- **Votre avis local (enregistré dans le navigateur)**: ogni revisore può segnare *Valider v2* oppure *Proposer autre catégorie* e aggiungere una nota libera (salvata in `localStorage` del browser), poi esportabile con **Exporter mes avis**.
+- **Barra di revisione fissa, coda e scorciatoie da tastiera**: in cima alla scheda a destra trovi sempre visibili `✓ Valider v2`, `✎ Autre cat.` e `? Incertain` (con scelta categoria e nota che si aprono solo quando servono), l'opzione `Avancer auto` e i tasti rapidi (`↓`/`↑` o `j`/`k` per cambiare riga, `A`/`V` per validare, `C` per cambiare categoria, `I` per incertain, `Suppr` per cancellare, `Échap` per uscire dal campo di testo). Sopra la tabella a sinistra, la barra di avanzamento e i filtri (`Tous`, `À revoir`, `Validés`, `Reclassés`, `Incertains`) permettono di lavorare la coda fino a zero e di esportare/reimportare il CSV delle decisioni (con controllo automatico se il testo `NATUREPVT` o la proposta `v2_cat` cambiano in una rigenerazione).
 
 ## 5. I 5 percorsi guidati (`Parcours rapides`)
 
