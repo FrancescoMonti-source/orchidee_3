@@ -40,8 +40,29 @@ and `de_domain_ref`.
 hospitalisation movement intervals at sampling time (`DATENT <= sample_datetime <
 DATSORT`). When a sample cannot be attributed to an active hospitalisation stay
 (`no_active_interval`, `multiple_active_unit_pairs`, or timestamp edge cases),
-the canonical `SEJUF` is set to `NA`. Under decision 03.5, an isolate with `SEJUF
-= NA` is excluded from the eligible surveillance perimeter.
+the canonical inpatient `SEJUF` is set to `NA`. Under decision 03.5, an isolate
+with `SEJUF = NA` is excluded from the strict inpatient perimeter
+(`spares_strict`). To support both comparability with the SPARES perimeter
+(SPARES pp. 9-10) and complete emergency surveillance without
+post-deduplication filtering, ORCHIDEE resolves three named perimeters
+(`03-activites.md`, `ADR-0009`):
+1. **Precedence of active eligible inpatient stays**: If `sample_datetime` falls
+   within an active movement interval (`DATENT <= sample_datetime < DATSORT`) of
+   an eligible inpatient unit (`CODE_TA ∈ {03, 20}` and eligible `CODE_DE`),
+   that unit takes precedence and the sample enters both **`spares_strict`**
+   and **`spares_ed24h`**.
+2. **Identification and attribution of Emergency (`TA 10`) samples**: If the
+   sample does not fall within an active eligible inpatient interval, it is
+   identified as an Emergency (`TA 10`) sample when its laboratory ordering UF
+   belongs to `TA 10` (`microbiology_SEJUF ∈ TA 10`) or it falls within a
+   `TA 10` movement:
+   - It always enters **`emergency_ta10`** (deduplicated strictly within
+     `TA 10`, publishing `%R` and isolate counts without a patient-day
+     denominator).
+   - It **also** enters **`spares_ed24h`** if the patient has an eligible
+     inpatient movement (`CODE_TA ∈ {03, 20}` and eligible `CODE_DE`) starting
+     within `(sample_datetime, sample_datetime + 24h]`, attributed to the
+     earliest such inpatient movement (`min(DATENT)`, `ADR-0009`).
 
 **Specialised intensive-care and continuous-monitoring units** are classified
 according to the French national `CODE_DE` → `DOMAINE` reference table
@@ -66,7 +87,7 @@ file (`ref/rouen/establishment_structure_2025.xlsx`), calendar year 2024.
 
 | # | Decision | Chosen | Alternative | Witness |
 |---|---|---|---|---|
-| 05.1 | Unit-less isolates | strict PMSI interval attribution; `SEJUF = NA` excludes isolate from perimeter | fallback to microbiology ordering UF | keeps **2 445** vs **2 555** (+110, +4.5 %, 93 patients gained); céfotaxime moves **14.80 → 15.82 %R (+1.02 pp)**. `docs/worked-examples/unit-attribution.md` |
+| 05.1 | Unit-less & ED isolates | three named perimeters (`spares_strict`, `spares_ed24h` with 24h `TA 10 -> TA 03/20` linkage, and `emergency_ta10`); no unconditional fallback to laboratory ordering UF | unconditional fallback to microbiology ordering UF | `spares_strict` vs Option B: keeps **2 445** vs **2 555** (+110, +4.5 %, 93 patients gained); céfotaxime moves **14.80 → 15.82 %R (+1.02 pp)** (`docs/worked-examples/unit-attribution.md`). Separate `spares_ed24h` and `emergency_ta10` counts to be measured on refreshed adapter handoff |
 | 05.2 | Structure coherence | Report matched and unmatched unit codes and affected records; population selection belongs to 03.5 | Enforce a minimum coverage percentage in the audit | Admin: 362/362 (100 %) in structure; lab: 272/278 in structure (6 external UFs, 68 raw rows) |
 | 05.3 | ICU reassignment | defined by national DE table; ORCHIDEE validates compliance | local text-parsing algorithm or subagent guessing | Rouen referential maps 3 USC to Médecine, 1 USC to Chirurgie, 4 réa néonat/péd to Pédiatrie; exactly 0 discrepancies with `reference_code_de.csv` |
 | 05.4 | Structure versioning | annual snapshot per surveillance period (`calendar_year`) | dynamic time-validity intervals `[start_date, end_date[` per event | Rouen structure has 1 155 UFs, all with `Date fin UF = 2099-12-31` (0 mid-year splits). Dynamic intervals make annual deduplication non-transitive |
@@ -89,28 +110,59 @@ Examining these 3 650 isolates against the establishment structure reveals why:
   (consultations externes, 447), TA 04 (HDJ, 164), TA 09 (séances, 149). These
   patients were never admitted to complete hospitalisation; the absence of a
   PMSI movement stay is legitimate.
-- **1 456 (40 %)** belong to eligible TA/DE sectors: 632 in USLD (soins de
-  longue durée) and 824 in MCO (Chirurgie 266, Médecine 206, Réanimation 124,
-  SSR 115, Pédiatrie 55, Obstétrique 51). In MCO, these are pre-admission
-  samplings (e.g. sample taken at 08:30 in ED, complete hospitalisation movement
-  starts at 15:10) or stays omitted from the warehouse export. In USLD, stays
-  are not captured in the acute MCO PMSI movement extract.
+- **1 456 (40 %)** belong to eligible TA/DE sectors in the laboratory ordering
+  field: 632 in USLD (`CODE_DE = 176`, soins de longue durée) and 824 in MCO/SSR
+  (Chirurgie 266, Médecine 206, Réanimation 124, SSR 115, Pédiatrie 55,
+  Obstétrique 51).
+  - In **USLD** (and long-stay **SSR**), `data/pmsi` (`SRC = "C"` from CORA and
+    `SRC = "DW"`) already contains movement rows for all hospital fields (MCO,
+    SSR with 60 526 patient-days in 2024, PSY with 1 092, and USLD with 12 689;
+    see `denominator.md`). Across all 927 USLD samples in raw `data/bact22_24`
+    (from which the 632 diagnostic antibiogram isolates in the v3 bundle
+    derive), interval attribution failed not because USLD was excluded by
+    sector, but because the historical extraction filtered on entry date
+    `DATENT >= 2022-01-01` (dropping long-stay residents admitted prior to
+    2022, which accounts for 624 of the 927 raw USLD samples) and because
+    residents still in bed at extraction have an open exit timestamp
+    (`DATSORT = NA`, 118 of the remaining 303 matched raw USLD samples). Under
+    `04-donnees-activite.md`, the site adapter caps genuinely ongoing
+    `CODE_TA ∈ {03, 20}` stays at $\min(T_{\text{end}}, T_{\text{extraction}})$
+    when preparing the handoff, while the core never invents end dates on
+    remaining `DATSORT = NA` rows.
+  - In **acute MCO**, these are predominantly pre-admission samplings (e.g.
+    sample taken at 08:30 in the ED before inpatient movement registration opens
+    at 15:10).
 
-Falling back to the laboratory UF (Option B) adds 110 deduplicated *E. coli*
-isolates (+4.5 %) and moves céfotaxime by +1.02 pp, but the denominator holds
-**no corresponding patient-days** for them (USLD has only 17 JH in MCO PMSI;
-pre-admission samples have 0 days prior to entry). Under decision 04.7, the
+Falling back unconditionally to the laboratory ordering UF (Option B) adds 110
+deduplicated *E. coli* isolates (+4.5 %) and moves céfotaxime by +1.02 pp, but
+injects isolates whose stays are absent from the movement interval denominator
+(or pre-admission hours prior to ward entry). Under decision 04.7, the
 perimeter is one object handed to both numerator and denominator. Admitting
 isolates whose hospital days are absent produces an incidence density of
 nothing.
 
-Option A is chosen with an explicit admission linkage rule: isolates without
-hospitalisation exposure receive `SEJUF = NA` and are excluded from the perimeter.
-However, to prevent discarding acute sepsis admissions, specimens collected in the
-Emergency Department (TA 10) that are followed by an acute inpatient admission (TA 03/20)
-within a bounded 24-hour look-ahead window are linked to the stay and attributed to the
-initial receiving inpatient UF (`ADR-0009`). True outpatient visits without subsequent
-hospitalisation remain excluded.
+Option A (interval-based attribution, never falling back unconditionally to the
+laboratory ordering UF for inpatient perimeters) is therefore retained across
+the three named perimeters:
+1. **`spares_strict`** retains only samples collected inside an active
+   `TA 03/20` movement interval.
+2. **`spares_ed24h`** adds diagnostic samples collected in the Emergency
+   Department (`TA 10`) that are followed within a bounded 24-hour look-ahead
+   window by an inpatient admission (`TA 03/20`), attributing them to the
+   initial receiving inpatient UF (`ADR-0009`).
+3. **`emergency_ta10`** retains all diagnostic samples from the Emergency
+   Department (`TA 10`) in a dedicated perimeter deduplicated on its own.
+
+**Period end.** The 24-hour look-ahead stops at the end of the surveillance
+period. A `TA 10` sample drawn in the last 24 hours of the period whose
+admission starts after the period end is not linked: it stays out of
+`spares_ed24h` and still enters `emergency_ta10`. Its sample date is never
+moved into the next period, and movements after the period end are not
+extracted to look for its admission. v3 accepts this blind spot (about one day
+in 365 for an annual run) and reports the number of `TA 10` diagnostic samples
+drawn in the last 24 hours of the period, so its size is visible. If runs ever
+extract each month separately, the blind spot recurs at every month end and
+this rule is to be revisited.
 
 ### 05.2 note — structure coverage
 
@@ -149,20 +201,28 @@ monitored through the 04.10 exposure volume tripwire (±30 % year-over-year shif
 
 ## Open
 
-- **Review ADR-0009's pre-admission linkage scope.** The current rule links diagnostic
-  bacteriology samples from Emergency (TA 10) to a complete hospitalisation (TA 03/20) only when
-  admission follows within 24 hours; Emergency visits discharged home remain excluded. Revisit
-  whether these conditions are intended. Section 00 describes sampling lags without
-  setting a timing threshold or changing eligibility; ADR-0009 remains the decision source.
-- **Extraction boundary for USLD.** 632 isolates in long-term care units (UFs
-  7163, 7183, etc.) lack PMSI intervals because USLD is not extracted in acute
-  MCO PMSI. If national surveillance includes USLD for a site, the site adapter
-  must supply USLD movements alongside MCO movements so exposure and numerator
-  remain coherent.
-- **Mapping audit of unclassified UFs.** 6 UFs in Rouen's referential remain
-  unclassified (2 with TA 03/20 and no DE: 5947, 8947; 4 absent from structure:
-  570A, 572A, 6420, 7116).
-- **Luna sample-type mapping.** Categorisation of ~25k `TYPE_PRELEV` labels to
-  ONERBA thesaurus categories is suitable for an AI-assisted batch review,
-  frozen into a versioned mapping file before code execution. Under decision
-  03.6, mapping is required only for values that reach an indicator.
+- **Rouen site adapter (Phase B): CORA movement extraction and ongoing inpatient
+  stays.** In Rouen's CORA database (`TB_SEJOUR` + `TB_MVT`, accessed via
+  `d2imr` / `redsan` as documented in `chu-data-knowledge`),
+  `TRIM(TB_MVT.ID_UNITE_M)` matches the `Code UF` of the establishment
+  structure file at 99.9 % and covers MCO, SSR, PSY and USLD. To capture
+  long-stay USLD and SSR residents admitted before the start of the extraction
+  window, the Rouen adapter query must select movements by interval intersection
+  (`DATE_DEBUT_MVT < period_end` and `(DATE_FIN_MVT > period_start OR
+  DATE_FIN_MVT IS NULL)`) rather than `DATENT >= period_start`, applying the
+  standard CORA filters (`STATUT_PROG != 'P'` and `DATE_ENTREE < TRUNC(SYSDATE)
+  + 1`), and cap genuinely ongoing inpatient stays (`CODE_TA ∈ {03, 20}`) at
+  $\min(T_{\text{end}}, T_{\text{extraction}})$ while leaving unclosed
+  outpatient/ED administrative anomalies (`TA 07`, `TA 10`) as `NA`. The
+  query stops at `period_end` by design: emergency samples drawn in the last
+  24 hours of the period are not linked to a later admission (see Period end
+  above).
+- **Rouen site adapter (Phase B): mapping audit of unclassified UFs.** 6 UFs in
+  Rouen's referential remain unclassified (2 with TA 03/20 and no DE: 5947,
+  8947; 4 absent from structure: 570A, 572A, 6420, 7116), to be rechecked
+  against the updated structure file.
+- **Rouen site adapter (Phase B): sample-type mapping (`NATUREPVT`).** Local
+  categorisation of Rouen's `NATUREPVT` labels (8 462 distinct labels among
+  samples with an antibiogram) into the ONERBA thesaurus categories belongs to
+  the Rouen site adapter (`ADR-0003`). Under decision 03.6, mapping is required
+  only for values that reach an indicator.

@@ -30,7 +30,8 @@ Desktop.ini
 
 # Local agent and audit state
 /.agents/
-/.claude/
+/.claude/*
+!/.claude/settings.json
 /audit_orchidee.md
 
 # Local secrets and credentials

@@ -28,12 +28,33 @@ excluding non-admitted ED visits.
 
 ## Consequences
 
-- The interval attribution engine supports a 24-hour look-ahead window for
-  Emergency Department (TA 10) specimens.
-- An ED specimen followed by an acute inpatient admission (TA 03/20) within 24
-  hours is attributed to the initial receiving inpatient unit (and flagged as an
-  admission episode).
-- ED specimens from patients who are discharged home without inpatient
-  hospitalisation remain excluded from inpatient surveillance.
+- Because population selection must precede deduplication (`ADR-0004`), ORCHIDEE
+  exposes three named perimeters (`perimeter_version` in `03-activites.md`,
+  `05-structure.md`, and `08-indicateurs.md`), each deduplicated independently:
+  1. **`spares_strict`**: inpatient hospitalisation (`CODE_TA ∈ {03, 20}` and
+     eligible `CODE_DE`) restricted strictly to samples collected during an
+     active inpatient movement interval (`DATENT <= sample_datetime < DATSORT`);
+     all Emergency (`TA 10`) pre-admission samples are excluded.
+  2. **`spares_ed24h`**: inpatient hospitalisation (`CODE_TA ∈ {03, 20}` and
+     eligible `CODE_DE`) plus diagnostic samples outside an active inpatient
+     interval that are identified as Emergency (`TA 10`) samples (via
+     `microbiology_SEJUF ∈ TA 10` or a `TA 10` movement) and followed within
+     `(sample_datetime, sample_datetime + 24h]` by an eligible inpatient
+     movement (`CODE_TA ∈ {03, 20}` and eligible `CODE_DE`), attributed to the
+     earliest such inpatient movement (`min(DATENT)`).
+  3. **`emergency_ta10`**: a standalone Emergency Department perimeter (`TA 10`)
+     retaining all diagnostic samples from `TA 10` (when not inside an active
+     eligible `TA 03/20` movement, identified via `microbiology_SEJUF ∈ TA 10`
+     or a `TA 10` movement, whether subsequently admitted or discharged home),
+     deduplicating them strictly within `TA 10`, and publishing **resistance
+     proportions (`%R`) and isolate counts only** (no patient-day `DI`).
+- Because admitted pre-admission `TA 10` samples enter both `spares_ed24h` and
+  `emergency_ta10`, those two perimeters are not disjoint and must never be
+  summed together.
 - The pre-flight audit ledger logs the volume and resistance rates of
   ED-to-inpatient linked isolates.
+- The look-ahead stops at the end of the surveillance period. A `TA 10`
+  sample whose admission starts after the period end is not linked and stays
+  in `emergency_ta10` only; its sample date is never moved into the next
+  period. The run reports how many `TA 10` diagnostic samples fall in the last
+  24 hours of the period (chapter 05, Period end).

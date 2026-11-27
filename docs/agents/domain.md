@@ -2,33 +2,29 @@
 
 How agents should consume and contribute to ORCHIDEE V3's domain documentation and architecture.
 
-## Before exploring or modifying, read these
+## Before exploring or modifying
 
-- **`CONTEXT.md`** at the repo root: defines the single-context domain glossary and mandatory terminology.
-- **`docs/adr/`**: read ADRs that touch the area you are about to work in (`ADR-0001` through `ADR-0009`).
-- **`docs/methods/`**: read the corresponding methodological specification (Sections 00 through 08).
-- **`docs/methods/tripwire-register.md`**: review the dynamic tripwires that guard data quality and invariant violations.
-- **`docs/findings.md`**: read the append-only record of empirical discoveries.
+Read the reading list in `AGENTS.md` (Essential References), then the ADRs and the method chapter that touch the area you are about to work in.
 
-If a concept or decision is missing, proceed silently and rely on `/domain-modeling` (reached via `/grill-with-docs`) to capture it lazily as decisions crystallize.
+If a concept or decision is missing, do not invent ad-hoc vocabulary: propose a definition for `CONTEXT.md` or a new ADR, and say so in your reply. The `domain-modeling` and `grill-with-docs` skills help capture it as decisions crystallize.
 
 ## Repository Domain Structure
 
 ```
 /
-├── AGENTS.md                                  ← agent guidelines & non-negotiable invariants
+├── AGENTS.md                                  ← agent guidelines & non-negotiable invariants (CLAUDE.md links here)
 ├── CONTEXT.md                                 ← single source of truth for domain vocabulary
-├── data/
-│   ├── bact22_24                              ← raw bacteriology extract (protected, ignored)
-│   ├── pmsi                                   ← raw hospitalisation movements (protected, ignored)
-│   └── site_handoff/                          ← benchmark handoff contract CSVs
+├── data/                                      ← local hospital inputs, ignored by Git, never committed
+├── outputs/                                   ← local run bundles and measurements, ignored by Git
 ├── docs/
 │   ├── adr/                                   ← Architecture Decision Records (0001–0009)
-│   ├── agents/                                ← agent governance and skills configuration
+│   ├── agents/                                ← agent conventions (this file, issue tracker, labels)
+│   ├── evidence/                              ← external facts preserved under version control
 │   ├── findings.md                            ← chronological findings ledger
-│   ├── methods/                               ← method chapters (00 to 08, tripwire register)
+│   ├── methods/                               ← method chapters (00 to 09, tripwire register)
 │   └── worked-examples/                       ← narrative worked examples and R witness scripts
-└── ref/                                       ← national reference tables (DE, ONERBA, etc.)
+├── ref/                                       ← reference tables (consores/ TA-DE codes, rouen/ unit structure)
+└── tools/citecheck/                           ← citation checker run by the pre-commit hook and CI
 ```
 
 ## Use the Glossary's Vocabulary
@@ -36,7 +32,6 @@ If a concept or decision is missing, proceed silently and rely on `/domain-model
 When naming any domain concept (in code, documentation, issue titles, commit messages, or hypotheses):
 - Use the exact canonical terms defined in `CONTEXT.md`.
 - Never use forbidden synonyms (e.g., avoid using "strain" when an isolate or counted bacterial population is meant).
-- If a concept is absent from `CONTEXT.md`, propose its definition rather than inventing ad-hoc vocabulary.
 
 ## Flag ADR Conflicts
 

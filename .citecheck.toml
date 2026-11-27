@@ -2,7 +2,7 @@
 # Paths are relative to the repository root. `include` uses fnmatch patterns,
 # where * also matches /.
 
-include = ["docs/*.md", "CONTEXT.md"]
+include = ["docs/*.md", "CONTEXT.md", "AGENTS.md"]
 
 # C4: a clause that names one of these and makes a claim needs a locator.
 bodies = [
