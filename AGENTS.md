@@ -67,7 +67,7 @@ Every citation in the docs must be checkable. A pre-commit hook (`tools/citechec
 
 ## Agent skills
 
-The engineering skills from `mattpocock/skills` are enabled for Claude Code through the project's `.claude/settings.json` (plugin `mattpocock-skills`), so cloud sessions get them too. Other agents (Codex, Antigravity) use the local copies installed with `skills.sh`, recorded in `skills-lock.json`.
+The engineering skills from `mattpocock/skills` come from Francesco's claude.ai account (plugin "Skills For Real Engineers") for Claude Code, including cloud sessions. Other agents (Codex, Antigravity) use the local copies installed with `skills.sh`, recorded in `skills-lock.json`.
 
 - **Issue tracker**: GitHub Issues. See `docs/agents/issue-tracker.md`.
 - **Triage labels**: the default canonical vocabulary. See `docs/agents/triage-labels.md`.
