@@ -2,7 +2,7 @@
 
 Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations. Cloud sessions have no `gh`: they use the equivalent GitHub MCP tools.
 
-The repository is public: issue titles, bodies and comments follow the privacy rules in `AGENTS.md` (no patient-level data, no raw free text, counts from 1 to 9 written `<10`).
+The repository is public: issue titles, bodies and comments follow the privacy rules in `AGENTS.md` (no patient-level data, no raw free text, nothing that singles out a patient or a rare record).
 
 ## Conventions
 

@@ -10,7 +10,7 @@ This repository is **public**. Everything committed, and all issue, pull request
 
 - Never commit anything under `data/` or `outputs/` (both are ignored), and never paste patient-level rows, identifiers (`PATID`, `EVTID`, `ELTID`, IPP, NDA), birth dates, or sample dates tied to one person.
 - Raw free text from the laboratory export can carry identifiers: `NATUREPVT` (graft or tissue-bank numbers) and non-`S`/`I`/`R` values of `STRRES` (staff initials). Never copy raw values; describe them by category.
-- Counts measured on hospital data: write any count from 1 to 9 as `<10`, and never describe a rare case precisely enough to single out a patient. This applies to docs, issues, pull requests, commit messages and agent replies.
+- Counts measured on hospital data: never describe a patient or a rare record precisely enough to single it out, and write any count of patients or of such records from 1 to 9 as `<10`. Aggregate isolate counts in method witnesses (for example untested isolates of a species over a year) may stay exact. This applies to docs, issues, pull requests, commit messages and agent replies.
 - Scripts that read raw hospital data must mask small counts and free text by construction.
 - `ADR-0008` (exact counts, no cell suppression) governs the indicator tables a hospital delivers to the national recipient (chapter 09). It does not apply to this repository.
 
