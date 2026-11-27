@@ -177,9 +177,9 @@ following a finding. Differences alone do not establish their cause.
   patients (99.97 %). Its denominator construction is not documented here; this is
   a historical example, not an acceptance threshold or a specification of Test 2.2.
 - In PMSI movements, 38 patients (0.036 %) have multiple recorded birth dates,
-  including `1991-01-01` and `1991-12-31` for the same patient.
+  in some cases two dates within the same year.
 - Recorded ages in PMSI movements span 0.0 to 106.0 years. In raw bacteriology,
-  4 rows carry `PATAGE == 136`. These examples do not establish the origin of those
+  fewer than 10 rows carry an implausible `PATAGE` above 120. These examples do not establish the origin of those
   values.
 
 ---
