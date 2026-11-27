@@ -53,3 +53,8 @@ excluding non-admitted ED visits.
   summed together.
 - The pre-flight audit ledger logs the volume and resistance rates of
   ED-to-inpatient linked isolates.
+- The look-ahead stops at the end of the surveillance period. A `TA 10`
+  sample whose admission starts after the period end is not linked and stays
+  in `emergency_ta10` only; its sample date is never moved into the next
+  period. The run reports how many `TA 10` diagnostic samples fall in the last
+  24 hours of the period (chapter 05, Period end).

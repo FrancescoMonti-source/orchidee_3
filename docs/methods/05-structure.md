@@ -153,6 +153,17 @@ the three named perimeters:
 3. **`emergency_ta10`** retains all diagnostic samples from the Emergency
    Department (`TA 10`) in a dedicated perimeter deduplicated on its own.
 
+**Period end.** The 24-hour look-ahead stops at the end of the surveillance
+period. A `TA 10` sample drawn in the last 24 hours of the period whose
+admission starts after the period end is not linked: it stays out of
+`spares_ed24h` and still enters `emergency_ta10`. Its sample date is never
+moved into the next period, and movements after the period end are not
+extracted to look for its admission. v3 accepts this blind spot (about one day
+in 365 for an annual run) and reports the number of `TA 10` diagnostic samples
+drawn in the last 24 hours of the period, so its size is visible. If runs ever
+extract each month separately, the blind spot recurs at every month end and
+this rule is to be revisited.
+
 ### 05.2 note — structure coverage
 
 The pre-flight audit reports unit codes matched and unmatched to the annual
@@ -202,7 +213,10 @@ monitored through the 04.10 exposure volume tripwire (±30 % year-over-year shif
   standard CORA filters (`STATUT_PROG != 'P'` and `DATE_ENTREE < TRUNC(SYSDATE)
   + 1`), and cap genuinely ongoing inpatient stays (`CODE_TA ∈ {03, 20}`) at
   $\min(T_{\text{end}}, T_{\text{extraction}})$ while leaving unclosed
-  outpatient/ED administrative anomalies (`TA 07`, `TA 10`) as `NA`.
+  outpatient/ED administrative anomalies (`TA 07`, `TA 10`) as `NA`. The
+  query stops at `period_end` by design: emergency samples drawn in the last
+  24 hours of the period are not linked to a later admission (see Period end
+  above).
 - **Rouen site adapter (Phase B): mapping audit of unclassified UFs.** 6 UFs in
   Rouen's referential remain unclassified (2 with TA 03/20 and no DE: 5947,
   8947; 4 absent from structure: 570A, 572A, 6420, 7116), to be rechecked
